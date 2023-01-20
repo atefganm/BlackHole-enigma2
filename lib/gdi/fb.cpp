@@ -25,6 +25,7 @@
 
 #define FBIO_SET_MANUAL_BLIT _IOW('F', 0x21, __u8)
 #define FBIO_BLIT 0x22
+
 #endif
 
 fbClass *fbClass::instance;
@@ -371,11 +372,12 @@ void fbClass::enableManualBlit()
 
 void fbClass::disableManualBlit()
 {
+#ifndef CONFIG_ION
 	unsigned char tmp = 0;
-	if (fbFd < 0) return;
 	if (ioctl(fbFd,FBIO_SET_MANUAL_BLIT, &tmp)<0)
-		eDebug("[fb] disable FBIO_SET_MANUAL_BLIT: %m");
+		eDebug("[fb] FBIO_SET_MANUAL_BLIT %m");
 	else
 		m_manual_blit = 0;
+#endif
 }
 

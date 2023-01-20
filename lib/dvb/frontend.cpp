@@ -299,7 +299,7 @@ RESULT eDVBFrontendParameters::getSystem(int &t) const
 RESULT eDVBFrontendParameters::getDVBS(eDVBFrontendParametersSatellite &p) const
 {
 	if (m_type != iDVBFrontend::feSatellite)
-		return p = {0}, -1;
+		return -1;
 	p = sat;
 	return 0;
 }
@@ -307,7 +307,7 @@ RESULT eDVBFrontendParameters::getDVBS(eDVBFrontendParametersSatellite &p) const
 RESULT eDVBFrontendParameters::getDVBC(eDVBFrontendParametersCable &p) const
 {
 	if (m_type != iDVBFrontend::feCable)
-		return p = {0}, -1;
+		return -1;
 	p = cable;
 	return 0;
 }
@@ -315,7 +315,7 @@ RESULT eDVBFrontendParameters::getDVBC(eDVBFrontendParametersCable &p) const
 RESULT eDVBFrontendParameters::getDVBT(eDVBFrontendParametersTerrestrial &p) const
 {
 	if (m_type != iDVBFrontend::feTerrestrial)
-		return p = {0}, -1;
+		return -1;
 	p = terrestrial;
 	return 0;
 }
@@ -323,7 +323,7 @@ RESULT eDVBFrontendParameters::getDVBT(eDVBFrontendParametersTerrestrial &p) con
 RESULT eDVBFrontendParameters::getATSC(eDVBFrontendParametersATSC &p) const
 {
 	if (m_type != iDVBFrontend::feATSC)
-		return p = {0}, -1;
+		return -1;
 	p = atsc;
 	return 0;
 }
@@ -1609,7 +1609,6 @@ int eDVBFrontend::readFrontendData(int type)
 				if (m_dvbversion >= DVB_VERSION(5, 10) && !eConfigManager::getConfigBoolValue(force_legacy_signal_stats, false))
 				{
 					dtv_property prop[1] = {};
-					memset(prop, 0, sizeof(prop))
 					prop[0].cmd = DTV_STAT_CNR;
 					dtv_properties props;
 					props.props = prop;

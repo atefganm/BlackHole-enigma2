@@ -311,7 +311,7 @@ AC_ARG_WITH(bwlcd96,
 	[[withbwlcd96=no]]
 )
 if test x"$withbwlcd96" != xno ; then
-	AC_DEFINE(HAVE_BWLCD96, 1,[Define when using a 96x64 black and white display device])
+	AC_DEFINE(HAVE_BWLCD96, 2,[Define when using a 96x64 black and white display device])
 fi
 AM_CONDITIONAL(HAVE_BWLCD96, test x"$withbwlcd96" != xno)
 

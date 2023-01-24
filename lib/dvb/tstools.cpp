@@ -330,7 +330,7 @@ int eDVBTSTools::fixupPTS(const off_t &offset, pts_t &now)
 		calcBegin();
 		if (!m_begin_valid)
 		{
-			eDebug("[eDVBTSTools] fixupPTS begin not valid, can't fixup");
+//			eDebug("[eDVBTSTools] fixupPTS begin not valid, can't fixup");
 			return -1;
 		}
 
@@ -568,7 +568,7 @@ void eDVBTSTools::calcEnd()
 		}
 		else
 		{
-			eDebug("[eDVBTSTools] calcEnd [@ML] m_streaminfo.getLastFrame failed, fallback");
+//			eDebug("[eDVBTSTools] calcEnd [@ML] m_streaminfo.getLastFrame failed, fallback");
 			while (!(m_end_valid || m_futile))
 			{
 				if (!--maxiter)

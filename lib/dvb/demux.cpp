@@ -37,7 +37,6 @@ enum dmx_source {
 #define DMX_SET_SOURCE _IOW('o', 49, enum dmx_source)
 #endif
 
-
 //#define SHOW_WRITE_TIME
 static int determineBufferCount()
 {
@@ -102,6 +101,9 @@ int eDVBDemux::openDemux(void)
 
 int eDVBDemux::openDVR(int flags)
 {
+#ifdef HAVE_OLDPVR
+	return ::open("/dev/misc/pvr", flags);
+#else
 	char filename[32];
 	snprintf(filename, sizeof(filename), "/dev/dvb/adapter%d/dvr%d", adapter, demux);
 	eDebug("[eDVBDemux] open dvr %s", filename);
@@ -120,6 +122,7 @@ int eDVBDemux::openDVR(int flags)
 		::close(tmp_fd);
 	}
 	return ::open(filename, flags);
+#endif
 }
 
 DEFINE_REF(eDVBDemux)

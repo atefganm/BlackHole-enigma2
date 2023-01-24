@@ -430,6 +430,17 @@ if test x"$withbwlcd128" != xno ; then
 fi
 AM_CONDITIONAL(HAVE_BWLCD128, test x"$withbwlcd128" != xno)
 
+AC_ARG_WITH(oldpvr,
+	AC_HELP_STRING([--with-oldpvr], [use /dev/misc/pvr instead of /dev/dvb/adapterX/dvrX, yes or no]),
+	[[witholdpvr=$withval]],
+	[[witholdpvr=no]]
+)
+if test x"$witholdpvr" != xno ; then
+	AC_DEFINE(HAVE_OLDPVR, 1,[Define when using /dev/misc/pvr])
+fi
+
+AM_CONDITIONAL(HAVE_OLDPVR, test x"$witholdpvr" != xno)
+
 AC_ARG_WITH(subttxtabnormalptsdiffs,
 	AC_HELP_STRING([--with-subttxtabnormalptsdiffs=n], [use n/90 msec diffs for subtitle and teletext abnormal pts]),
 	[[with_subttxtabnormalptsdiffs=$withval]],

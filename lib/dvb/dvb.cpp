@@ -151,7 +151,7 @@ eDVBResourceManager::eDVBResourceManager()
 	else if (!strncmp(tmp, "dm920\n", rd))
 		m_boxtype = DM920;
 	else {
-		eDebug("[eDVBResourceManager] boxtype detection via /proc/stb/info not possible... use fallback via demux count!");
+		eDebug("boxtype detection via /proc/stb/info not possible... use fallback via demux count!\n");
 		if (m_demux.size() == 3)
 			m_boxtype = DM800;
 		else if (m_demux.size() < 5)
@@ -619,7 +619,6 @@ void *eDVBUsbAdapter::vtunerPump()
 
 						if (pidcount > 1)
 						{
-							//eDebug("[adenin]rmove PID %d(0x%04x)", pidList[i], pidList[i]);
 							::ioctl(demuxFd, DMX_REMOVE_PID, &pidList[i]);
 							pidcount--;
 						}
@@ -640,7 +639,6 @@ void *eDVBUsbAdapter::vtunerPump()
 
 						if (pidcount)
 						{
-							//eDebug("[adenin]add PID %d(0x%04x)", message.pidlist[i], message.pidlist[i]);
 							::ioctl(demuxFd, DMX_ADD_PID, &message.pidlist[i]);
 							pidcount++;
 						}

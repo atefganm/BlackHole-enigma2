@@ -418,6 +418,22 @@ class PliExtraInfo(Poll, Converter, object):
 		res += Hex2strColor(self.cryptocolors[3])
 		return res
 
+	def createCryptoVerimatrix(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0x5601', 16) <= int(self.current_caid, 16) <= int('0x5604', 16):
+			color = Hex2strColor(self.cryptocolors[0])
+		else:
+			color = Hex2strColor(self.cryptocolors[1])
+			try:
+				for caid in available_caids:
+					if int('0x5601', 16) <= caid <= int('0x5604', 16):
+						color = Hex2strColor(self.cryptocolors[2])
+			except:
+				pass
+		res = color + 'VM'
+		res += Hex2strColor(self.cryptocolors[3])
+		return res
+
 	def createCryptoBeta(self, info):
 		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
 		if int('0x1700', 16) <= int(self.current_caid, 16) <= int('0x17ff', 16):
@@ -532,12 +548,14 @@ class PliExtraInfo(Poll, Converter, object):
 
 	def createCryptoSpecial(self, info):
 		caid_name = "Free to Air"
+		if int(self.current_caid, 16) == 0:
+			return caid_name + ":%06X:%04X" % (int(self.current_provid, 16), info.getInfo(iServiceInformation.sSID))
 		try:
 			for caid_entry in caid_data:
 				if int(caid_entry[0], 16) <= int(self.current_caid, 16) <= int(caid_entry[1], 16):
 					caid_name = caid_entry[2]
 					break
-			return caid_name + ":%04x:%04x:%04x" % (int(self.current_caid, 16), int(self.current_provid, 16), info.getInfo(iServiceInformation.sSID))
+			return caid_name + ":%04X:%06X:%04X" % (int(self.current_caid, 16), int(self.current_provid, 16), info.getInfo(iServiceInformation.sSID))
 		except:
 			pass
 		return ""
@@ -551,7 +569,7 @@ class PliExtraInfo(Poll, Converter, object):
 				if int(caid_entry[0], 16) <= int(self.current_caid, 16) <= int(caid_entry[1], 16):
 					caid_name = caid_entry[2]
 					break
-			return caid_name + ":%04x" % (int(self.current_caid, 16))
+			return caid_name + ":%04X" % (int(self.current_caid, 16))
 		except:
 			pass
 		return ""

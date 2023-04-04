@@ -1,7 +1,7 @@
-from time import time, localtime, gmtime
-from os import path
 from fcntl import ioctl
+from os.path import exists, isfile
 from struct import pack, unpack
+from time import time, localtime, gmtime
 from boxbranding import getBoxType, getBrandOEM
 from Tools.Directories import fileReadLine, fileWriteLine
 

@@ -166,6 +166,7 @@ class eDVBResourceManager: public iObject, public sigc::trackable
 	eSmartPtrList<eDVBRegisteredDemux> m_demux;
 	eSmartPtrList<eDVBRegisteredFrontend> m_frontend, m_simulate_frontend;
 	void addAdapter(iDVBAdapter *adapter, bool front = false);
+	void setUsbTuner();
 
 	struct active_channel
 	{
@@ -183,6 +184,7 @@ class eDVBResourceManager: public iObject, public sigc::trackable
 	static eDVBResourceManager *instance;
 	friend class eDVBChannel;
 	friend class eFBCTunerManager;
+	friend class eRTSPStreamClient;
 	ePtr<eFBCTunerManager> m_fbcmng;
 	RESULT addChannel(const eDVBChannelID &chid, eDVBChannel *ch);
 	RESULT removeChannel(eDVBChannel *ch);
@@ -310,6 +312,7 @@ private:
 	sigc::signal<void(iDVBChannel*,int)> m_event;
 	int m_state;
 	ePtr<iTsSource> m_source;
+	std::string m_streaminfo_file;
 
 			/* for channel list */
 	ePtr<eDVBResourceManager> m_mgr;

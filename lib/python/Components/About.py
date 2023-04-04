@@ -62,16 +62,21 @@ def getIsBroadcom():
 		return False
 
 
+def getModelString():
+	model = getBoxType()
+	return model
+
+
 def getChipSetString():
-	if MODEL in ('dm7080', 'dm820'):
+	if getMachineBuild() in ('dm7080', 'dm820'):
 		return "7435"
-	elif MODEL in ('dm520', 'dm525'):
+	elif getMachineBuild() in ('dm520', 'dm525'):
 		return "73625"
-	elif MODEL in ('dm900', 'dm920', 'et13000', 'sf5008'):
+	elif getMachineBuild() in ('dm900', 'dm920', 'et13000', 'sf5008'):
 		return "7252S"
-	elif MODEL in ('hd51', 'vs1500', 'h7'):
+	elif getMachineBuild() in ('hd51', 'vs1500', 'h7'):
 		return "7251S"
-	elif MODEL in ('alien5',):
+	elif getMachineBuild() in ('alien5',):
 		return "S905D"
 	else:
 		chipset = fileReadLine("/proc/stb/info/chipset", source=MODULE_NAME)

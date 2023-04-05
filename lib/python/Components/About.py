@@ -4,7 +4,9 @@ import fcntl
 import struct
 
 from boxbranding import getImageVersion, getMachineBuild, getBoxType
+from Tools.Directories import fileReadLine, fileReadLines
 
+MODULE_NAME = __name__.split(".")[-1]
 
 def getVersionString():
 	return getImageVersion()

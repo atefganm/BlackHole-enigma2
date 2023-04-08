@@ -271,5 +271,6 @@ self.session.scart.VCRSbChanged(3)
 		<item entryID="H9SDswap" level="0" text="H9SDroot" requires="HasH9SD"><screen module="H9SDswap" screen="H9SDswap">1</screen></item>
 		<item entryID="restart" level="0" text="Reboot"><screen module="Standby" screen="TryQuitMainloop">2</screen></item>
 		<item entryID="restart_enigma" level="0" text="Restart Enigma2"><screen module="Standby" screen="TryQuitMainloop">3</screen></item>
+		<item entryID="maintenance_mode" level="0" text="Recovery Mode" requires="RecoveryMode"><screen module="Standby" screen="TryQuitMainloop">16</screen></item>
 	</menu>
 </menu>

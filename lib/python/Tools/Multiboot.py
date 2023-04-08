@@ -10,6 +10,11 @@ from Components.Console import Console
 from Components.SystemInfo import SystemInfo, BoxInfo as BoxInfoRunningInstance, BoxInformation
 from Tools.Directories import fileHas, fileExists
 
+if fileHas("/proc/cmdline", "kexec=1"):
+	from PIL import Image
+	from PIL import ImageDraw
+	from PIL import ImageFont
+
 MbootList1 = ("/dev/mmcblk0p1", "/dev/mmcblk1p1", "/dev/mmcblk0p3", "/dev/mmcblk0p4", "/dev/mtdblock2", "/dev/block/by-name/bootoptions")
 MbootList2 = ("/dev/%s" % getMachineMtdRoot(), )	# kexec kernel Vu+ multiboot
 
@@ -173,15 +178,8 @@ def GetImagelist(Recovery=None):
 #			print("[multiboot] [GetImagelist]1 Slot = %s imagedir = %s" % (slot, imagedir))
 			if path.isfile(path.join(imagedir, "usr/lib/enigma.info")):
 				print("[multiboot] [BoxInfo] using BoxInfo")
-				BoxInfo = BoxInformation(root=imagedir) if SystemInfo["MultiBootSlot"] != slot else BoxInfoRunningInstance
-				Creator = BoxInfo.getItem("distro", " ").capitalize()
-				BuildImgVersion = BoxInfo.getItem("imgversion")
-				BuildType = BoxInfo.getItem("imagetype", " ")[0:3]
-				BuildVer = BoxInfo.getItem("imagebuild")
-				BuildDate = VerDate(imagedir)
-				BuildDev = str(BoxInfo.getItem("imagedevbuild")).zfill(3) if BuildType == "developer" else ""
-				BuildVersion = "%s %s %s %s %s (%s)" % (Creator, BuildImgVersion, BuildType, BuildVer, BuildDev, BuildDate)
-#				print("[multiboot] [BoxInfo]  slot=%s, Creator=%s, BuildType=%s, BuildImgVersion=%s, BuildDate=%s, BuildDev=%s" % (slot, Creator, BuildType, BuildImgVersion, BuildDate, BuildDev))
+				BuildVersion = createInfo(slot, imagedir=imagedir)
+#				print("[multiboot] [BoxInfo]  slot=%s, BuildVersion=%s" % (slot, BuildVersion))
 			else:
 #				print("[multiboot] [BoxInfo] using BoxBranding")
 				print("[multiboot] [GetImagelist] 2 slot = %s imagedir = %s" % (slot, imagedir))
@@ -208,6 +206,8 @@ def GetImagelist(Recovery=None):
 					date = VerDate(imagedir)
 					Creator = Creator.replace("-release", " ")
 					BuildVersion = "%s (%s)" % (Creator, date)
+			if fileHas("/proc/cmdline", "kexec=1") and Recovery:
+				bootmviSlot(imagedir=imagedir, text=BuildVersion, slot=slot)
 			Imagelist[slot] = {"imagename": "%s" % BuildVersion}
 		elif path.isfile(path.join(imagedir, "usr/bin/enigmax")):
 			Imagelist[slot] = {"imagename": _("Deleted image")}
@@ -220,6 +220,17 @@ def GetImagelist(Recovery=None):
 	return Imagelist
 
 
+def createInfo(slot, imagedir="/"):
+	BoxInfo = BoxInformation(root=imagedir) if SystemInfo["MultiBootSlot"] != slot else BoxInfoRunningInstance
+	Creator = BoxInfo.getItem("distro", " ").capitalize()
+	BuildImgVersion = BoxInfo.getItem("imgversion")
+	BuildType = BoxInfo.getItem("imagetype", " ")[0:3]
+	BuildVer = BoxInfo.getItem("imagebuild")
+	BuildDate = VerDate(imagedir)
+	BuildDev = str(BoxInfo.getItem("imagedevbuild")).zfill(3) if BuildType == "developer" else ""
+	return 	"%s %s %s %s %s (%s)" % (Creator, BuildImgVersion, BuildType, BuildVer, BuildDev, BuildDate)
+
+
 def VerDate(imagedir):
 	date3 = "00000000"
 	date1 = datetime.fromtimestamp(stat(path.join(imagedir, "var/lib/opkg/status")).st_mtime).strftime("%Y-%m-%d")
@@ -230,7 +241,6 @@ def VerDate(imagedir):
 	date = max(date1, date2, date3)
 	print("[multiboot][VerDate]2 date = %s" % date)
 	date = datetime.strptime(date, '%Y-%m-%d').strftime("%d-%m-%Y")
-
 	return date
 
 
@@ -252,6 +262,36 @@ def emptySlot(slot):
 		rmdir(tmp.dir)
 	return ret
 
+def bootmviSlot(imagedir="/", text=" ", slot=0):
+	inmviPath = path.join(imagedir, "usr/share/bootlogo.mvi")
+	outmviPath = path.join(imagedir, "usr/share/enigma2/bootlogo.mvi")
+	txtPath = path.join(imagedir, "usr/share/enigma2/bootlogo.txt")
+	text = "booting slot %s %s" % (slot, text)
+	print("[multiboot][bootmviSlot] inPath, outpath ", inmviPath, "   ", outmviPath)
+	if path.exists(inmviPath):
+		if path.exists(outmviPath) and path.exists(txtPath) and open(txtPath).read() == text:
+			return
+		print ("[multiboot][bootmviSlot] Copy /usr/share/bootlogo.mvi to /tmp/bootlogo.m1v")
+		Console(binary=True).ePopen("cp %s /tmp/bootlogo.m1v" % inmviPath)
+		print ("[multiboot][bootmviSlot] Dump iframe to png")
+		Console(binary=True).ePopen("ffmpeg -skip_frame nokey -i /tmp/bootlogo.m1v -vsync 0  -y  /tmp/out1.png 2>/dev/null")
+		Console(binary=True).ePopen("rm -f /tmp/mypicture.m1v")
+		if path.exists("/tmp/out1.png"):
+			img = Image.open("/tmp/out1.png")						# Open an Image
+		else:
+			print ("[multiboot][bootmviSlot] unable to create new bootlogo cannot open out1.png")
+			return
+		I1 = ImageDraw.Draw(img)									# Call draw Method to add 2D graphics in an image
+		myFont = ImageFont.truetype("/usr/share/fonts/OpenSans-Regular.ttf", 65)		# Custom font style and font size
+		print("[multiboot][bootmviSlot] Write text to png")
+		I1.text((52, 12), text, font=myFont, fill =(255, 0, 0))		# Add Text to an image
+		I1.text((50, 10), text, font=myFont, fill =(255, 255, 255))
+		img.save("/tmp/out1.png")									# Save the edited image
+		print ("[multiboot][bootmviSlot] Repack bootlogo")
+		Console(binary=True).ePopen("ffmpeg -i /tmp/out1.png -r 25 -b 20000 -y /tmp/mypicture.m1v  2>/dev/null")
+		Console(binary=True).ePopen("cp /tmp/mypicture.m1v %s" % outmviPath)
+		with open(txtPath, "w") as f:
+			f.write(text)
 
 def restoreSlots():
 	for slot in SystemInfo["canMultiBoot"]:

@@ -78,7 +78,6 @@ def getModelString():
 
 
 def getChipSetString():
-	if ospath.isfile("/proc/stb/info/chipset"):
 	if getMachineBuild() in ('dm7080', 'dm820'):
 		return "7435"
 	elif getMachineBuild() in ('dm520', 'dm525'):

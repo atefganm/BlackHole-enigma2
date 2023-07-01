@@ -94,7 +94,7 @@ def getChipSetString():
 			chipset = f.read()
 			f.close()
 			return str(chipset.lower().replace('\n', '').replace('bcm', '').replace('brcm', '').replace('sti', ''))
-	else:
+		else:
 			return "unavailable"
 
 

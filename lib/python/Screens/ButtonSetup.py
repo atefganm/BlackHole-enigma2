@@ -18,7 +18,7 @@ import os
 
 from time import time
 
-ButtonSetupKeys = [	(_("Red"), "red", "Infobar/activateRedButton"),
+ButtonSetupKeys = [(_("Red"), "red", "Infobar/openSingleServiceEPG/1"),
 	(_("Red long"), "red_long", ""),
 	(_("Green long"), "green_long", ""),
 	(_("Yellow "), "yellow", "Infobar/AudioSelection"),

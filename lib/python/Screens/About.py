@@ -152,7 +152,7 @@ class About(AboutBase):
 		else:
 			AboutText += _("4097 iptv player:\tDefault player\n")
 		AboutText += _("Python:\t%s\n") % about.getPythonVersionString()
-		flashDate = about.getFlashDateString() 
+		flashDate = about.getFlashDateString()
 		AboutText += _("Installed:\t%s\n") % flashDate
 		lastUpdate = about.getLastUpdate()
 		AboutText += _("Last update:\t%s\n") % lastUpdate
@@ -298,7 +298,7 @@ class Devices(Screen):
 				free = hdd.Totalfree()
 				if free >= 1:
 					free *= 1000000 # convert MB to bytes
-					freeline = _("Free: ") + bytesToHumanReadable(free)
+					freeline = _("\n") + ("Free: ") + bytesToHumanReadable(free)
 				elif "Generic(STORAGE" in hddp:				# This is the SDA boot volume for SF8008 if "full" #
 					continue
 				else:
@@ -680,6 +680,3 @@ class TranslationInfo(Screen):
 
 		# TRANSLATORS: Add here whatever should be shown in the "translator" about screen, up to 6 lines (use \n for newline)
 		self["TranslationInfo"] = StaticText(_("TRANSLATOR_INFO") if "TRANSLATOR_INFO" != _("TRANSLATOR_INFO") else "")
-
-
-

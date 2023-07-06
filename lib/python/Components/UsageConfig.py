@@ -20,12 +20,16 @@ from Tools.HardwareInfo import HardwareInfo
 # stderr expect unicode, not str, so we decode as utf-8
 #
 import io
+
+
 def raw_stderr_print(text):
 	with io.open(2, mode="wt", closefd=False) as myerr:
 		myerr.write(text)
 
+
 originalAudioTracks = "orj dos ory org esl qaa und mis mul ORY ORJ Audio_ORJ oth"
 visuallyImpairedCommentary = "NAR qad"
+
 
 def InitUsageConfig():
 	config.version = ConfigNumber(default=0)
@@ -45,6 +49,7 @@ def InitUsageConfig():
 	config.usage.multibouquet = ConfigYesNo(default=True)
 	config.usage.maxchannelnumlen = ConfigSelection(default="4", choices=[("3", _("3")), ("4", _("4")), ("5", _("5")), ("6", _("6"))])
 	config.usage.alternative_number_mode = ConfigYesNo(default=False)
+
 
 	def alternativeNumberModeChange(configElement):
 		eDVBDB.getInstance().setNumberingMode(configElement.value)
@@ -98,6 +103,7 @@ def InitUsageConfig():
 		[("EPG", _("EPG")), ("INFOBAREPG", _("InfoBar EPG"))]
 	config.usage.show_second_infobar = ConfigSelection(default="5", choices=choicelist)
 	config.usage.fix_second_infobar = ConfigYesNo(default=False)
+
 
 	def showsecondinfobarChanged(configElement):
 		if config.usage.show_second_infobar.value != "INFOBAREPG":
@@ -1400,6 +1406,7 @@ def upgradeConfig():
 				item.save()
 		config.version.value = "53023"
 		config.version.save()
+
 
 def preferredTunerChoicesUpdate(update=False):
 	dvbs_nims = [("-2", _("disabled"))]

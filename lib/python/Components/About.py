@@ -23,11 +23,14 @@ def getFlashDateString():
 	else:
 		return _("unknown")
 
+
 def driversDate():
 	return _formatDate(getDriverDate())
 
+
 def getLastUpdate():
 	return _formatDate(getEnigmaVersionString().replace("-", ""))
+
 
 def _formatDate(Date):
 	# expected input = "YYYYMMDD"

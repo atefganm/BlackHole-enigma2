@@ -19,15 +19,17 @@ if fileHas("/proc/cmdline", "kexec=1"):
 MbootList1 = ("/dev/mmcblk0p1", "/dev/mmcblk1p1", "/dev/mmcblk0p3", "/dev/mmcblk0p4", "/dev/mtdblock2", "/dev/block/by-name/bootoptions")
 MbootList2 = ("/dev/%s" % getMachineMtdRoot(), )	# kexec kernel Vu+ multiboot
 
+
 class tmp:
 	dir = None
+
 
 def getMultibootslots():
 	bootslots = {}
 	slotname = ""
 	SystemInfo["MultiBootSlot"] = None
 	SystemInfo["VuUUIDSlot"] = ""
-	UUID =	""
+	UUID = ""
 	UUIDnum = 0
 	BoxInfo = BoxInfoRunningInstance
 	tmp.dir = tempfile.mkdtemp(prefix="getMultibootslots")
@@ -74,14 +76,14 @@ def getMultibootslots():
 							SystemInfo["HasKexecUSB"] = True
 						print("[Multiboot][getMultibootslots]6a slot", slot)
 						if "root" in slot.keys():
-							if 	"UUID=" in slot["root"]:
+							if "UUID=" in slot["root"]:
 								slotx = getUUIDtoSD(slot["root"])
 								UUID = slot["root"]
-								UUIDnum +=1
+								UUIDnum += 1
 								print("[Multiboot][getMultibootslots]6a slotx slot['root']", slotx, slot["root"])
 								if slotx is not None:
 									slot["root"] = slotx
-								slot["kernel"] = "/linuxrootfs%s/zImage" %slotnumber
+								slot["kernel"] = "/linuxrootfs%s/zImage" % slotnumber
 							if path.exists(slot["root"]) or slot["root"] == "ubi0:ubifs":
 								slot["startupfile"] = path.basename(file)
 								slot["slotname"] = slotname
@@ -115,7 +117,7 @@ def getMultibootslots():
 			rootsubdir = [x for x in bootArgs.split() if x.startswith("rootsubdir")]
 			char = "/" if "/" in rootsubdir[0] else "="
 			SystemInfo["MultiBootSlot"] = int(rootsubdir[0].rsplit(char, 1)[1][11:])
-			SystemInfo["VuUUIDSlot"] = (UUID, UUIDnum) if UUIDnum !=0 else ""
+			SystemInfo["VuUUIDSlot"] = (UUID, UUIDnum) if UUIDnum != 0 else ""
 			print("[Multiboot][MultiBootSlot]0 current slot used:", SystemInfo["MultiBootSlot"])
 #			print("[Multiboot][MultiBootSlot]0 UID, UUIDnum:", SystemInfo["VuUUIDSlot"], "   ", SystemInfo["VuUUIDSlot"][0], "   ", SystemInfo["VuUUIDSlot"][1])
 		elif SystemInfo["HasMultibootFlags"]:
@@ -140,6 +142,7 @@ def getMultibootslots():
 					break
 	return bootslots
 
+
 def getUUIDtoSD(UUID): # returns None on failure
 #	print("[multiboot][getUUIDtoSD2] UUID = ", UUID)
 	check = "/sbin/blkid"
@@ -152,6 +155,7 @@ def getUUIDtoSD(UUID): # returns None on failure
 	else:
 		return None
 
+
 def GetCurrentImageMode():
 	return bool(SystemInfo["canMultiBoot"]) and SystemInfo["canMode12"] and int(open("/sys/firmware/devicetree/base/chosen/bootargs", "r").read().replace("\0", "").split("=")[-1])
 
@@ -160,6 +164,7 @@ def GetImagelist(Recovery=None):
 	Imagelist = {}
 	tmp.dir = tempfile.mkdtemp(prefix="GetImagelist")
 	tmpname = tmp.dir
+	from Components.config import config		# here to prevent boot loop
 	for slot in sorted(list(SystemInfo["canMultiBoot"].keys())):
 		if slot == 0:
 			if not Recovery:		# called by ImageManager
@@ -209,13 +214,13 @@ def GetImagelist(Recovery=None):
 					date = VerDate(imagedir)
 					Creator = Vti[0:3]
 					Build = Vti[-8:-1]
-					BuildVersion  = "%s %s (%s) " % (Creator, Build, date)
+					BuildVersion = "%s %s (%s) " % (Creator, Build, date)
 #					print("[BootInfo]8 BuildVersion  = ", BuildVersion )
 				else:
 					date = VerDate(imagedir)
 					Creator = Creator.replace("-release", " ")
 					BuildVersion = "%s (%s)" % (Creator, date)
-			if fileHas("/proc/cmdline", "kexec=1") and Recovery:
+			if fileHas("/proc/cmdline", "kexec=1") and Recovery and config.usage.bootlogo_identify.value:
 				bootmviSlot(imagedir=imagedir, text=BuildVersion, slot=slot)
 			Imagelist[slot] = {"imagename": "%s" % BuildVersion}
 		elif path.isfile(path.join(imagedir, "usr/bin/enigmax")):
@@ -237,7 +242,7 @@ def createInfo(slot, imagedir="/"):
 	BuildVer = BoxInfo.getItem("imagebuild")
 	BuildDate = VerDate(imagedir)
 	BuildDev = str(BoxInfo.getItem("imagedevbuild")).zfill(3) if BuildType == "developer" else ""
-	return 	"%s %s %s %s %s (%s)" % (Creator, BuildImgVersion, BuildType, BuildVer, BuildDev, BuildDate)
+	return "%s %s %s %s %s (%s)" % (Creator, BuildImgVersion, BuildType, BuildVer, BuildDev, BuildDate)
 
 
 def VerDate(imagedir):
@@ -272,6 +277,7 @@ def emptySlot(slot):
 		rmdir(tmp.dir)
 	return ret
 
+
 def bootmviSlot(imagedir="/", text=" ", slot=0):
 	inmviPath = path.join(imagedir, "usr/share/bootlogo.mvi")
 	outmviPath = path.join(imagedir, "usr/share/enigma2/bootlogo.mvi")
@@ -294,7 +300,7 @@ def bootmviSlot(imagedir="/", text=" ", slot=0):
 		I1 = ImageDraw.Draw(img)									# Call draw Method to add 2D graphics in an image
 		myFont = ImageFont.truetype("/usr/share/fonts/OpenSans-Regular.ttf", 65)		# Custom font style and font size
 		print("[multiboot][bootmviSlot] Write text to png")
-		I1.text((52, 12), text, font=myFont, fill=(255, 0, 0))		# Add Text to an image
+		I1.text((50, 10), text, font=myFont, fill=(255, 255, 255))		# Add Text to an image
 		I1.text((50, 10), text, font=myFont, fill=(255, 255, 255))
 		img.save("/tmp/out1.png")									# Save the edited image
 		print("[multiboot][bootmviSlot] Repack bootlogo")
@@ -302,6 +308,7 @@ def bootmviSlot(imagedir="/", text=" ", slot=0):
 		Console(binary=True).ePopen("cp /tmp/mypicture.m1v %s" % outmviPath)
 		with open(txtPath, "w") as f:
 			f.write(text)
+
 
 def restoreSlots():
 	for slot in SystemInfo["canMultiBoot"]:

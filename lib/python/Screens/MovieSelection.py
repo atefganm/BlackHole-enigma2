@@ -462,7 +462,7 @@ class MovieContextMenu(Screen, ProtectedScreen):
 				if not parentalControl.sessionPinCached:
 					append_to_menu(menu, (_("Unhide parental control services"), csel.unhideParentalServices), key="9")
 			# Plugins expect a valid selection, so only include them if we selected a non-dir
-			if not(service.flags & eServiceReference.mustDescent):
+			if not (service.flags & eServiceReference.mustDescent):
 				for p in plugins.getPlugins(PluginDescriptor.WHERE_MOVIELIST):
 					append_to_menu(menu, (p.description, boundFunction(p, session, service)), key="bullet")
 
@@ -2415,7 +2415,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 		if deletedList:
 			path2 = path + ".del"
 			if offline is None and os.path.isdir(path2):		# directory not deleted by eraser and .del added to path name
-				shutil.rmtree(path2) 
+				shutil.rmtree(path2)
 			self["list"].removeServices(deletedList)
 			deletedCount = len(deletedList)
 			self.showActionFeedback(_("Deleted '%s'") % name if deletedCount == 1 else _("Deleted %d items") % deletedCount)

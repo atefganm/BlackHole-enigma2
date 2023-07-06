@@ -152,7 +152,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 			self['tl_yellow'].show()
 		else:
 			self['tl_off'].show()
-		if (getImageType() != 'release' and self.trafficLight not in  ("unknown", "alien")) or (getImageType() == 'release' and self.trafficLight not in ("stable", "unstable", "alien")):
+		if (getImageType() != 'release' and self.trafficLight not in ("unknown", "alien")) or (getImageType() == 'release' and self.trafficLight not in ("stable", "unstable", "alien")):
 			self.session.openWithCallback(self.close, MessageBox, feedsstatuscheck.getFeedsErrorMessage(), type=MessageBox.TYPE_INFO, timeout=30, close_on_any_key=True)
 			return
 		else:
@@ -214,8 +214,6 @@ class UpdatePlugin(Screen, ProtectedScreen):
 		if event == IpkgComponent.EVENT_DOWNLOAD:
 			self.status.setText(_("Downloading"))
 		elif event == IpkgComponent.EVENT_UPGRADE:
-			if self.sliderPackages.has_key(param):
-				self.slider.setValue(self.sliderPackages[param])
 			if param in self.sliderPackages:
 				self.slider.setValue(self.sliderPackages[param])
 			self.package.setText(param)

@@ -229,7 +229,7 @@ def getCpuCoresInt():
 					splitted[1] = splitted[1].replace("\n", "")
 					if splitted[0].startswith("processor"):
 						cores = int(splitted[1]) + 1
-	return cores
+			return cores
 
 
 def getCpuCoresString():

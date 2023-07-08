@@ -6,11 +6,12 @@ import fcntl
 import struct
 
 from boxbranding import getDriverDate, getImageVersion, getMachineBuild, getBoxType
+from Components.SystemInfo import BoxInfo
 from Tools.Directories import fileReadLine, fileReadLines
 from enigma import getEnigmaVersionString
 
-
 MODULE_NAME = __name__.split(".")[-1]
+
 
 def getVersionString():
 	return getImageVersion()
@@ -73,10 +74,36 @@ def getModelString():
 
 
 def getChipSetString():
-	try:
-		return str(open("/proc/stb/info/chipset").read().lower().replace("\n", "").replace("brcm", "").replace("bcm", ""))
-	except:
-		return _("unavailable")
+	if getMachineBuild() in ('dm7080', 'dm820'):
+		return "7435"
+	elif getMachineBuild() in ('dm520', 'dm525'):
+		return "73625"
+	elif getMachineBuild() in ('dm900', 'dm920', 'et13000', 'sf5008'):
+		return "7252S"
+	elif getMachineBuild() in ('hd51', 'vs1500', 'h7'):
+		return "7251S"
+	elif getMachineBuild() in ('alien5',):
+		return "S905D"
+	else:
+		chipset = fileReadLine("/proc/stb/info/chipset", source=MODULE_NAME)
+		if chipset is None:
+			return _("Undefined")
+		return str(chipset.lower().replace('\n', '').replace('bcm', '').replace('brcm', '').replace('sti', ''))
+
+
+def getCPUBrand():
+	if BoxInfo.getItem("AmlogicFamily"):
+		return _("Amlogic")
+	elif BoxInfo.getItem("HiSilicon"):
+		return _("HiSilicon")
+	elif socfamily.startswith("smp"):
+		return _("Sigma Designs")
+	elif BoxInfo.getItem("STi"):
+		return _("Sti")
+	elif socfamily.startswith("bcm") or BoxInfo.getItem("brand") == "rpi":
+		return _("Broadcom")
+	print("[About] No CPU brand?")
+	return _("Undefined")
 
 
 def getCPUSpeedMHzInt():

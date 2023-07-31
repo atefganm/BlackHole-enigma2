@@ -1406,7 +1406,7 @@ def findWidgets(name):
 					widgetSet.update(findWidgets(name))
 				else:
 					recurseNamelessPanel(childPanel)
-		
+
 	widgetSet = set()
 	element, path = domScreens.get(name, (None, None))
 	if element is not None:

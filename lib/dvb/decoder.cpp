@@ -133,7 +133,7 @@ int eDVBAudio::startPid(int pid, int type)
 		case aAAC:
 			bypass = 8;
 			break;
-		case aHEAAC:
+		case aAACHE:
 			bypass = 9;
 			break;
 		case aLPCM:
@@ -144,14 +144,14 @@ int eDVBAudio::startPid(int pid, int type)
 			break;
 		case aDRA:
 			bypass = 0x40;
-			break;
+			break;			
 		case aDDP:
 #ifdef DREAMBOX
-			bypass = 7;
+		bypass = 7;
 #else
-			bypass = 0x22;
+		bypass = 0x22;
 #endif
-			break;
+		break;
 		}
 
 		eDebugNoNewLineStart("[eDVBAudio%d] AUDIO_SET_BYPASS bypass=%d ", m_dev, bypass);

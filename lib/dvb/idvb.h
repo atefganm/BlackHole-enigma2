@@ -334,7 +334,7 @@ public:
 	};
 
 	static const cacheID audioCacheTags[];
-	static const int nAudioCacheTags
+	static const int nAudioCacheTags;
 	int getCacheEntry(cacheID);
 	void setCacheEntry(cacheID, int);
 

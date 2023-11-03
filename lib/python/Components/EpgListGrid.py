@@ -1,6 +1,6 @@
 from time import localtime, time, strftime
 
-from enigma import eListbox, eListboxPythonMultiContent, eServiceReference, gFont, eRect, eSize, RT_HALIGN_LEFT, RT_HALIGN_RIGHT, RT_HALIGN_CENTER, RT_VALIGN_CENTER, RT_VALIGN_TOP, RT_WRAP, BT_SCALE, BT_KEEP_ASPECT_RATIO, BT_ALIGN_CENTER
+from enigma import eListbox, eListboxPythonMultiContent, eServiceReference, gFont, eRect, eSize, RT_HALIGN_LEFT, RT_VALIGN_CENTER, BT_SCALE, BT_KEEP_ASPECT_RATIO, BT_ALIGN_CENTER
 
 from skin import parseColor, parseFont, parseScale, applySkinFactor
 from Components.EpgListBase import EPGListBase
@@ -527,7 +527,7 @@ class EPGListGrid(EPGListBase):
 				duration = ev[3]
 
 				xpos, ewidth = self.calcEventPosAndWidthHelper(stime, duration, start, end, width)
-				serviceref = "1" + service[4:] if service[:4] in config.recording.setstreamto1.value else service # converts 4097, 5001, 5002 to 1
+				serviceref = "1" + service[4:] if service[:4] in config.recording.setstreamto1.value else service  # converts 4097, 5001, 5002 to 1
 				serviceTimers = self.filteredTimerList.get(':'.join(serviceref.split(':')[:11]))
 				if serviceTimers is not None:
 					# Code below: "+ (20 if config.recording.margin_before.value == 0 else 0)"
@@ -827,12 +827,12 @@ class EPGListGrid(EPGListBase):
 			# repeat timers represent all their future repetitions, so always include them
 			if (startTime <= timer.end or timer.repeated) and timer.begin < endTime:
 				serviceref = timer.service_ref.ref.toCompareString()
-				serviceref = "1" + serviceref[4:] if serviceref[:4] in config.recording.setstreamto1.value else serviceref # converts 4097, 5001, 5002 to 1
-				l = self.filteredTimerList.get(serviceref)
-				if l is None:
-					self.filteredTimerList[serviceref] = l = [timer]
+				serviceref = "1" + serviceref[4:] if serviceref[:4] in config.recording.setstreamto1.value else serviceref  # converts 4097, 5001, 5002 to 1
+				srefl = self.filteredTimerList.get(serviceref)
+				if srefl is None:
+					self.filteredTimerList[serviceref] = srefl = [timer]
 				else:
-					l.append(timer)
+					srefl.append(timer)
 
 	def getChannelNumber(self, service):
 		if service.ref and "0:0:0:0:0:0:0:0:0" not in service.ref.toString():
@@ -854,7 +854,7 @@ class TimelineText(GUIComponent):
 		GUIComponent.__init__(self)
 		self.epgConfig = epgConfig
 		self.graphic = graphic
-		self.l = eListboxPythonMultiContent()
+		self.l = eListboxPythonMultiContent()  # noqa: E741
 		self.l.setSelectionClip(eRect(0, 0, 0, 0))
 		self.itemHeight = 30
 		self.timelineDate = None
@@ -896,7 +896,7 @@ class TimelineText(GUIComponent):
 		self.listHeight = self.instance.size().height()
 		self.listWidth = self.instance.size().width()
 		self.setFontsize()
-#		print("[EpgListGrid1] itemHeight %s" % (self.itemHeight))
+		# print("[EpgListGrid1] itemHeight %s" % (self.itemHeight))
 		self.l.setItemHeight(self.itemHeight)
 		if self.graphic:
 			self.timelineDate = LoadPixmap(resolveFilename(SCOPE_CURRENT_SKIN, "epg/TimeLineDate.png"))
@@ -958,7 +958,7 @@ class TimelineText(GUIComponent):
 			bgpng = self.timelineDate
 			if bgpng is not None and self.graphic:
 				backColor = None
-				backColorSel = None
+				# backColorSel = None
 				res.append(MultiContentEntryPixmapAlphaBlend(
 					pos=(0, 0),
 					size=(serviceRect.width(), self.listHeight),
@@ -984,7 +984,7 @@ class TimelineText(GUIComponent):
 			xpos = 0
 			if bgpng is not None and self.graphic:
 				backColor = None
-				backColorSel = None
+				# backColorSel = None
 				res.append(MultiContentEntryPixmapAlphaBlend(
 					pos=(serviceRect.width(), 0),
 					size=(eventRect.width(), self.listHeight),

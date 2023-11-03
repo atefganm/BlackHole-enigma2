@@ -1,6 +1,4 @@
 from os import path as ospath
-import re
-import unicodedata
 from Components.Renderer.Renderer import Renderer
 from enigma import ePixmap, ePicLoad
 from Tools.Directories import pathExists, SCOPE_CURRENT_SKIN, resolveFilename
@@ -71,7 +69,7 @@ class LcdPicon(Renderer):
 		if self.instance:
 			if what[0] in (self.CHANGED_DEFAULT, self.CHANGED_ALL, self.CHANGED_SPECIFIC):
 				pngname = lcdPiconLocator.getPiconName(self.source.text)
-				if not pathExists(pngname): # no picon for service found
+				if not pathExists(pngname):  # no picon for service found
 					pngname = self.defaultpngname
 				if self.pngname != pngname:
 					if pngname:

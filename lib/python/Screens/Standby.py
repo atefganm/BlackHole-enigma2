@@ -1,20 +1,21 @@
 from os import path
-from gettext import dgettext
-from time import localtime, time
-from enigma import eDVBVolumecontrol, eTimer, eDVBLocalTimeHandler, eServiceReference, eStreamServer
-from boxbranding import getMachineBrand, getMachineName, getBoxType, getBrandOEM, getMachineBuild
-from GlobalActions import globalActionMap
+from time import time
 
+from enigma import eDVBVolumecontrol, eTimer, eDVBLocalTimeHandler, eServiceReference, eStreamServer, iRecordableService, quitMainloop
+
+from boxbranding import getMachineBrand, getMachineName, getBoxType, getBrandOEM
 from Components.ActionMap import ActionMap
 from Components.AVSwitch import AVSwitch
 from Components.config import config
 from Components.Console import Console
 import Components.ParentalControl
 from Components.SystemInfo import SystemInfo
-from Components.Sources.StaticText import StaticText
 from Components.Sources.StreamService import StreamServiceList
+from Components.Task import job_manager
+from GlobalActions import globalActionMap
 import Screens.InfoBar
 from Screens.Screen import Screen, ScreenSummary
+from Screens.MessageBox import MessageBox
 import Tools.Notifications
 
 inStandby = None
@@ -24,7 +25,6 @@ QUIT_REBOOT = 2
 QUIT_RESTART = 3
 QUIT_UPGRADE_FP = 4
 QUIT_ERROR_RESTART = 5
-QUIT_RECOVERY = 16
 QUIT_ANDROID = 12
 QUIT_MAINT = 16
 QUIT_UPGRADE_PROGRAM = 42
@@ -123,7 +123,6 @@ class Standby2(Screen):
 				open("/proc/stb/hdmi/output", "w").write("off")
 			except:
 				pass
-
 		self.onFirstExecBegin.append(self.__onFirstExecBegin)
 		self.onClose.append(self.__onClose)
 
@@ -135,7 +134,6 @@ class Standby2(Screen):
 		if self.paused_service:
 			self.paused_action and self.paused_service.unPauseService()
 		elif self.prev_running_service:
-			service = self.prev_running_service.toString()
 			if config.servicelist.startupservice_onstandby.value:
 				self.session.nav.playService(eServiceReference(config.servicelist.startupservice.value))
 				from Screens.InfoBar import InfoBar
@@ -144,7 +142,7 @@ class Standby2(Screen):
 				self.session.nav.playService(self.prev_running_service)
 		self.session.screen["Standby"].boolean = False
 		globalActionMap.setEnabled(True)
-		self.avswitch.setInput("encoder")
+		self.avswitch.setInput("ENCODER")
 		self.leaveMute()
 		if path.exists("/usr/scripts/standby_leave.sh"):
 			Console().ePopen("/usr/scripts/standby_leave.sh")
@@ -200,12 +198,6 @@ class StandbySummary(ScreenSummary):
 	</screen>"""
 
 
-from enigma import quitMainloop, iRecordableService
-from Screens.MessageBox import MessageBox
-from time import time
-from Components.Task import job_manager
-
-
 class QuitMainloopScreen(Screen):
 	def __init__(self, session, retvalue=1):
 		self.skin = """<screen name="QuitMainloopScreen" position="fill" flags="wfNoBorder">
@@ -219,7 +211,6 @@ class QuitMainloopScreen(Screen):
 			QUIT_REBOOT: _("Your %s %s is rebooting") % (getMachineBrand(), getMachineName()),
 			QUIT_RESTART: _("The user interface of your %s %s is restarting") % (getMachineBrand(), getMachineName()),
 			QUIT_ANDROID: _("Your %s %s is rebooting into Android Mode") % (getMachineBrand(), getMachineName()),
-			QUIT_RECOVERY: _("Your %s %s is rebooting into Recovery Mode") % (getMachineBrand(), getMachineName()),
 			QUIT_MAINT: _("Your %s %s is rebooting into Recovery Mode") % (getMachineBrand(), getMachineName()),
 			QUIT_UPGRADE_FP: _("Your frontprocessor will be upgraded\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (getMachineBrand(), getMachineName()),
 			QUIT_ERROR_RESTART: _("The user interface of your %s %s is restarting\ndue to an error in StartEnigma.py") % (getMachineBrand(), getMachineName()),
@@ -239,7 +230,7 @@ class TryQuitMainloop(MessageBox):
 		recordings = session.nav.getRecordings()
 		jobs = []
 		for job in job_manager.getPendingJobs():
-			if job.name != dgettext('vix', 'SoftcamCheck'):
+			if job.name != _('SoftcamCheck'):
 				jobs.append(job)
 
 		inTimeshift = Screens.InfoBar.InfoBar and Screens.InfoBar.InfoBar.instance and Screens.InfoBar.InfoBar.ptsGetTimeshiftStatus(Screens.InfoBar.InfoBar.instance)
@@ -272,7 +263,6 @@ class TryQuitMainloop(MessageBox):
 				QUIT_REBOOT: _("Really reboot now?"),
 				QUIT_RESTART: _("Really restart now?"),
 				QUIT_ANDROID: _("Really reboot into Android Mode?"),
-				QUIT_RECOVERY: _("Really reboot into Recovery Mode?"),
 				QUIT_MAINT: _("Really reboot into Recovery Mode?"),
 				QUIT_UPGRADE_FP: _("Really upgrade the frontprocessor and reboot now?"),
 				QUIT_UPGRADE_PROGRAM: _("Really upgrade your %s %s and reboot now?") % (getMachineBrand(), getMachineName()),
@@ -296,34 +286,34 @@ class TryQuitMainloop(MessageBox):
 		else:
 			if event == iRecordableService.evEnd:
 				recordings = self.session.nav.getRecordings()
-				if not recordings: # no more recordings exist
+				if not recordings:  # no more recordings exist
 					rec_time = self.session.nav.RecordTimer.getNextRecordingTime()
 					if rec_time > 0 and (rec_time - time()) < 360:
-						self.initTimeout(360) # wait for next starting timer
+						self.initTimeout(360)  # wait for next starting timer
 						self.startTimer()
 					else:
-						self.close(True) # immediate shutdown
+						self.close(True)  # immediate shutdown
 			elif event == iRecordableService.evStart:
 				self.stopTimer()
 
 	def sendCEC(self):
-			print("[Standby][sendCEC] entered ")
-			import struct
-			from enigma import eHdmiCEC
-			physicaladdress = eHdmiCEC.getInstance().getPhysicalAddress()
-			msgaddress = 0x0f # use broadcast for active source command
-			cmd0 = 0x9d	# 157 sourceinactive
-			data0 = struct.pack("BB", int(physicaladdress // 256), int(physicaladdress % 256))
-			data0 = data0.decode("UTF-8", "ignore")
-			cmd1 = 0x44	# 68 keypoweroff
-			data1 = struct.pack("B", 0x6c)
-			data1 = data1.decode("UTF-8", "ignore")
-			cmd2 = 0x36	# 54 standby
-			data2 = ""
-			eHdmiCEC.getInstance().sendMessage(msgaddress, cmd0, data0, len(data0))
-			eHdmiCEC.getInstance().sendMessage(msgaddress, cmd1, data1, len(data1))
-			eHdmiCEC.getInstance().sendMessage(msgaddress, cmd2, data2, len(data2))
-			print("[Standby][sendCEC] departed ")
+		print("[Standby][sendCEC] entered ")
+		import struct
+		from enigma import eHdmiCEC  # noqa: E402
+		physicaladdress = eHdmiCEC.getInstance().getPhysicalAddress()
+		msgaddress = 0x0f  # use broadcast for active source command
+		cmd0 = 0x9d  # 157 sourceinactive
+		data0 = struct.pack("BB", int(physicaladdress // 256), int(physicaladdress % 256))
+		data0 = data0.decode("UTF-8", "ignore")
+		cmd1 = 0x44  # 68 keypoweroff
+		data1 = struct.pack("B", 0x6c)
+		data1 = data1.decode("UTF-8", "ignore")
+		cmd2 = 0x36  # 54 standby
+		data2 = ""
+		eHdmiCEC.getInstance().sendMessage(msgaddress, cmd0, data0, len(data0))
+		eHdmiCEC.getInstance().sendMessage(msgaddress, cmd1, data1, len(data1))
+		eHdmiCEC.getInstance().sendMessage(msgaddress, cmd2, data2, len(data2))
+		print("[Standby][sendCEC] departed ")
 
 	def close(self, value):
 		if self.connected:
@@ -341,12 +331,11 @@ class TryQuitMainloop(MessageBox):
 			self.quitScreen = self.session.instantiateDialog(QuitMainloopScreen, retvalue=self.retval)
 			self.quitScreen.show()
 			print("[Standby] quitMainloop #1")
-			quitMainloopCode = self.retval
 			if SystemInfo["Display"] and SystemInfo["LCDMiniTV"]:
 				# set LCDminiTV off / fix a deep-standby-crash on some boxes / gb4k
 				print("[Standby] LCDminiTV off")
 				setLCDMiniTVMode("0")
-			if getBoxType() == "vusolo4k":  #workaround for white display flash
+			if getBoxType() == "vusolo4k":  # workaround for white display flash
 				f = open("/proc/stb/fp/oled_brightness", "w")
 				f.write("0")
 				f.close()

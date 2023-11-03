@@ -230,11 +230,11 @@ int eDVBServiceRecord::doPrepare()
 			{
 				/*
 				* streams are considered to be descrambled by default;
-				* (or idDVB + idServiceIsScrambled == idDVBScrambled)
+				* user can indicate a stream is scrambled, by using servicetype id + 0x100
 				*/
 				bool config_descramble_client = eConfigManager::getConfigBoolValue("config.streaming.descramble_client", false);
 
-				m_descramble = (m_ref.type == eServiceReference::idDVBScrambled);
+				m_descramble = (m_ref.type == eServiceFactoryDVB::id + 0x100);
 
 				if(config_descramble_client)
 					m_descramble = true;
@@ -263,6 +263,11 @@ int eDVBServiceRecord::doPrepare()
 				f->open(m_ref.path.c_str());
 				source = ePtr<iTsSource>(f);
 			}
+			m_event((iRecordableService*)this, evPvrTuneStart);
+		}
+		else
+		{
+			m_event((iRecordableService*)this, evTuneStart);
 		}
 		return m_service_handler.tuneExt(m_ref, source, m_ref.path.c_str(), 0, m_simulate, NULL, servicetype, m_descramble);
 	}
@@ -636,6 +641,10 @@ PyObject *eDVBServiceRecord::getCutList()
 
 void eDVBServiceRecord::saveCutlist()
 {
+	/* save cuesheet only when main file is accessible. */
+	if (::access(m_filename.c_str(), R_OK) < 0)
+		return;
+
 	std::string filename = m_filename + ".cuts";
 
 	// If a cuts file exists, append to it (who cares about sorting it)

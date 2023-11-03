@@ -2,12 +2,12 @@ from enigma import eDVBVolumecontrol, eTimer
 from Tools.Profile import profile
 from Screens.Volume import Volume
 from Screens.Mute import Mute
-from GlobalActions import globalActionMap
+from GlobalActions import globalActionMap  # noqa: F401
 from Components.config import config, ConfigSubsection, ConfigInteger
 import skin
 
 profile("VolumeControl")
-#TODO .. move this to a own .py file
+# TODO .. move this to a own .py file
 
 
 class VolumeControl:
@@ -66,7 +66,6 @@ class VolumeControl:
 		self.setVolume(-1)
 
 	def setVolume(self, direction):
-		oldvol = self.volctrl.getVolume()
 		if direction > 0:
 			self.volctrl.volumeUp()
 		else:
@@ -75,9 +74,9 @@ class VolumeControl:
 		vol = self.volctrl.getVolume()
 		self.volumeDialog.show()
 		if is_muted:
-			self.volMute() # unmute
+			self.volMute()  # unmute
 		elif not vol:
-			self.volMute(False, True) # mute but dont show mute symbol
+			self.volMute(False, True)  # mute but dont show mute symbol
 		if self.volctrl.isMuted():
 			self.volumeDialog.setValue(0)
 		else:

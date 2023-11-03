@@ -54,8 +54,8 @@ class CronTimers(Screen):
 			'green': self.addtocron,
 			'yellow': self.CrondStart,
 			'blue': self.autostart,
-			})
-		if not self.selectionChanged in self["list"].onSelectionChanged:
+			})  # noqa: E123
+		if self.selectionChanged not in self["list"].onSelectionChanged:
 			self["list"].onSelectionChanged.append(self.selectionChanged)
 		self.service_name = 'cronie'
 		self.onLayoutFinish.append(self.InstallCheck)
@@ -245,9 +245,9 @@ class CronTimers(Screen):
 			mysel = self['list'].getCurrent()
 			if mysel:
 				myline = mysel[1]
-				open('/etc/cron/crontabs/root.tmp', 'w').writelines([l for l in open('/etc/cron/crontabs/root').readlines() if myline not in l])
+				open('/etc/cron/crontabs/root.tmp', 'w').writelines([x for x in open('/etc/cron/crontabs/root').readlines() if myline not in x])
 				rename('/etc/cron/crontabs/root.tmp', '/etc/cron/crontabs/root')
-				rc = system('crontab /etc/cron/crontabs/root -c /etc/cron/crontabs')
+				system('crontab /etc/cron/crontabs/root -c /etc/cron/crontabs')
 				self.updateList()
 
 	def info(self):
@@ -302,7 +302,7 @@ class CronTimersConfig(Setup):
 	def changedEntry(self):
 		if self["config"].getCurrent()[1] in (self.runwhen, self.commandtype):
 			self.createSetup()
-		ConfigListScreen.changedEntry(self) # update callbacks
+		ConfigListScreen.changedEntry(self)  # update callbacks
 
 	def keySave(self):
 		msg = ''
@@ -348,5 +348,5 @@ class CronTimersConfig(Setup):
 		out = open('/etc/cron/crontabs/root', 'a')
 		out.write(newcron)
 		out.close()
-		rc = system('crontab /etc/cron/crontabs/root -c /etc/cron/crontabs')
+		system('crontab /etc/cron/crontabs/root -c /etc/cron/crontabs')
 		self.close()

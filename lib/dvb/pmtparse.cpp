@@ -30,6 +30,7 @@ void eDVBPMTParser::clearProgramInfo(program &program)
 	program.textPid = -1;
 	program.aitPid = -1;
 	program.isCached = false;
+	program.pmtVersion = -1;
 	program.dsmccPid = -1;
 	program.serviceId = -1;
 	program.adapterId = -1;
@@ -68,6 +69,7 @@ int eDVBPMTParser::getProgramInfo(program &program)
 		eDVBTableSpec table_spec;
 		ptr->getSpec(table_spec);
 		program.pmtPid = table_spec.pid < 0x1fff ? table_spec.pid : -1;
+		program.pmtVersion = table_spec.version;
 
 		for (const auto i : ptr->getSections())
 		{
@@ -165,7 +167,7 @@ int eDVBPMTParser::getProgramInfo(program &program)
 					if (!isvideo && !isaudio)
 					{
 						isaudio = 1;
-						audio.type = audioStream::atAACHE;
+						audio.type = audioStream::atHEAAC;
 						forced_audio = 1;
 					}
 					[[fallthrough]];
@@ -304,7 +306,7 @@ int eDVBPMTParser::getProgramInfo(program &program)
 							case 0x1C: // TS_PSI_DT_MPEG4_Audio
 							case AAC_DESCRIPTOR:
 								isaudio = 1;
-								audio.type = audioStream::atAACHE; // MPEG4-AAC
+								audio.type = audioStream::atHEAAC; // MPEG4-AAC
 								break;
 							case AC3_DESCRIPTOR:
 								isaudio = 1;

@@ -19,10 +19,11 @@ class Pixmap(GUIComponent):
 		s = self.instance.size()
 		return s.width(), s.height()
 
+	def setPixmap(self, pixmap):
+		self.instance.setPixmap(pixmap)
+
 	def applySkin(self, desktop, screen):
 		if self.skinAttributes is not None:
-			skin_path_prefix = getattr(screen, "skin_path", path)
-			pixmap = None
 			attribs = []
 			for (attrib, value) in self.skinAttributes:
 				if attrib == "offset":
@@ -129,7 +130,7 @@ class MovingPixmap(Pixmap):
 			self.currDest += 1
 			self.moveTimer.stop()
 			self.moving = False
-			if self.currDest >= len(self.path): # end of path
+			if self.currDest >= len(self.path):  # end of path
 				if self.repeated:
 					self.currDest = 0
 					self.moving = False

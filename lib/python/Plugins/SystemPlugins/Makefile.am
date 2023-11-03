@@ -3,7 +3,7 @@ installdir = $(pkglibdir)/python/Plugins/SystemPlugins
 SUBDIRS = PositionerSetup Satfinder CableScan \
 	VideoTune Hotplug OpentvZapper \
 	DefaultServicesScanner CommonInterfaceAssignment \
-	VideoClippingSetup VideoEnhancement \
+	VideoClippingSetup VideoEnhancement OBH \
 	WirelessLan NetworkWizard SABnzbdSetup \
 	FastScan SatelliteEquipmentControl DiseqcTester
 
@@ -13,6 +13,10 @@ endif
 
 if HAVE_OSDANIMATION
 SUBDIRS += AnimationSetup
+endif
+
+if HAVE_FCC
+SUBDIRS += FastChannelChange
 endif
 
 install_PYTHON = __init__.py

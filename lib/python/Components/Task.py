@@ -1,5 +1,7 @@
 # A Job consists of many "Tasks".
 # A task is the run of an external tool, with proper methods for failure handling
+from os import access, environ, path as ospath, pathsep, statvfs, X_OK, W_OK
+
 from Tools.CList import CList
 
 
@@ -289,7 +291,7 @@ class PythonTask(Task):
 		self.timer.start(5)
 
 	def work(self):
-		raise NotImplemented("work")
+		raise NotImplementedError("[Task] PythonTask work")  # what is this?
 
 	def abort(self):
 		self.aborted = True
@@ -430,39 +432,38 @@ class JobManager:
 		return list
 
 # some examples:
-#class PartitionExistsPostcondition:
-#	def __init__(self, device):
-#		self.device = device
+# class PartitionExistsPostcondition:
+# 		def __init__(self, device):
+# 			self.device = device
 #
-#	def check(self, task):
-#		import os
-#		return os.access(self.device + "part1", os.F_OK)
+# 		def check(self, task):
+# 			return access(self.device + "part1", F_OK)
 #
-#class CreatePartitionTask(Task):
-#	def __init__(self, device):
-#		Task.__init__(self, "Creating partition")
-#		self.device = device
-#		self.setTool("/sbin/sfdisk")
-#		self.args += ["-f", self.device + "disc"]
-#		self.initial_input = "0,\n;\n;\n;\ny\n"
-#		self.postconditions.append(PartitionExistsPostcondition(self.device))
+# class CreatePartitionTask(Task):
+# 		def __init__(self, device):
+# 			Task.__init__(self, "Creating partition")
+# 			self.device = device
+# 			self.setTool("/sbin/sfdisk")
+# 			self.args += ["-f", self.device + "disc"]
+# 			self.initial_input = "0,\n;\n;\n;\ny\n"
+# 			self.postconditions.append(PartitionExistsPostcondition(self.device))
 #
-#class CreateFilesystemTask(Task):
-#	def __init__(self, device, partition = 1, largefile = True):
-#		Task.__init__(self, "Creating filesystem")
-#		self.setTool("/sbin/mkfs.ext")
-#		if largefile:
-#			self.args += ["-T", "largefile"]
-#		self.args.append("-m0")
-#		self.args.append(device + "part%d" % partition)
+# class CreateFilesystemTask(Task):
+# 		def __init__(self, device, partition = 1, largefile = True):
+# 			Task.__init__(self, "Creating filesystem")
+# 			self.setTool("/sbin/mkfs.ext")
+# 			if largefile:
+# 				self.args += ["-T", "largefile"]
+# 			self.args.append("-m0")
+# 			self.args.append(device + "part%d" % partition)
 #
-#class FilesystemMountTask(Task):
-#	def __init__(self, device, partition = 1, filesystem = "ext3"):
-#		Task.__init__(self, "Mounting filesystem")
-#		self.setTool("/bin/mount")
-#		if filesystem is not None:
-#			self.args += ["-t", filesystem]
-#		self.args.append(device + "part%d" % partition)
+# class FilesystemMountTask(Task):
+# 		def __init__(self, device, partition = 1, filesystem = "ext3"):
+# 			Task.__init__(self, "Mounting filesystem")
+# 			self.setTool("/bin/mount")
+# 			if filesystem is not None:
+# 				self.args += ["-t", filesystem]
+# 			self.args.append(device + "part%d" % partition)
 
 
 class Condition:
@@ -480,7 +481,7 @@ class WorkspaceExistsPrecondition(Condition):
 		pass
 
 	def check(self, task):
-		return os.access(task.job.workspace, os.W_OK)
+		return access(task.job.workspace, W_OK)
 
 
 class DiskspacePrecondition(Condition):
@@ -489,9 +490,8 @@ class DiskspacePrecondition(Condition):
 		self.diskspace_available = 0
 
 	def check(self, task):
-		import os
 		try:
-			s = os.statvfs(task.job.workspace)
+			s = statvfs(task.job.workspace)
 			self.diskspace_available = s.f_bsize * s.f_bavail
 			return self.diskspace_available >= self.diskspace_required
 		except OSError:
@@ -506,16 +506,15 @@ class ToolExistsPrecondition(Condition):
 		pass
 
 	def check(self, task):
-		import os
 		if task.cmd[0] == '/':
 			self.realpath = task.cmd
 			print("[Task] WARNING: usage of absolute paths for tasks should be avoided!")
-			return os.access(self.realpath, os.X_OK)
+			return access(self.realpath, X_OK)
 		else:
 			self.realpath = task.cmd
-			path = os.environ.get('PATH', '').split(os.pathsep)
+			path = environ.get('PATH', '').split(pathsep)
 			path.append(task.cwd + '/')
-			absolutes = list(filter(lambda _file: os.access(_file, os.X_OK), map(lambda directory, _file=task.cmd: os.path.join(directory, _file), path)))
+			absolutes = list(filter(lambda _file: access(_file, X_OK), map(lambda directory, _file=task.cmd: ospath.join(directory, _file), path)))
 			if absolutes:
 				self.realpath = absolutes[0]
 				return True
@@ -568,20 +567,20 @@ class FailedPostcondition(Condition):
 	def check(self, task):
 		return (self.exception is None) or (self.exception == 0)
 
-#class HDDInitJob(Job):
-#	def __init__(self, device):
-#		Job.__init__(self, _("Initialize Harddisk"))
-#		self.device = device
-#		self.fromDescription(self.createDescription())
+# class HDDInitJob(Job):
+# 		def __init__(self, device):
+# 			Job.__init__(self, _("Initialize Harddisk"))
+# 			self.device = device
+# 			self.fromDescription(self.createDescription())
 #
-#	def fromDescription(self, description):
-#		self.device = description["device"]
-#		self.addTask(CreatePartitionTask(self.device))
-#		self.addTask(CreateFilesystemTask(self.device))
-#		self.addTask(FilesystemMountTask(self.device))
+# 		def fromDescription(self, description):
+# 			self.device = description["device"]
+# 			self.addTask(CreatePartitionTask(self.device))
+# 			self.addTask(CreateFilesystemTask(self.device))
+# 			self.addTask(FilesystemMountTask(self.device))
 #
-#	def createDescription(self):
-#		return {"device": self.device}
+# 		def createDescription(self):
+# 			return {"device": self.device}
 
 
 job_manager = JobManager()

@@ -1,6 +1,6 @@
 from enigma import eRCInput, eTimer, eWindow  # , getDesktop
 
-from skin import GUI_SKIN_ID, applyAllAttributes
+from skin import GUI_SKIN_ID, applyAllAttributes  # noqa: F401 GUI_SKIN_ID used by debug
 from Components.config import config
 from Components.GUIComponent import GUIComponent
 from Components.Sources.Source import Source
@@ -175,7 +175,7 @@ class Screen(dict):
 			screenTitle = title
 		self["ScreenPath"].text = screenPath
 		self["Title"].text = screenTitle
-		self["title"].text = self.screenTitle # DEBUG: Hack to support for some summary screens.
+		self["title"].text = self.screenTitle  # DEBUG: Hack to support for some summary screens.
 
 	def getTitle(self):
 		return self.screenTitle
@@ -307,11 +307,9 @@ class ScreenSummary(Screen):
 		names = parent.skinName
 		if not isinstance(names, list):
 			names = [names]
-		self.skinName = ["%sSummary" % x for x in names]  # DEBUG: Proposed for new summary screens.
-		self.skinName += ["%s_summary" % x for x in names]
+		self.skinName = ["%s_summary" % x for x in names]
 		className = self.__class__.__name__
-		if className != "ScreenSummary" and className not in self.skinName: # e.g. if a module uses Screens.Setup.SetupSummary the skin needs to be available directly
+		if className != "ScreenSummary" and className not in self.skinName:  # e.g. if a module uses Screens.Setup.SetupSummary the skin needs to be available directly
 			self.skinName.append(className)
 		self.skinName.append("SimpleSummary")
-		self.skinName.append("ScreenSummary")  # DEBUG: Proposed for new summary screens.
 		self.skin = parent.__dict__.get("skinSummary", self.skin)  # If parent has a "skinSummary" defined, use that as default.

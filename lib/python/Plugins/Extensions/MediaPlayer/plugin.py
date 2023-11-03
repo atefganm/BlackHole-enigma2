@@ -1,33 +1,32 @@
-import os
+from os import listdir, path as ospath, remove as osremove
 from time import strftime
 import random
 from boxbranding import getMachineBrand, getMachineName
 
 from enigma import iPlayableService, eTimer, eServiceCenter, iServiceInformation, ePicLoad
-
-from ServiceReference import ServiceReference
-from Screens.Screen import Screen
-from Screens.HelpMenu import HelpableScreen
-from Screens.MessageBox import MessageBox
-from Screens.InputBox import InputBox
+from Components.ActionMap import NumberActionMap, HelpableActionMap
+from Components.config import config
+from Components.Label import Label
+from Components.FileList import FileList
+from Components.Harddisk import harddiskmanager
+from Components.MediaPlayer import PlayList
+from Components.MovieList import AUDIO_EXTENSIONS
+from Components.Pixmap import Pixmap, MultiPixmap
+from Components.Playlist import PlaylistIOInternal, PlaylistIOM3U, PlaylistIOPLS
+from Components.ServiceEventTracker import ServiceEventTracker, InfoBarBase
+from Components.ServicePosition import ServicePositionGauge
+from Components.Sources.StaticText import StaticText
+from Components.SystemInfo import SystemInfo
+from Plugins.Plugin import PluginDescriptor
 from Screens.ChoiceBox import ChoiceBox
 from Screens.InfoBar import InfoBar
 from Screens.InfoBarGenerics import InfoBarSeek, InfoBarScreenSaver, InfoBarAudioSelection, InfoBarCueSheetSupport, InfoBarNotifications, InfoBarSubtitleSupport, InfoBarAspectSelection, InfoBarResolutionSelection
-from Components.ActionMap import NumberActionMap, HelpableActionMap
-from Components.Label import Label
-from Components.Pixmap import Pixmap, MultiPixmap
-from Components.FileList import FileList
-from Components.MediaPlayer import PlayList
-from Components.MovieList import AUDIO_EXTENSIONS
-from Components.ServicePosition import ServicePositionGauge
-from Components.ServiceEventTracker import ServiceEventTracker, InfoBarBase
-from Components.Playlist import PlaylistIOInternal, PlaylistIOM3U, PlaylistIOPLS
-from Components.AVSwitch import AVSwitch
-from Components.Harddisk import harddiskmanager
-from Components.config import config
-from Components.SystemInfo import SystemInfo
-from Components.Sources.StaticText import StaticText
-from Tools.Directories import fileExists, pathExists, resolveFilename, SCOPE_CONFIG, SCOPE_PLAYLIST, SCOPE_CURRENT_SKIN
+from Screens.InputBox import InputBox
+from Screens.HelpMenu import HelpableScreen
+from Screens.MessageBox import MessageBox
+from Screens.Screen import Screen
+from ServiceReference import ServiceReference
+from Tools.Directories import fileExists, resolveFilename, SCOPE_CONFIG, SCOPE_PLAYLIST, SCOPE_CURRENT_SKIN
 from Tools.BoundFunction import boundFunction
 from .settings import MediaPlayerSettings
 
@@ -66,9 +65,8 @@ class MediaPixmap(Pixmap):
 
 	def onShow(self):
 		Pixmap.onShow(self)
-		sc = AVSwitch().getFramebufferScale()
-		#0=Width 1=Height 2=Aspect 3=use_cache 4=resize_type 5=Background(#AARRGGBB)
-		self.picload.setPara((self.instance.size().width(), self.instance.size().height(), sc[0], sc[1], False, 1, "#00000000"))
+		# 0=Width 1=Height 2=Aspect 3=use_cache 4=resize_type 5=Background(#AARRGGBB)
+		self.picload.setPara((self.instance.size().width(), self.instance.size().height(), 1, 1, False, 1, "#00000000"))
 
 	def paintCoverArtPixmapCB(self, picInfo=None):
 		ptr = self.picload.getData()
@@ -132,7 +130,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 
 		# 'None' is magic to start at the list of mountpoints
 		defaultDir = config.mediaplayer.defaultDir.getValue()
-		self.filelist = FileList(defaultDir, matchingPattern="(?i)^.*\.(dts|mp3|wav|wave|wv|oga|ogg|flac|m4a|mp2|m2a|wma|ac3|mka|aac|ape|alac|mpg|vob|m4v|mkv|avi|divx|dat|flv|mp4|mov|wmv|asf|3gp|3g2|mpeg|mpe|rm|rmvb|ogm|ogv|m2ts|mts|ts|m3u|e2pls|pls|amr|au|mid|pva|wtv)", useServiceRef=True, additionalExtensions="4098:m3u 4098:e2pls 4098:pls")
+		self.filelist = FileList(defaultDir, matchingPattern=r"(?i)^.*\.(dts|mp3|wav|wave|wv|oga|ogg|flac|m4a|mp2|m2a|wma|ac3|mka|aac|ape|alac|mpg|vob|m4v|mkv|avi|divx|dat|flv|mp4|mov|wmv|asf|3gp|3g2|mpeg|mpe|rm|rmvb|ogm|ogv|m2ts|mts|ts|m3u|e2pls|pls|amr|au|mid|pva|wtv)", useServiceRef=True, additionalExtensions="4098:m3u 4098:e2pls 4098:pls")
 		self["filelist"] = self.filelist
 
 		self.playlist = MyPlayList()
@@ -260,12 +258,12 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 			self.playlist.updateList()
 
 		self.__event_tracker = ServiceEventTracker(screen=self, eventmap={
-				iPlayableService.evUpdatedInfo: self.__evUpdatedInfo,
-				iPlayableService.evUser + 10: self.__evAudioDecodeError,
-				iPlayableService.evUser + 11: self.__evVideoDecodeError,
-				iPlayableService.evUser + 12: self.__evPluginError,
-				iPlayableService.evUser + 13: self["coverArt"].embeddedCoverArt
-			})
+			iPlayableService.evUpdatedInfo: self.__evUpdatedInfo,
+			iPlayableService.evUser + 10: self.__evAudioDecodeError,
+			iPlayableService.evUser + 11: self.__evVideoDecodeError,
+			iPlayableService.evUser + 12: self.__evPluginError,
+			iPlayableService.evUser + 13: self["coverArt"].embeddedCoverArt
+		})
 
 		self.servicelist = None
 		self.pipZapAvailable = False
@@ -526,13 +524,13 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 				if r is None:
 					return
 				text = r.getPath()
-				self["currenttext"].setText(os.path.basename(text))
+				self["currenttext"].setText(ospath.basename(text))
 
 		if self.currList == "playlist":
 			t = self.playlist.getSelection()
 			if t is None:
 				return
-			#display current selected entry on LCD
+			# display current selected entry on LCD
 			text = self.getIdentifier(t)
 			self.summaries.setText(text, 1)
 			self["currenttext"].setText(text)
@@ -585,17 +583,17 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 			else:
 				menulist.append((_("Add files to playlist"), "copyfiles"))
 			menulist.append((_("Switch to playlist"), "playlist"))
-			if config.usage.setup_level.index >= 1: # intermediate+
+			if config.usage.setup_level.index >= 1:  # intermediate+
 				menulist.append((_("Delete file"), "deletefile"))
 		else:
 			menulist.append((_("Switch to filelist"), "filelist"))
 			menulist.append((_("Clear playlist"), "clear"))
 			menulist.append((_("Delete entry"), "deleteentry"))
-			if config.usage.setup_level.index >= 1: # intermediate+
+			if config.usage.setup_level.index >= 1:  # intermediate+
 				menulist.append((_("Shuffle playlist"), "shuffle"))
 		menulist.append((_("Hide player"), "hide"))
 		menulist.append((_("Load playlist"), "loadplaylist"))
-		if config.usage.setup_level.index >= 1: # intermediate+
+		if config.usage.setup_level.index >= 1:  # intermediate+
 			menulist.append((_("Save playlist"), "saveplaylist"))
 			menulist.append((_("Delete saved playlist"), "deleteplaylist"))
 			menulist.append((_("Edit settings"), "settings"))
@@ -614,7 +612,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 		if choice[1] == "copydir":
 			self.copyDirectory(self.filelist.getSelection()[0])
 		elif choice[1] == "copyfiles":
-			self.copyDirectory(os.path.dirname(self.filelist.getSelection()[0].getPath()) + "/", recursive=False)
+			self.copyDirectory(ospath.dirname(self.filelist.getSelection()[0].getPath()) + "/", recursive=False)
 		elif choice[1] == "playlist":
 			self.switchToPlayList()
 		elif choice[1] == "filelist":
@@ -660,7 +658,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 				cdinfo = Query(self)
 				cdinfo.scan()
 			except ImportError:
-				pass # we can live without CDInfo
+				pass  # we can live without CDInfo
 			self.changeEntry(0)
 			self.switchToPlayList()
 
@@ -722,7 +720,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 		listpath = []
 		playlistdir = resolveFilename(SCOPE_PLAYLIST)
 		try:
-			for i in os.listdir(playlistdir):
+			for i in listdir(playlistdir):
 				listpath.append((i, playlistdir + i))
 		except IOError as e:
 			print("Error while scanning subdirs ", e)
@@ -764,7 +762,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 	def deleteConfirmed(self, confirmed):
 		if confirmed:
 			try:
-				os.remove(self.delname)
+				osremove(self.delname)
 			except OSError as e:
 				print("delete failed:", e)
 				self.session.open(MessageBox, _("Delete failed!"), MessageBox.TYPE_ERROR)
@@ -783,7 +781,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 		filelist = FileList(directory, useServiceRef=True, showMountpoints=False, isTop=True)
 
 		for x in filelist.getFileList():
-			if x[0][1]: #isDir
+			if x[0][1]:  # isDir
 				if recursive:
 					if x[0][0] != directory:
 						self.copyDirectory(x[0][0])
@@ -852,7 +850,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 				self.switchToFileList()
 
 	def copyFile(self):
-		if self.filelist.getServiceRef().type == 4098: # playlist
+		if self.filelist.getServiceRef().type == 4098:  # playlist
 			ServiceRef = self.filelist.getServiceRef()
 			extension = ServiceRef.getPath()[ServiceRef.getPath().rfind('.') + 1:]
 			if extension in self.playlistparsers:
@@ -874,7 +872,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 		next = self.playlist.getCurrentIndex() + 1
 		if next < len(self.playlist):
 			self.changeEntry(next)
-		elif (len(self.playlist) > 0) and (config.mediaplayer.repeat.value == True):
+		elif (len(self.playlist) > 0) and (config.mediaplayer.repeat.value is True):
 			self.stopEntry()
 			self.changeEntry(0)
 		elif len(self.playlist) > 0:
@@ -920,12 +918,12 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 			self.isAudioCD = False
 			sel = self.filelist.getSelection()
 			if sel:
-				if sel[1]: # can descent
+				if sel[1]:  # can descent
 					# add directory to playlist
 					self.copyDirectory(sel[0])
 				else:
 					# add files to playlist
-					self.copyDirectory(os.path.dirname(sel[0].getPath()) + "/", recursive=False)
+					self.copyDirectory(ospath.dirname(sel[0].getPath()) + "/", recursive=False)
 			if len(self.playlist) > 0:
 				self.changeEntry(0)
 
@@ -942,7 +940,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 				idx = self.playlist.getCurrentIndex()
 				currref = self.playlist.getServiceRefList()[idx]
 				text = self.getIdentifier(currref)
-				self.ext = os.path.splitext(text)[1].lower()
+				self.ext = ospath.splitext(text)[1].lower()
 				text = ">" + text
 				# FIXME: the information if the service contains video (and we should hide our window) should com from the service instead
 				if self.ext not in AUDIO_EXTENSIONS and not self.isAudioCD:
@@ -971,7 +969,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 				idx = self.playlist.getCurrentIndex()
 				currref = self.playlist.getServiceRefList()[idx]
 				text = currref.getPath()
-				ext = os.path.splitext(text)[1].lower()
+				self.ext = ospath.splitext(text)[1].lower()
 				if self.ext not in AUDIO_EXTENSIONS and not self.isAudioCD:
 					self.hideAndInfoBar()
 				else:
@@ -1139,16 +1137,16 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 
 class MediaPlayerLCDScreen(Screen):
 	skin = (
-	"""<screen name="MediaPlayerLCDScreen" position="0, 0" size="132, 64" id="1">
-		<widget name="text1" position="4, 0" size="132, 35" font="Regular;16"/>
-		<widget name="text3" position="4, 36" size="132, 14" font="Regular;10"/>
-		<widget name="text4" position="4, 49" size="132, 14" font="Regular;10"/>
-	</screen>""",
-	"""<screen name="MediaPlayerLCDScreen" position="0, 0" size="96, 64" id="2">
-		<widget name="text1" position="0, 0" size="96, 35" font="Regular;14"/>
-		<widget name="text3" position="0, 36" size="96, 14" font="Regular;10"/>
-		<widget name="text4" position="0, 49" size="96, 14" font="Regular;10"/>
-	</screen>""")
+		"""<screen name="MediaPlayerLCDScreen" position="0, 0" size="132, 64" id="1">
+			<widget name="text1" position="4, 0" size="132, 35" font="Regular;16"/>
+			<widget name="text3" position="4, 36" size="132, 14" font="Regular;10"/>
+			<widget name="text4" position="4, 49" size="132, 14" font="Regular;10"/>
+		</screen>""",
+		"""<screen name="MediaPlayerLCDScreen" position="0, 0" size="96, 64" id="2">
+			<widget name="text1" position="0, 0" size="96, 35" font="Regular;14"/>
+			<widget name="text3" position="0, 36" size="96, 14" font="Regular;10"/>
+			<widget name="text4" position="0, 49" size="96, 14" font="Regular;10"/>
+		</screen>""")
 
 	def __init__(self, session, parent):
 		Screen.__init__(self, session)
@@ -1222,7 +1220,7 @@ def movielist_open(list, session, **kwargs):
 	else:
 		stype = 4097
 	if InfoBar.instance:
-		path = os.path.split(f.path)[0]
+		path = ospath.split(f.path)[0]
 		if not path.endswith('/'):
 			path += '/'
 		config.movielist.last_videodir.value = path
@@ -1267,9 +1265,6 @@ def filescan(**kwargs):
 			openfnc=audioCD_open,
 		),
 		]
-
-
-from Plugins.Plugin import PluginDescriptor
 
 
 def Plugins(**kwargs):

@@ -2,7 +2,7 @@ from Plugins.Plugin import PluginDescriptor
 from Components.PluginComponent import plugins
 
 import os
-#from mimetypes import guess_type, add_type
+# from mimetypes import guess_type, add_type
 
 # start: temporary workaround until we discover why mimetypes.add_type() is not updating the map
 from mimetypes import types_map
@@ -174,11 +174,10 @@ def scanDevice(mountpoint):
 	scanner = []
 
 	for p in plugins.getPlugins(PluginDescriptor.WHERE_FILESCAN):
-		l = p()
-		if not isinstance(l, list):
-			l = [l]
-		scanner += l
-
+		scanDev = p()
+		if not isinstance(scanDev, list):
+			scanDev = [scanDev]
+		scanner += scanDev
 	print("[Scanner] ", scanner)
 
 	res = {}
@@ -195,7 +194,7 @@ def scanDevice(mountpoint):
 	# ...then remove with_subdir=False when same path exists
 	# with with_subdirs=True
 	for p in paths_to_scan.copy():
-		if p.with_subdirs == True and ScanPath(path=p.path) in paths_to_scan:
+		if p.with_subdirs is True and ScanPath(path=p.path) in paths_to_scan:
 			paths_to_scan.remove(ScanPath(path=p.path))
 
 	# now scan the paths
@@ -227,11 +226,11 @@ def openList(session, files):
 	scanner = []
 
 	for p in plugins.getPlugins(PluginDescriptor.WHERE_FILESCAN):
-		l = p()
-		if not isinstance(l, list):
-			scanner.append(l)
+		scanDev = p()
+		if not isinstance(scanDev, list):
+			scanner.append(scanDev)
 		else:
-			scanner += l
+			scanner += scanDev
 
 	print("[Scanner] ", scanner)
 

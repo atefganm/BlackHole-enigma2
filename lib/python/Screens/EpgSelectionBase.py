@@ -10,7 +10,6 @@ from Components.Label import Label
 from Components.Sources.Event import Event
 from Components.Sources.ServiceEvent import ServiceEvent
 from Components.Sources.StaticText import StaticText
-from Components.UsageConfig import preferredTimerPath
 from RecordTimer import AFTEREVENT
 from Screens.ChoiceBox import PopupChoiceBox
 from Screens.EventView import EventViewEPGSelect
@@ -25,7 +24,7 @@ epgActions = [
 	# function name, button label, help text
 	("", _("Do nothing")),
 	("openIMDb", _("IMDb Search"), _("IMDB search for current event")),
-	("openTMDb", _("TMDb Search"), _("TMDB search for current event")),	
+	("openTMDb", _("TMDb Search"), _("TMDB search for current event")),
 	("sortEPG", _("Sort"), _("Sort the EPG list")),
 	("addEditTimer", _("Add Timer"), _("Add/Remove timer for current event")),
 	("openTimerList", _("Show Timer List")),
@@ -134,7 +133,7 @@ class EPGSelectionBase(Screen, HelpableScreen):
 		self.noAutotimer = _("The AutoTimer plugin is not installed!\nPlease install it.")
 		self.noEPGSearch = _("The EPGSearch plugin is not installed!\nPlease install it.")
 		self.noIMDb = _("The IMDb plugin is not installed!\nPlease install it.")
-		self.noTMDb = _("The TMDb plugin is not installed!\nPlease install it.")		
+		self.noTMDb = _("The TMDb plugin is not installed!\nPlease install it.")
 		self.refreshTimer = eTimer()
 		self.refreshTimer.timeout.get().append(self.refreshList)
 		self.onLayoutFinish.append(self.onCreate)
@@ -227,7 +226,6 @@ class EPGSelectionBase(Screen, HelpableScreen):
 			if event is not None:
 				self.session.open(tmdbScreen, event.getEventName(), 2)
 
-
 	def openEPGSearch(self):
 		self.closeEventViewDialog()
 		try:
@@ -290,7 +288,7 @@ class EPGSelectionBase(Screen, HelpableScreen):
 		try:
 			from Plugins.Extensions.AutoTimer.AutoPoller import AutoPoller
 			from Plugins.Extensions.AutoTimer.AutoTimer import AutoTimer
-			from Plugins.Extensions.AutoTimer.plugin import autostart, main
+			# from Plugins.Extensions.AutoTimer.plugin import autostart, main  # what is this for?
 			autopoller = AutoPoller()
 			autotimer = AutoTimer()
 			try:
@@ -349,9 +347,10 @@ class EPGSelectionBase(Screen, HelpableScreen):
 
 		self.closeEventViewDialog()
 		self.__popupMenu(
-				"%s?" % event.getEventName(),
-				[[_("Add Timer"), addTimerFromEventSilent, self.session, self.refreshTimerActionButton, event, service],
-				[_("Add AutoTimer"), self.addAutoTimerSilent, event, service]])
+			"%s?" % event.getEventName(),
+			[[_("Add Timer"), addTimerFromEventSilent, self.session, self.refreshTimerActionButton, event, service],
+			[_("Add AutoTimer"), self.addAutoTimerSilent, event, service]]
+		)
 
 	def addEditTimer(self):
 		self.closeEventViewDialog()

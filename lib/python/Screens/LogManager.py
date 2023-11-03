@@ -1,8 +1,7 @@
 from os import path, remove, walk, stat, rmdir
-from time import time, ctime
+from time import time
 
-
-from enigma import eTimer, eBackgroundFileEraser, eLabel, getDesktop, gFont, fontRenderClass
+from enigma import eTimer, eBackgroundFileEraser, eLabel, gFont, fontRenderClass
 
 from Components.ActionMap import ActionMap
 from Components.Button import Button
@@ -125,26 +124,26 @@ class LogManagerPoller:
 						eBackgroundFileEraser.getInstance().erase(fn)
 						bytesToRemove -= st_size
 						size -= st_size
-		self.TrashTimer.startLongTimer(43200) #twice a day
+		self.TrashTimer.startLongTimer(43200)  # twice a day
 
 
 class LogManager(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
-		self.logtype = 'crashlogs'
+		self.logtype = "crashlogs"
 
-		self['myactions'] = ActionMap(['ColorActions', 'OkCancelActions', 'DirectionActions'],
+		self["myactions"] = ActionMap(["ColorActions", "OkCancelActions", "DirectionActions"],
 			{
-				'ok': self.changeSelectionState,
-				'cancel': self.close,
-				'red': self.changelogtype,
-				'green': self.showLog,
-				'yellow': self.deletelog,
+				"ok": self.changeSelectionState,
+				"cancel": self.close,
+				"red": self.changelogtype,
+				"green": self.showLog,
+				"yellow": self.deletelog,
 				"left": self.left,
 				"right": self.right,
 				"down": self.down,
 				"up": self.up
-			}, -1)
+			}, -1)  # noqa: E123
 
 		self["key_red"] = Button(_("Debug Logs"))
 		self["key_green"] = Button(_("View"))
@@ -159,7 +158,7 @@ class LogManager(Screen):
 		self["list"] = self.filelist
 		self["LogsSize"] = self.logsinfo = LogInfo(config.crash.debug_path.value, LogInfo.USED, update=False)
 		self.onLayoutFinish.append(self.layoutFinished)
-		if not self.selectionChanged in self["list"].onSelectionChanged:
+		if self.selectionChanged not in self["list"].onSelectionChanged:
 			self["list"].onSelectionChanged.append(self.selectionChanged)
 
 	def createSummary(self):
@@ -218,14 +217,14 @@ class LogManager(Screen):
 	def changelogtype(self):
 		self["LogsSize"].update(config.crash.debug_path.value)
 		import re
-		if self.logtype == 'crashlogs':
+		if self.logtype == "crashlogs":
 			self["key_red"].setText(_("Crash Logs"))
-			self.logtype = 'debuglogs'
-			self.matchingPattern = 'Enigma2_debug_'
+			self.logtype = "debuglogs"
+			self.matchingPattern = "Enigma2_debug_"
 		else:
 			self["key_red"].setText(_("Debug Logs"))
-			self.logtype = 'crashlogs'
-			self.matchingPattern = 'Enigma2_crash_'
+			self.logtype = "crashlogs"
+			self.matchingPattern = "Enigma2_crash_"
 		self["list"].matchingPattern = re.compile(self.matchingPattern)
 		self["list"].changeDir(self.defaultDir)
 
@@ -373,14 +372,14 @@ class LogManagerFb(Screen):
 
 		self["actions"] = ActionMap(["ChannelSelectBaseActions", "WizardActions", "DirectionActions", "MenuActions", "NumberActions", "ColorActions"],
 			{
-			 "ok": self.ok,
-			 "back": self.exit,
-			 "up": self.goUp,
-			 "down": self.goDown,
-			 "left": self.goLeft,
-			 "right": self.goRight,
-			 "0": self.doRefresh,
-			 }, -1)
+			"ok": self.ok,
+			"back": self.exit,
+			"up": self.goUp,
+			"down": self.goDown,
+			"left": self.goLeft,
+			"right": self.goRight,
+			"0": self.doRefresh,
+			}, -1)  # noqa: E123
 		self.onLayoutFinish.append(self.mainlist)
 
 	def exit(self):
@@ -390,9 +389,9 @@ class LogManagerFb(Screen):
 		self.close()
 
 	def ok(self):
-		if self.SOURCELIST.canDescent(): # isDir
+		if self.SOURCELIST.canDescent():  # isDir
 			self.SOURCELIST.descent()
-			if self.SOURCELIST.getCurrentDirectory(): #??? when is it none
+			if self.SOURCELIST.getCurrentDirectory():  # ??? when is it none
 				self.setTitle(self.SOURCELIST.getCurrentDirectory())
 		else:
 			self.onFileAction()

@@ -27,7 +27,7 @@ class ServiceList(GUIComponent):
 	def __init__(self, serviceList):
 		self.serviceList = serviceList
 		GUIComponent.__init__(self)
-		self.l = eListboxServiceContent()
+		self.l = eListboxServiceContent()  # noqa: E741
 
 		pic = LoadPixmap(cached=True, path=resolveFilename(SCOPE_CURRENT_SKIN, "icons/folder.png"))
 		pic and self.l.setPixmap(self.l.picFolder, pic)
@@ -212,7 +212,7 @@ class ServiceList(GUIComponent):
 		return rc
 
 	def connectSelChanged(self, fnc):
-		if not fnc in self.onSelectionChanged:
+		if fnc not in self.onSelectionChanged:
 			self.onSelectionChanged.append(fnc)
 
 	def disconnectSelChanged(self, fnc):
@@ -277,6 +277,9 @@ class ServiceList(GUIComponent):
 		r = eServiceReference()
 		self.l.getNext(r)
 		return r
+
+	def getList(self):
+		return self.l.getList()
 
 	def atBegin(self):
 		return self.instance.atBegin()
@@ -419,7 +422,7 @@ class ServiceList(GUIComponent):
 			ref = eServiceReference()
 		return marked
 
-#just for movemode.. only one marked entry..
+	# just for movemode.. only one marked entry..
 	def setCurrentMarked(self, state):
 		self.l.setCurrentMarked(state)
 
@@ -437,7 +440,7 @@ class ServiceList(GUIComponent):
 		else:
 			self.l.setGetPiconNameFunc(None)
 
-		rowWidth = self.instance.size().width() - 30 #scrollbar is fixed 20 + 10 Extra marge
+		rowWidth = self.instance.size().width() - 30  # scrollbar is fixed 20 + 10 Extra marge
 
 		if mode == self.MODE_NORMAL or not config.usage.show_channel_numbers_in_servicelist.value:
 			channelNumberWidth = 0

@@ -1,7 +1,7 @@
+import io
 import locale
 import os
 import skin
-from time import time
 from boxbranding import getBrandOEM, getDisplayType
 
 from enigma import eDVBDB, eEPGCache, setTunerTypePriorityOrder, setPreferredTuner, setSpinnerOnOff, setEnableTtCachingOnOff, eEnv, Misc_Options, eBackgroundFileEraser, eServiceEvent, RT_HALIGN_LEFT, RT_HALIGN_RIGHT, RT_HALIGN_CENTER, RT_VALIGN_CENTER, RT_WRAP
@@ -19,7 +19,6 @@ from Tools.HardwareInfo import HardwareInfo
 # getting a time-stamp prepended.
 # stderr expect unicode, not str, so we decode as utf-8
 #
-import io
 
 
 def raw_stderr_print(text):
@@ -27,7 +26,7 @@ def raw_stderr_print(text):
 		myerr.write(text)
 
 
-originalAudioTracks = "orj dos ory org esl qaa und mis mul ORY ORJ Audio_ORJ oth"
+originalAudioTracks = "orj dos ory org esl qaa qaf und mis mul ORY ORJ Audio_ORJ oth"
 visuallyImpairedCommentary = "NAR qad"
 
 
@@ -49,7 +48,6 @@ def InitUsageConfig():
 	config.usage.multibouquet = ConfigYesNo(default=True)
 	config.usage.maxchannelnumlen = ConfigSelection(default="4", choices=[("3", _("3")), ("4", _("4")), ("5", _("5")), ("6", _("6"))])
 	config.usage.alternative_number_mode = ConfigYesNo(default=False)
-
 
 	def alternativeNumberModeChange(configElement):
 		eDVBDB.getInstance().setNumberingMode(configElement.value)
@@ -104,7 +102,6 @@ def InitUsageConfig():
 	config.usage.show_second_infobar = ConfigSelection(default="5", choices=choicelist)
 	config.usage.fix_second_infobar = ConfigYesNo(default=False)
 
-
 	def showsecondinfobarChanged(configElement):
 		if config.usage.show_second_infobar.value != "INFOBAREPG":
 			SystemInfo["InfoBarEpg"] = True
@@ -117,7 +114,7 @@ def InitUsageConfig():
 	except Exception as err:
 		print("[UsageConfig] Error loading 'SecondInfoBarSimple' skin parameter! (%s)" % err)
 		SystemInfo["SecondInfoBarSimple"] = False
-	config.usage.second_infobar_simple = ConfigBoolean(descriptions={False: _("Standard"), True: _("Alternative")}, graphic=False)
+	config.usage.second_infobar_simple = ConfigBoolean(descriptions={False: _("Standard"), True: _("Simple")}, graphic=False)
 
 	config.usage.infobar_frontend_source = ConfigSelection(default="tuner", choices=[("settings", _("Settings")), ("tuner", _("Tuner"))])
 
@@ -281,7 +278,7 @@ def InitUsageConfig():
 
 	config.usage.check_timeshift = ConfigYesNo(default=True)
 
-	config.usage.bootlogo_identify = ConfigYesNo(default=True)
+	config.usage.bootlogo_identify = ConfigYesNo(default=False)
 
 	config.usage.alternatives_priority = ConfigSelection(default="0", choices=[
 		("0", "DVB-S/-C/-T"),
@@ -316,16 +313,16 @@ def InitUsageConfig():
 	config.usage.serviceitems_per_page = ConfigSelection(default=0, choices=choices)
 	config.usage.show_servicelist = ConfigYesNo(default=True)
 	config.usage.servicelist_mode = ConfigSelection(default="standard", choices=[
-		("standard", _("Standard")),
-		("simple", _("Alternative"))])
+					("standard", _("Standard")),
+					("simple", _("Slim"))])
 	config.usage.servicelistpreview_mode = ConfigYesNo(default=False)
 	config.usage.tvradiobutton_mode = ConfigSelection(default="BouquetList", choices=[
 					("ChannelList", _("Channel List")),
 					("BouquetList", _("Bouquet List")),
 					("MovieList", _("Movie List"))])
 	config.usage.okbutton_mode = ConfigSelection(default="0", choices=[
-						("0", _("InfoBar")),
-						("1", _("Channel List"))])
+					("0", _("InfoBar")),
+					("1", _("Channel List"))])
 	config.usage.channelbutton_mode = ConfigSelection(default="0", choices=[
 					("0", _("Just change channels")),
 					("1", _("Channel List")),
@@ -336,11 +333,11 @@ def InitUsageConfig():
 					("1", _("Channel List"))])
 	config.usage.show_bouquetalways = ConfigYesNo(default=False)
 	config.usage.show_event_progress_in_servicelist = ConfigSelection(default='barleft', choices=[
-		('barleft', _("Progress bar left")),
-		('barright', _("Progress bar right")),
-		('percleft', _("Percentage left")),
-		('percright', _("Percentage right")),
-		('no', _("No"))])
+					('barleft', _("Progress bar left")),
+					('barright', _("Progress bar right")),
+					('percleft', _("Percentage left")),
+					('percright', _("Percentage right")),
+					('no', _("No"))])
 	config.usage.show_channel_numbers_in_servicelist = ConfigYesNo(default=True)
 	config.usage.show_channel_jump_in_servicelist = ConfigSelection(default="alpha", choices=[
 					("quick", _("Quick Actions")),
@@ -359,7 +356,7 @@ def InitUsageConfig():
 		config.usage.wakeOnLAN = ConfigYesNo(default=False)
 		config.usage.wakeOnLAN.addNotifier(wakeOnLANChanged)
 
-	#standby
+	# standby
 	if getDisplayType() in ("textlcd7segment"):
 		config.usage.blinking_display_clock_during_recording = ConfigSelection(default="Rec", choices=[
 						("Rec", _("REC")),
@@ -368,7 +365,7 @@ def InitUsageConfig():
 	else:
 		config.usage.blinking_display_clock_during_recording = ConfigYesNo(default=False)
 
-	#in use
+	# in use
 	if getDisplayType() in ("textlcd"):
 		config.usage.blinking_rec_symbol_during_recording = ConfigSelection(default="Channel", choices=[
 						("Rec", _("REC Symbol")),
@@ -429,7 +426,7 @@ def InitUsageConfig():
 		setPreferredTuner(int(configElement.value))
 	config.usage.frontend_priority.addNotifier(PreferredTunerChanged)
 
-	config.usage.hide_zap_errors = ConfigYesNo(default=False)
+	config.usage.hide_zap_errors = ConfigYesNo(default=True)
 	config.usage.hide_ci_messages = ConfigYesNo(default=False)
 	config.usage.show_cryptoinfo = ConfigSelection([("0", _("Off")), ("1", _("One line")), ("2", _("Two lines"))], "2")
 	config.usage.show_eit_nownext = ConfigYesNo(default=True)
@@ -824,30 +821,6 @@ def InitUsageConfig():
 	])
 	config.epg.correct_invalid_epgdata.addNotifier(correctInvalidEPGDataChange)
 
-# storm - previous code were placed in VideoHardware to where its belong
-
-	config.osd.dst_left = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=720, wraparound=False)
-	config.osd.dst_width = ConfigSelectionNumber(default=720, stepwidth=1, min=0, max=720, wraparound=False)
-	config.osd.dst_top = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=576, wraparound=False)
-	config.osd.dst_height = ConfigSelectionNumber(default=576, stepwidth=1, min=0, max=576, wraparound=False)
-
-	config.osd.alpha = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.osd.alpha_teletext = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.osd.alpha_webbrowser = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.av.osd_alpha = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.osd.threeDmode = ConfigSelection(default="auto", choices=[
-		("off", _("Off")),
-		("auto", _("Auto")),
-		("sidebyside", _("Side by Side")),
-		("topandbottom", _("Top and Bottom"))
-	])
-	config.osd.threeDznorm = ConfigSlider(default=50, increment=1, limits=(0, 100))
-	config.osd.show3dextensions = ConfigYesNo(default=False)
-	config.osd.threeDsetmode = ConfigSelection(default="mode1", choices=[
-		("mode1", _("Mode 1")),
-		("mode2", _("Mode 2"))
-	])
-
 	hddchoices = [("/etc/enigma2/", "Internal Flash")]
 	for p in harddiskmanager.getMountedPartitions():
 		if os.path.exists(p.mountpoint):
@@ -1016,13 +989,6 @@ def InitUsageConfig():
 		config.misc.zapmode = ConfigSelection(default="mute", choices=[
 			("mute", _("Black screen")), ("hold", _("Hold screen")), ("mutetilllock", _("Black screen till locked")), ("holdtilllock", _("Hold till locked"))])
 		config.misc.zapmode.addNotifier(setZapmode, immediate_feedback=False)
-
-	if not SystemInfo["ZapMode"] and os.path.exists("/proc/stb/info/model"):
-		def setZapmodeDM(el):
-			print('[UsageConfig] >>> zapmodeDM')
-		config.misc.zapmodeDM = ConfigSelection(default="black", choices=[("black", _("Black screen")), ("hold", _("Hold screen"))])
-		config.misc.zapmodeDM.addNotifier(setZapmodeDM, immediate_feedback = False)
-
 	config.usage.historymode = ConfigSelection(default="1", choices=[("0", _("Just zap")), ("1", _("Show menu"))])
 
 	config.subtitles = ConfigSubsection()
@@ -1080,7 +1046,7 @@ def InitUsageConfig():
 	config.subtitles.pango_autoturnon = ConfigYesNo(default=True)
 
 	config.autolanguage = ConfigSubsection()
-	default_autoselect = "eng Englisch" # for audio_autoselect1
+	default_autoselect = "eng Englisch"  # for audio_autoselect1
 	audio_language_choices = [
 		("", _("None")),
 		("und", _("Undetermined")),
@@ -1180,8 +1146,10 @@ def InitUsageConfig():
 	config.misc.enableCamscript = ConfigYesNo(default=False)
 	config.misc.softcams = ConfigSelection(default="None", choices=[(x, _(x)) for x in CamControl("softcam").getList()])
 	config.misc.softcamrestarts = ConfigSelection(default="", choices=[
-					("", _("Don't restart")),
-					("s", _("Restart softcam"))])
+		("", _("Don't restart")),
+		("s", _("Restart softcam"))])
+	config.misc.softcam_streamrelay_url = ConfigIP(default=[127, 0, 0, 1], auto_jump=True)
+	config.misc.softcam_streamrelay_port = ConfigInteger(default=17999, limits=(0, 65535))
 	SystemInfo["OScamInstalled"] = False
 
 	config.cccaminfo = ConfigSubsection()
@@ -1269,7 +1237,7 @@ def InitUsageConfig():
 	config.hdmicec.debug = ConfigSelection(default="0", choices=[("0", _("Disabled")), ("1", _("Messages")), ("2", _("Key Events")), ("3", _("All"))])
 	config.hdmicec.bookmarks = ConfigLocations(default="/hdd/")
 	config.hdmicec.log_path = ConfigDirectory("/hdd/")
-	config.hdmicec.next_boxes_detect = ConfigYesNo(default=False)	# Before switching the TV to standby, receiver tests if any devices plugged to TV are in standby. If they are not, the 'sourceinactive' command will be sent to the TV instead of the 'standby' command.
+	config.hdmicec.next_boxes_detect = ConfigYesNo(default=False)  # Before switching the TV to standby, receiver tests if any devices plugged to TV are in standby. If they are not, the 'sourceinactive' command will be sent to the TV instead of the 'standby' command.
 	config.hdmicec.sourceactive_zaptimers = ConfigYesNo(default=False)				# Command the TV to switch to the correct HDMI input when zap timers activate.
 
 	upgradeConfig()

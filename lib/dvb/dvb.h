@@ -162,10 +162,6 @@ class eDVBResourceManager: public iObject, public sigc::trackable
 	DECLARE_REF(eDVBResourceManager);
 	int avail, busy;
 
-	enum { DM7025, DM800, DM500HD, DM800SE, DM8000, DM7020HD, DM7080, DM820, DM520, DM525, DM900, DM920, DM500HDV2, DM800SEV2};
-
-	int m_boxtype;
-
 	eSmartPtrList<iDVBAdapter> m_adapter;
 	eSmartPtrList<eDVBRegisteredDemux> m_demux;
 	eSmartPtrList<eDVBRegisteredFrontend> m_frontend, m_simulate_frontend;
@@ -188,7 +184,6 @@ class eDVBResourceManager: public iObject, public sigc::trackable
 	static eDVBResourceManager *instance;
 	friend class eDVBChannel;
 	friend class eFBCTunerManager;
-	friend class eRTSPStreamClient;
 	ePtr<eFBCTunerManager> m_fbcmng;
 	RESULT addChannel(const eDVBChannelID &chid, eDVBChannel *ch);
 	RESULT removeChannel(eDVBChannel *ch);
@@ -316,7 +311,6 @@ private:
 	sigc::signal<void(iDVBChannel*,int)> m_event;
 	int m_state;
 	ePtr<iTsSource> m_source;
-	std::string m_streaminfo_file;
 
 			/* for channel list */
 	ePtr<eDVBResourceManager> m_mgr;

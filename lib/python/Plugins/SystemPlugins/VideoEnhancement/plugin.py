@@ -11,7 +11,7 @@ from Plugins.Plugin import PluginDescriptor
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 
-from . import VideoEnhancement
+from . import VideoEnhancement  # noqa: F401
 
 
 class VideoEnhancementSetup(ConfigListScreen, Screen):
@@ -311,7 +311,7 @@ class VideoEnhancementPreview(ConfigListScreen, Screen):
 		self["config"].list = self.list
 		self["config"].l.setSeperation(300)
 		self["config"].l.setList(self.list)
-		if not self.selectionChanged in self["config"].onSelectionChanged:
+		if self.selectionChanged not in self["config"].onSelectionChanged:
 			self["config"].onSelectionChanged.append(self.selectionChanged)
 		self.selectionChanged()
 

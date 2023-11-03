@@ -3,9 +3,12 @@ from enigma import iServiceInformation, iPlayableService
 from Screens.InfoBarGenerics import hasActiveSubservicesForCurrentChannel
 from Components.Element import cached
 from Components.Converter.Poll import Poll
+from Components.Converter.VAudioInfo import StdAudioDesc
 from Tools.Transponder import ConvertToHumanReadable
 
-WIDESCREEN = [3, 4, 7, 8, 0xB, 0xC, 0xF, 0x10]
+from os import path
+
+WIDESCREEN = [1, 3, 4, 7, 8, 0xB, 0xC, 0xF, 0x10]
 
 
 class ServiceInfo(Poll, Converter):
@@ -124,7 +127,7 @@ class ServiceInfo(Poll, Converter):
 			f.close()
 			if val >= 2 ** 31:
 				val -= 2 ** 32
-		except Exception as e:
+		except:
 			pass
 		return val
 
@@ -161,7 +164,7 @@ class ServiceInfo(Poll, Converter):
 	def _getProgressive(self, info):
 		return self._getValInt("/proc/stb/vmpeg/0/progressive", info, iServiceInformation.sProgressive, default=0)
 
-	def _getProgressiveStr(self, info, convert=lambda x: "" if x else "i"):
+	def _getProgressiveStr(self, info, convert=lambda x: "p" if x else "i"):
 		return self._getValStr("/proc/stb/vmpeg/0/progressive", info, iServiceInformation.sProgressive, convert=convert)
 
 	@cached
@@ -171,9 +174,22 @@ class ServiceInfo(Poll, Converter):
 		if not info:
 			return False
 		video_height = None
+		video_width = None
 		video_aspect = None
 		video_height = self._getVideoHeight(info)
-		video_aspect = info.getInfo(iServiceInformation.sAspect)
+		video_width = self._getVideoWidth(info)
+
+		if path.exists("/proc/stb/vmpeg/0/aspect"):
+			f = open("/proc/stb/vmpeg/0/aspect", "r")
+			try:
+				video_aspect = int(f.read())
+			except:
+				pass
+			f.close()
+
+		if not video_aspect:
+			video_aspect = info.getInfo(iServiceInformation.sAspect)
+
 		if self.type == self.HAS_TELETEXT:
 			tpid = info.getInfo(iServiceInformation.sTXTPID)
 			return tpid != -1
@@ -185,7 +201,7 @@ class ServiceInfo(Poll, Converter):
 				idx = 0
 				while idx < n:
 					i = audio.getTrackInfo(idx)
-					description = i.getDescription().replace("A_", "").replace("", "").replace("AC-3", "AC3").replace("(ATSC A/52)", "").replace("(ATSC A/52B)", "").replace("MPEG", "AAC").replace(" Layer 2 (MP2)", "").replace(" 3 (MP3)", "MP3").replace("-1", "").replace("2-", "").replace("-4 AAC", "").replace("4-AAC", "HE-AAC").replace("audio", "").replace("/L3", "").replace("/mpeg", "AAC").replace("/x-",  "").replace("raw",  "Dolby TrueHD").replace("E-AC3", "AC3+").replace("EAC3", "AC3+").replace("IPCM", "AC3").replace("LPCM", "AC3+").replace("AAC_PLUS", "AAC+").replace("AAC_LATM", "AAC").replace("WMA/PRO", "WMA Pro")
+					description = StdAudioDesc(i.getDescription())
 					if description and description.split()[0] in ("AC4", "AAC+", "AC3", "AC3+", "Dolby", "DTS", "DTS-HD", "HE-AAC", "IPCM", "LPCM", "WMA Pro"):
 						if self.type == self.IS_MULTICHANNEL:
 							return True
@@ -221,24 +237,24 @@ class ServiceInfo(Poll, Converter):
 				return video_aspect in WIDESCREEN
 			elif self.type == self.IS_NOT_WIDESCREEN:
 				return video_aspect not in WIDESCREEN
-			elif self.type == self.IS_SD:
-				return video_height < 720
 			elif self.type == self.IS_HD:
-				return video_height >= 720 and video_height < 1500
+				return video_width > 1025 and video_width <= 1920 and video_height >= 481 and video_height < 1440 or video_width >= 960 and video_height == 720
+			elif self.type == self.IS_SD:
+				return video_width > 1 and video_width <= 1024 and video_height > 1 and video_height <= 578
 			elif self.type == self.IS_SD_AND_WIDESCREEN:
-				return video_height < 720 and video_aspect in WIDESCREEN
+				return video_height < 578 and video_aspect in WIDESCREEN
 			elif self.type == self.IS_SD_AND_NOT_WIDESCREEN:
-				return video_height < 720 and video_aspect not in WIDESCREEN
+				return video_height < 578 and video_aspect not in WIDESCREEN
 			elif self.type == self.IS_1080:
-				return video_height > 1000 and video_height <= 1080
+				return video_width >= 1367 and video_width <= 1920 and video_height >= 768 and video_height <= 1440
 			elif self.type == self.IS_720:
-				return video_height > 700 and video_height <= 720
+				return video_width >= 1025 and video_width <= 1366 and video_height >= 481 and video_height <= 768 or video_width >= 960 and video_height == 720
 			elif self.type == self.IS_576:
-				return video_height > 500 and video_height <= 576
+				return video_width > 1 and video_width <= 1024 and video_height > 481 and video_height <= 578
 			elif self.type == self.IS_480:
-				return video_height > 0 and video_height <= 480
+ 				return video_width > 1 and video_width <= 1024 and video_height > 1 and video_height <= 480
 			elif self.type == self.IS_4K:
-				return video_height >= 1500
+				return video_height >= 1460
 			elif self.type == self.PROGRESSIVE:
 				return bool(self._getProgressive(info))
 			elif self.type == self.IS_SDR:
@@ -320,12 +336,7 @@ class ServiceInfo(Poll, Converter):
 		elif self.type == self.VIDEO_INFO:
 			progressive = self._getProgressiveStr(info)
 			fieldrate = self._getFrameRate(info)
-			if fieldrate > 0:
-				if progressive == 'i':
-					fieldrate *= 2
-				fieldrate = "%dHz" % ((fieldrate + 500) // 1000,)
-			else:
-				fieldrate = ""
+			fieldrate = "%dfps" % ((fieldrate + 500) // 1000,)
 			return "%sx%s%s %s" % (self._getVideoWidthStr(info), self._getVideoHeightStr(info), progressive, fieldrate)
 		return ""
 

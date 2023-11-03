@@ -1,12 +1,12 @@
-from Screens.Screen import Screen
+from enigma import eTimer, eStreamServer
+
 from Components.ActionMap import ActionMap
 from Components.Button import Button
-from Components.ScrollLabel import ScrollLabel
 from Components.Converter.ClientsStreaming import ClientsStreaming
-from Components.config import config
+from Components.ScrollLabel import ScrollLabel
 from Components.Sources.StaticText import StaticText
-from enigma import eTimer, eStreamServer
-import skin
+from Screens.Screen import Screen
+import skin  # noqa: F401
 
 
 class StreamingClientsInfo(Screen):
@@ -27,7 +27,7 @@ class StreamingClientsInfo(Screen):
 				"blue": self.stopStreams,
 				"up": self["ScrollLabel"].pageUp,
 				"down": self["ScrollLabel"].pageDown
-			})
+			})  # noqa: E123
 
 		self.onLayoutFinish.append(self.start)
 

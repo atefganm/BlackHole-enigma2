@@ -738,59 +738,6 @@ void eDVBResourceManager::setUsbTuner()
 			if ((res = sscanf(line.c_str(), "NIM Socket %d:", &fe_idx)) == 1)
 				continue;
 
-			if ((fe_idx != -1) && (line.find("\tName: ") == 0) && (line.find("VTUNER") != std::string::npos))
-				usbtuner_idx[usbtuner_count++] = fe_idx;
-		}
-		in.close();
-	}
-
-	if (usbtuner_count)
-	{
-		for (eSmartPtrList<eDVBRegisteredFrontend>::iterator it(m_frontend.begin()); it != m_frontend.end(); ++it)
-		{
-			int slotid = it->m_frontend->getSlotID();
-			for (int i=0; i < usbtuner_count ; i++)
-			{
-				if (slotid == usbtuner_idx[i])
-				{
-					it->m_frontend->setUSBTuner(true);
-					break;
-				}
-			}
-		}
-		for (eSmartPtrList<eDVBRegisteredFrontend>::iterator it(m_simulate_frontend.begin()); it != m_simulate_frontend.end(); ++it)
-		{
-			int slotid = it->m_frontend->getSlotID();
-			for (int i=0; i < usbtuner_count ; i++)
-			{
-				if (slotid == usbtuner_idx[i])
-				{
-					it->m_frontend->setUSBTuner(true);
-					break;
-				}
-			}
-		}
-	}
-}
-
-void eDVBResourceManager::setUsbTuner()
-{
-	std::ifstream in("/proc/bus/nim_sockets");
-	std::string line;
-
-	int res = -1;
-	int fe_idx = -1;
-	int usbtuner_idx[8] = {0};
-	int usbtuner_count = 0;
-
-	if (in.is_open())
-	{
-		while(!in.eof())
-		{
-			getline(in, line);
-			if ((res = sscanf(line.c_str(), "NIM Socket %d:", &fe_idx)) == 1)
-				continue;
-
 			if ((fe_idx != -1) && (line.find("\tName: ") == 0) && (line.find("VTUNER") != -1))
 				usbtuner_idx[usbtuner_count++] = fe_idx;
 		}
@@ -1644,55 +1591,6 @@ int eDVBResourceManager::canAllocateChannel(const eDVBChannelID &channelid, cons
 		}
 	}
 #endif
-	/* check FCC channels */
-	std::vector<int*> fcc_decremented_fe_usecounts;
-	std::map<eDVBChannelID, int> fcc_chids;
-	int apply_to_ignore = 0;
-	if (!eFCCServiceManager::getFCCChannelID(fcc_chids))
-	{
-		for (std::map<eDVBChannelID, int>::iterator i(fcc_chids.begin()); i != fcc_chids.end(); ++i)
-		{
-			//eDebug("[eDVBResourceManager::canAllocateChannel] FCC NS : %08x, TSID : %04x, ONID : %04x", i->first.dvbnamespace.get(), i->first.transport_stream_id.get(), i->first.original_network_id.get());
-			if (ignore == i->first)
-			{
-				apply_to_ignore = i->second;
-				continue;
-			}
-			for (std::list<active_channel>::iterator ii(active_channels.begin()); ii != active_channels.end(); ++ii)
-			{
-				eSmartPtrList<eDVBRegisteredFrontend> &frontends = simulate ? m_simulate_frontend : m_frontend;
-				if (ii->m_channel_id == i->first)
-				{
-					eDVBChannel *channel = (eDVBChannel*) &(*ii->m_channel);
-
-					int check_usecount = channel == &(*m_cached_channel) ? 1 : 0;
-					check_usecount += i->second * 2; // one is used in eDVBServicePMTHandler and another is used in eDVBScan.
-					//eDebug("[eDVBResourceManager::canAllocateChannel] channel->getUseCount() : %d , check_usecount : %d (cached : %d)", channel->getUseCount(), check_usecount, channel == &(*m_cached_channel));
-					if (channel->getUseCount() == check_usecount)
-					{
-						ePtr<iDVBFrontend> fe;
-						if (!ii->m_channel->getFrontend(fe))
-						{
-							for (eSmartPtrList<eDVBRegisteredFrontend>::iterator iii(frontends.begin()); iii != frontends.end(); ++iii)
-							{
-								if ( &(*fe) == &(*iii->m_frontend) )
-								{
-									//eDebug("[eDVBResourceManager::canAllocateChannel] fcc : decrease fcc fe use_count! feid : %d (%d -> %d)", iii->m_frontend->getSlotID(), iii->m_inuse, iii->m_inuse-1);
-									--iii->m_inuse;
-									int *tmp_decremented_fe_usecount = &iii->m_inuse;
-									fcc_decremented_fe_usecounts.push_back(tmp_decremented_fe_usecount);
-									if (channel == &(*m_cached_channel))
-										decremented_cached_channel_fe_usecount = tmp_decremented_fe_usecount;
-									break;
-								}
-							}
-						}
-					}
-					break;
-				}
-			}
-		}
-	}
 
 	for (std::list<active_channel>::iterator i(active_channels.begin()); i != active_channels.end(); ++i)
 	{

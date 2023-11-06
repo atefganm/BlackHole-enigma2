@@ -184,6 +184,7 @@ class eDVBResourceManager: public iObject, public sigc::trackable
 	static eDVBResourceManager *instance;
 	friend class eDVBChannel;
 	friend class eFBCTunerManager;
+	friend class eRTSPStreamClient;
 	ePtr<eFBCTunerManager> m_fbcmng;
 	RESULT addChannel(const eDVBChannelID &chid, eDVBChannel *ch);
 	RESULT removeChannel(eDVBChannel *ch);
@@ -311,6 +312,7 @@ private:
 	sigc::signal<void(iDVBChannel*,int)> m_event;
 	int m_state;
 	ePtr<iTsSource> m_source;
+	std::string m_streaminfo_file;
 
 			/* for channel list */
 	ePtr<eDVBResourceManager> m_mgr;

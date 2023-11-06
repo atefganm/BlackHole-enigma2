@@ -1269,7 +1269,7 @@ def InitAVSwitch():
 			except OSError:
 				print("[AVSwitch] couldn't write pep_scaler_sharpness")
 
-		if MACHINEBUILD in ('gbquad', 'gbquadplus')
+		if MACHINEBUILD in ('gbquad', 'gbquadplus'):
 			config.av.scaler_sharpness = ConfigSlider(default=5, limits=(0, 26))
 		else:
 			config.av.scaler_sharpness = ConfigSlider(default=13, limits=(0, 26))

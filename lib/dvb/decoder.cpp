@@ -312,10 +312,14 @@ eDVBVideo::eDVBVideo(eDVBDemux *demux, int dev, bool fcc_enable)
 		m_fd_demux = -1;
 	}
 
+std::string zapmodeDM = eConfigManager::getConfigValue("config.misc.zapmodeDM");
+if (zapmodeDM == "hold")
+{
 	if (m_fd >= 0)
 	{
 		::ioctl(m_fd, VIDEO_SELECT_SOURCE, demux ? VIDEO_SOURCE_DEMUX : VIDEO_SOURCE_HDMI);
 	}
+}
 
 	if (m_close_invalidates_attributes < 0)
 	{

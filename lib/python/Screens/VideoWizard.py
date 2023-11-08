@@ -1,21 +1,29 @@
+from __future__ import print_function
 from Screens.Wizard import WizardSummary
 from Screens.WizardLanguage import WizardLanguage
 from Screens.Rc import Rc
 from Components.AVSwitch import iAVSwitch as iAV
+from Screens.Screen import Screen
 
 from Components.Pixmap import Pixmap
 from Components.config import config, ConfigBoolean, configfile
-from Components.SystemInfo import SystemInfo, BoxInfo
+from Components.SystemInfo import BoxInfo
 
 from Tools.Directories import resolveFilename, SCOPE_SKIN, SCOPE_CURRENT_SKIN
-# from Tools.HardwareInfo import HardwareInfo
+from Tools.HardwareInfo import HardwareInfo
 
 config.misc.showtestcard = ConfigBoolean(default=False)
 
-has_scart = BoxInfo.getItem("scart", False)
-has_rca = BoxInfo.getItem("rca", False)
-has_jack = BoxInfo.getItem("avjack", False)
-has_dvi = BoxInfo.getItem("dvi", False)
+has_rca = False
+has_dvi = False
+has_jack = False
+has_scart = False
+
+
+has_rca = BoxInfo.getItem("HaveRCA")
+has_dvi = BoxInfo.getItem("HaveDVI")
+has_jack = BoxInfo.getItem("HaveAVJACK")
+has_scart = BoxInfo.getItem("HAVESCART")
 
 
 class VideoWizardSummary(WizardSummary):
@@ -162,13 +170,15 @@ class VideoWizard(WizardLanguage, Rc):
 		if querymode is None:
 			querymode = self.mode
 		list = []
-		print("[VideoWizard] modes for port", self.port, "and mode", querymode)
-		for mode in iAV.getModeList(self.port):
-			print("[VideoWizard] mode:", mode)
+		print("modes for port", self.port, "and mode", querymode)
+		for mode in self.hw.getModeList(self.port):
+			print(mode)
 			if mode[0] == querymode:
 				for rate in mode[1]:
+					if rate in ("auto") and not BoxInfo.getItem("have24hz"):
+						continue
 					if self.port == "DVI-PC":
-						print("[VideoWizard] rate:", rate)
+						print("rate:", rate)
 						if rate == "640x480":
 							list.insert(0, (rate, rate))
 							continue
@@ -185,7 +195,7 @@ class VideoWizard(WizardLanguage, Rc):
 		self.rateSelect(self.selection)
 
 	def rateSelect(self, rate):
-		self.hw.setMode(port=self.port, mode=self.mode, rate=rate)
+		iAV.setMode(port=self.port, mode=self.mode, rate=rate)
 
 	def showTestCard(self, selection=None):
 		if selection is None:
@@ -199,12 +209,12 @@ class VideoWizard(WizardLanguage, Rc):
 	def keyNumberGlobal(self, number):
 		if number in (1, 2, 3):
 			if number == 1:
-				self.hw.saveMode("HDMI", "720p", "multi")
+				iAV.saveMode("HDMI", "720p", "multi")
 			elif number == 2:
-				self.hw.saveMode("HDMI", "1080i", "multi")
+				iAV.saveMode("HDMI", "1080i", "multi")
 			elif number == 3:
-				self.hw.saveMode("Scart", "Multi", "multi")
-			self.hw.setConfiguredMode()
+				iAV.saveMode("Scart", "Multi", "multi")
+			iAV.setConfiguredMode()
 			self.close()
 
 		WizardLanguage.keyNumberGlobal(self, number)

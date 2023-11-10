@@ -63,6 +63,7 @@
 		<item level="1" text="Show positioner position" requires="isRotorTuner" description="Configure whether or not an rotor position will be displayed on infobar">config.misc.showrotorposition</item>
 		<item level="0" text="Include CI assignment" description="Set CI assignment for detection of available services." >config.misc.use_ci_assignment</item>
 		<item level="1" text="Alternative radio mode" description="Use the alternative or the conventional radio mode.">config.usage.e1like_radio_mode</item>
+		<item level="2" text="Show infobar picons">config.usage.showpicon</item>
 		<item level="2" text="Show infobar on channel change" description="If set to 'yes' the infobar will be displayed when changing channels.">config.usage.show_infobar_on_zap</item>
 		<item level="1" text="Show infobar on skip forward/backward" description="If set to 'yes', the infobar will be displayed when Fast Forwarding or Rewinding during media playback.">config.usage.show_infobar_on_skip</item>
 		<item level="1" text="Show infobar on event change" description="If set to 'yes' the infobar will be displayed when a new event starts.">config.usage.show_infobar_on_event_change</item>

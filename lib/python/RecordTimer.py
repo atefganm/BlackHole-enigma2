@@ -167,9 +167,6 @@ def RecordingsState(alter):
 
 RecordingsState(0)       # Initialize
 
-service_types_tv = service_types_tv_ref.toString()
-service_types_radio = service_types_radio_ref.toString()
-
 # please do not translate log messages
 
 

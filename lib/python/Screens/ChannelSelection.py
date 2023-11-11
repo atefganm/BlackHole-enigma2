@@ -3,7 +3,7 @@ from os import listdir, rename, remove, path as os_path
 import re
 from time import localtime, time, strftime
 
-from enigma import eActionMap, eServiceReferenceDVB, eServiceReference, eEPGCache, eServiceCenter, eRCInput, eTimer, ePoint, eDVBDB, iPlayableService, iServiceInformation, getPrevAsciiCode, eEnv, eDVBLocalTimeHandler
+from enigma import eActionMap, eServiceReference, eEPGCache, eServiceCenter, eRCInput, eTimer, ePoint, eDVBDB, iPlayableService, iServiceInformation, getPrevAsciiCode, eDVBLocalTimeHandler
 
 from Tools.Profile import profile
 from Components.ActionMap import ActionMap, HelpableActionMap, HelpableNumberActionMap
@@ -23,7 +23,7 @@ from Components.Sources.List import List
 from Components.Sources.RdsDecoder import RdsDecoder
 from Components.Sources.ServiceEvent import ServiceEvent
 from Components.Sources.StaticText import StaticText
-from Components.SystemInfo import SystemInfo, BoxInfo
+from Components.SystemInfo import SystemInfo
 from Plugins.Plugin import PluginDescriptor
 from RecordTimer import AFTEREVENT
 from Screens.Screen import Screen
@@ -39,7 +39,7 @@ from Screens.RdsDisplay import RassInteractive
 from Screens.ServiceInfo import ServiceInfo
 from Screens.TimerEntry import TimerEntry, addTimerFromEventSilent
 from Screens.VirtualKeyBoard import VirtualKeyBoard
-from ServiceReference import ServiceReference, hdmiInServiceRef
+from ServiceReference import ServiceReference
 from Tools.Alternatives import GetWithAlternative
 from Tools.BoundFunction import boundFunction
 from Tools.Directories import sanitizeFilename
@@ -277,8 +277,6 @@ class ChannelContextMenu(Screen):
 				self.removeFunction = self.removeCurrentService
 				if not csel.entry_marked and not inBouquetRootList and current_root and not (current_root.flags & eServiceReference.isGroup):
 					_append_when_current_valid(current, menu, actions, (_("Add marker"), self.showMarkerInputBox), level=0, key="green")
-					if BoxInfo.getItem("HDMIin"):
-						appendWhenValid(current, menu, (_("Add HDMI IN to bouquet"), self.showHDMIInInputBox))
 					if not csel.movemode:
 						if haveBouquets:
 							_append_when_current_valid(current, menu, actions, (_("Enable bouquet edit"), self.bouquetMarkStart), level=0, key="yellow")
@@ -607,14 +605,6 @@ class ChannelContextMenu(Screen):
 
 	def copyCurrentToBouquetList(self):
 		self.csel.copyCurrentToBouquetList()
-		self.close()
-
-	def showHDMIInInputBox(self):
-		self.session.openWithCallback(self.hdmiInputCallback, VirtualKeyBoard, title=_("Please enter a name for the HDMI-IN"), text="HDMI-IN", maxSize=False, visible_width=56, type=Input.TEXT)
-
-	def hdmiInputCallback(self, marker):
-		if marker is not None:
-			self.csel.addHDMIIn(marker)
 		self.close()
 
 	def showMarkerInputBox(self):
@@ -960,16 +950,6 @@ class ChannelSelectionEdit:
 				self.servicelist.removeCurrent()
 				if not self.servicelist.atEnd():
 					self.servicelist.moveUp()
-
-	def addHDMIIn(self, name):
-		current = self.servicelist.getCurrent()
-		mutableList = self.getMutableList()
-		ref = hdmiInServiceRef()
-		ref.setName(name)
-		if mutableList and current and current.valid():
-			if not mutableList.addService(ref, current):
-				self.servicelist.addService(ref, True)
-				mutableList.flushChanges()
 
 	def addMarker(self, name):
 		current = self.servicelist.getCurrent()

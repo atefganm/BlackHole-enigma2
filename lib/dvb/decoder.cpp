@@ -135,7 +135,7 @@ int eDVBAudio::startPid(int pid, int type)
 		case aAAC:
 			bypass = 8;
 			break;
-		case aHEAAC:
+		case aAACHE:
 			bypass = 9;
 			break;
 		case aLPCM:

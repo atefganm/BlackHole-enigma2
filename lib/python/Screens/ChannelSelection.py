@@ -3,7 +3,7 @@ from os import listdir, rename, remove, path as os_path
 import re
 from time import localtime, time, strftime
 
-from enigma import eActionMap, eServiceReference, eEPGCache, eServiceCenter, eRCInput, eTimer, ePoint, eDVBDB, iPlayableService, iServiceInformation, getPrevAsciiCode, eDVBLocalTimeHandler
+from enigma import eActionMap, eServiceReferenceDVB, eServiceReference, eEPGCache, eServiceCenter, eRCInput, eTimer, ePoint, eDVBDB, iPlayableService, iServiceInformation, getPrevAsciiCode, eEnv, eDVBLocalTimeHandler
 
 from Tools.Profile import profile
 from Components.ActionMap import ActionMap, HelpableActionMap, HelpableNumberActionMap

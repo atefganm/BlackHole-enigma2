@@ -496,10 +496,12 @@ int eDVBServicePMTHandler::getProgramInfo(program &program)
 			{
 				eDVBService::cacheID cTag = eDVBService::audioCacheTags[m];
 				if (as->pid == cached_apid[cTag])
+				{
 					/* if we find the cached pids, this will be our default stream */
 
 					audio_cached = i;
 					break;
+				}
 			}
 			/* also, we need to know the first non-mpeg (i.e. "ac3"/dts/...) stream */
 			if (as->type != audioStream::atMPEG) {
@@ -510,8 +512,10 @@ int eDVBServicePMTHandler::getProgramInfo(program &program)
 					for (int m = 0; m < eDVBService::nAudioCacheTags; m++)
 					{
 						if (as->pid == cached_apid[eDVBService::audioCacheTags[m]])
+						{
 							first_non_mpeg = i;
 							break;
+						}
 					}
 				}
 			}
@@ -540,9 +544,9 @@ int eDVBServicePMTHandler::getProgramInfo(program &program)
 								break;
 							}
 						}
-							autoaudio_level = x;
-							languageFound = true;
-							break;
+						autoaudio_level = x;
+						languageFound = true;
+						break;
 						}
 						audioStreamLanguages.erase(0, pos + 1);
 					}
@@ -597,7 +601,7 @@ int eDVBServicePMTHandler::getProgramInfo(program &program)
 		else if (defaultac3 && autoaudio[eDVBService::cAC3PID] != -1)
 			program.defaultAudioStream = autoaudio[eDVBService::cAC3PID];
 		else if (defaultddp && autoaudio[eDVBService::cDDPPID] != -1)
-			program.defaultAudioStream = autoaudio[eDVBService::cDDPPID]
+			program.defaultAudioStream = autoaudio[eDVBService::cDDPPID];
 		else
 		{
 			int defaultAudio = -1;

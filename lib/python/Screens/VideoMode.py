@@ -253,37 +253,6 @@ class VideoSetup(Screen, ConfigListScreen):
 			self.list.append(getConfigListEntry(_("HDR10 Support"), config.av.hdr10_support, _("This option allows you can force the HDR10 Modes for UHD")))
 			self.list.append(getConfigListEntry(_("Allow 12bit"), config.av.allow_12bit, _("This option allows you can enable or disable the 12 Bit Color Mode")))
 			self.list.append(getConfigListEntry(_("Allow 10bit"), config.av.allow_10bit, _("This option allows you can enable or disable the 10 Bit Color Mode")))
-		if level >= 1:
-			if BoxInfo.getItem("CanDownmixAC3"):
-				self.list.append(getConfigListEntry(_("AC3 downmix"), config.av.downmix_ac3, _("Choose whether multi channel ac3 sound tracks should be downmixed to stereo.")))
-			if BoxInfo.getItem("CanDownmixDTS"):
-				self.list.append(getConfigListEntry(_("DTS downmix"), config.av.downmix_dts, _("Choose whether multi channel dts sound tracks should be downmixed to stereo.")))
-			if BoxInfo.getItem("CanDownmixAACPlus"):
-				self.list.append(getConfigListEntry(_("AAC+ downmix"), config.av.downmix_aacplus, _("Choose whether multi channel aac+ sound tracks should be downmixed to stereo.")))
-			if BoxInfo.getItem("CanDownmixAAC"):
-				self.list.append(getConfigListEntry(_("AAC downmix"), config.av.downmix_aac, _("Choose whether multi channel aac sound tracks should be downmixed to stereo.")))
-			if BoxInfo.getItem("CanAACTranscode"):
-				self.list.append(getConfigListEntry(_("AAC transcoding"), config.av.transcodeaac, _("Choose whether AAC sound tracks should be transcoded.")))
-			if BoxInfo.getItem("CanDTSHD"):
-				self.list.append(getConfigListEntry(_("DTS-HD HR/DTS-HD MA/DTS"), config.av.dtshd, ("Choose whether multi channel DTSHD sound tracks should be downmixed or transcoded..")))
-			if BoxInfo.getItem("CanWMAPRO"):
-				self.list.append(getConfigListEntry(_("WMA Pro downmix"), config.av.wmapro, _("Choose whether WMA Pro sound tracks should be downmixed.")))
-			if BoxInfo.getItem("CanPcmMultichannel"):
-				self.list.append(getConfigListEntry(_("PCM Multichannel"), config.av.pcm_multichannel, _("Choose whether multi channel sound tracks should be output as PCM.")))
-			self.list.extend((
-				getConfigListEntry(_("General AC3 delay"), config.av.generalAC3delay, _("This option configures the general audio delay of Dolby Digital sound tracks.")),
-				getConfigListEntry(_("General PCM delay"), config.av.generalPCMdelay, _("This option configures the general audio delay of stereo sound tracks."))
-			))
-			if BoxInfo.getItem("CanBTAudio"):
-				self.list.append(getConfigListEntry(_("Enable Bluetooth Audio"), config.av.btaudio, _("This option allows you to switch audio to bluetooth speakers.")))
-			if BoxInfo.getItem("Can3DSurround"):
-				self.list.append(getConfigListEntry(_("3D Surround"), config.av.surround_3d, _("This option allows you to enable 3D Surround Sound for an output.")))
-			if BoxInfo.getItem("Can3DSpeaker") and config.av.surround_3d.value != "none":
-				self.list.append(getConfigListEntry(_("3D Surround Speaker Position"), config.av.surround_3d_speaker, _("This option allows you to change the virtual loudspeaker position.")))
-			if BoxInfo.getItem("CanAutoVolume"):
-				self.list.append(getConfigListEntry(_("Auto Volume Level"), config.av.autovolume, _("This option configures output for Auto Volume Level.")))
-				self.list.append(getConfigListEntry(_("Audio volume step size"), config.av.volume_stepsize, _("Configure the general audio volume step size (limit 1-10).")))
-			self.list.append(getConfigListEntry(_("Hide mute notification"), config.av.volume_hide_mute, _("If muted, hide mute icon or mute information after few seconds.")))
 
 		if BoxInfo.getItem("havesyncmode"):
 			self.list.append(getConfigListEntry(_("Sync mode"), config.av.sync_mode, _("Setup how to control the channel changing.")))
@@ -420,7 +389,7 @@ class VideoSetup(Screen, ConfigListScreen):
 			or (port, mode_uhd, rate_uhd) != self.last_good_autores_uhd or (autores_24p, autores_1080i) != self.last_good_autores_extra or self.last_good_autores != config.av.autores.value or self.reset_mode == 1
 			or (self.last_good_autores_unknownres != config.av.autores_unknownres.value and config.av.autores.value == "native")):
 			self.reset_mode = 2
-			if self.current_mode == None:
+			if self.current_mode is None:
 				self.current_mode = self.getCurrent_mode()
 			AutoVideoMode(None).VideoChangeDetect()
 		else:
@@ -450,7 +419,7 @@ class VideoSetup(Screen, ConfigListScreen):
 			cur = self["config"].getCurrent()
 			cur = cur and len(cur) > 3 and cur[3]
 			if cur in ("check", "check_sd", "check_hd", "check_fhd", "check_uhd"):
-				if self.current_mode == None:
+				if self.current_mode is None:
 					self.current_mode = self.getCurrent_mode()
 				if cur in ("check", "check_sd"):
 					self.getVerify_videomode(config.av.autores_mode_sd, config.av.autores_rate_sd)
@@ -505,7 +474,7 @@ def applySettings(mode=config.osd.threeDmode.value, znorm=int(config.osd.threeDz
 		try:
 			previous = (mode, znorm)
 			if BoxInfo.getItem("CanUse3DModeChoices"):
-				f = open("/proc/stb/fb/3dmode_choices", "r")
+				f = open("/proc/stb/fb/3dmode_choices")
 				choices = f.readlines()[0].split()
 				f.close()
 				if mode not in choices:
@@ -525,7 +494,7 @@ class AutoVideoMode(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
 
-		if session != None:
+		if session is not None:
 			self.__event_tracker = ServiceEventTracker(screen=self, eventmap={
 				iPlayableService.evStart: self.__evStart,
 				iPlayableService.evVideoSizeChanged: self.VideoChanged,
@@ -852,9 +821,9 @@ class AutoVideoMode(Screen):
 			else:
 				autorestyp = "no match"
 				if path.exists("/sys/class/display/mode") and config_rate in ("auto", "multi"):
-					f = open("/sys/class/display/mode", "r")
+					f = open("/sys/class/display/mode")
 				elif path.exists("/proc/stb/video/videomode_%shz" % new_rate) and config_rate in ("auto", "multi"):
-					f = open("/proc/stb/video/videomode_%shz" % new_rate, "r")
+					f = open("/proc/stb/video/videomode_%shz" % new_rate)
 				if f:
 					multi_videomode = f.read().replace("\n", "")
 					f.close()

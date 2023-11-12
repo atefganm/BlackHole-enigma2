@@ -753,7 +753,6 @@ class PliExtraInfo(Poll, Converter, object):
 		else:
 			return ""
 
-
 	def createOrbPos(self, feraw, info):
 		orbpos = feraw.get("orbital_position")
 		if orbpos is not None:

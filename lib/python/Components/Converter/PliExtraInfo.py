@@ -1,6 +1,6 @@
 # shamelessly copied from pliExpertInfo (Vali, Mirakels, Littlesat)
 
-from enigma import eServiceCenter, iServiceInformation, iPlayableService
+from enigma import iServiceInformation, iPlayableService
 from Components.Converter.Converter import Converter
 from Components.Element import cached
 from Components.config import config
@@ -9,7 +9,6 @@ from Tools.GetEcmInfo import GetEcmInfo
 from Tools.Hex2strColor import Hex2strColor
 from Components.Converter.Poll import Poll
 from skin import parameters
-from Session import SessionObject
 
 caid_data = (
 	("0x1700", "0x17ff", "BetaCrypt", "B", True),
@@ -871,7 +870,7 @@ class PliExtraInfo(Poll, Converter, object):
 		if "%3a//" in refstr.lower() and "127.0.0.1" not in refstr and "0.0.0.0" not in refstr and "localhost" not in refstr:
 			return ""
 		else:
-			return info.getInfoString(iServiceInformation.sProvider) or self.feraw and {282: "BSkyB", 192: "SKY", 130: "SkyItalia"}.get(self.feraw.get("orbital_position"), "")
+			return info.getInfoString(iServiceInformation.sProvider)
 
 	def createMisPls(self, fedata):
 		tmp = ""
@@ -1065,11 +1064,6 @@ class PliExtraInfo(Poll, Converter, object):
 				self.feraw = feinfo.getAll(config.usage.infobar_frontend_source.value == "settings")
 				if self.feraw:
 					self.fedata = ConvertToHumanReadable(self.feraw)
-				else:
-					serviceref = SessionObject().session.nav.getCurrentlyPlayingServiceReference()
-					self.feraw = serviceref and eServiceCenter.getInstance().info(serviceref).getInfoObject(serviceref, iServiceInformation.sTransponderData)
-					if self.feraw:
-						self.fedata = ConvertToHumanReadable(self.feraw)
 
 		feraw = self.feraw
 		if not feraw:

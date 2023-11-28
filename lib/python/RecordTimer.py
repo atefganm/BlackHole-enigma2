@@ -4,7 +4,7 @@ from bisect import insort
 from sys import maxsize
 from time import localtime, strftime, ctime, time
 
-from enigma import eEPGCache, getBestPlayableServiceReference, eServiceReferenceDVB, eStreamServer, eServiceReference, iRecordableService, quitMainloop, eActionMap, setPreferredTuner, eServiceCenter
+from enigma import eEPGCache, getBestPlayableServiceReference, eStreamServer, eServiceReference, iRecordableService, quitMainloop, eActionMap, setPreferredTuner, eServiceCenter
 from boxbranding import getMachineBrand, getMachineName, getBoxType
 from Components.config import config
 import Components.ParentalControl
@@ -15,7 +15,6 @@ import Screens.InfoBar
 from Screens.MessageBox import MessageBox
 from Screens.PictureInPicture import PictureInPicture
 import Screens.Standby
-from ServiceReference import ServiceReference
 from Tools import Directories, Notifications, ASCIItranslit, Trashcan
 from Tools.XMLTools import stringToXML
 
@@ -166,6 +165,19 @@ def RecordingsState(alter):
 
 
 RecordingsState(0)       # Initialize
+
+# type 1 = digital television service
+# type 4 = nvod reference service (NYI)
+# type 17 = MPEG-2 HD digital television service
+# type 22 = advanced codec SD digital television
+# type 24 = advanced codec SD NVOD reference service (NYI)
+# type 25 = advanced codec HD digital television
+# type 27 = advanced codec HD NVOD reference service (NYI)
+# type 2 = digital radio sound service
+# type 10 = advanced codec digital radio sound service
+
+service_types_tv = "1:7:1:0:0:0:0:0:0:0:(type == 1) || (type == 17) || (type == 22) || (type == 25) || (type == 134) || (type == 195)"
+wasRecTimerWakeup = False
 
 # please do not translate log messages
 

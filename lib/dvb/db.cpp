@@ -158,16 +158,6 @@ RESULT eBouquet::setListName(const std::string &name)
 	return 0;
 }
 
-const eDVBService::cacheID eDVBService::audioCacheTags[] = {
-	eDVBService::cMPEGAPID, eDVBService::cAC3PID,
-	eDVBService::cAACHEAPID, eDVBService::cDDPPID,
-	eDVBService::cDTSPID, eDVBService::cAACAPID,
-	eDVBService::cLPCMPID, eDVBService::cDTSHDPID,
-};
-
-const int eDVBService::nAudioCacheTags = sizeof(eDVBService::audioCacheTags) / sizeof(eDVBService::audioCacheTags[0]);
-
-
 eDVBService::eDVBService()
 	:m_cache(0), m_flags(0)
 {
@@ -232,23 +222,14 @@ bool eDVBService::isCrypted()
 
 int eDVBService::isPlayable(const eServiceReference &ref, const eServiceReference &ignore, bool simulate)
 {
-	std::string sr_url = eConfigManager::getConfigValue("config.misc.softcam_streamrelay_url");
-	sr_url = replace_all(replace_all(replace_all(sr_url, "[", ""), "]", ""), ", ", ".");
-	std::string sr_port = eConfigManager::getConfigValue("config.misc.softcam_streamrelay_port");
-	eServiceReferenceDVB newRef;
+	eServiceReferenceDVB sRelayOrigSref;
 	ePtr<iPlayableService> refCur;
 	eNavigation::getInstance()->getCurrentService(refCur);
 	ePtr<iServiceInformation> tmp_info;
 	refCur->info(tmp_info);
 	std::string ref_s = tmp_info->getInfoString(iServiceInformation::sServiceref);
-	if (ref_s.find(sr_url + "%3a" + sr_port) != std::string::npos) {
-		std::vector<std::string> s_split = split(ref_s, ":");
-		std::string url_sr = s_split[s_split.size() - 2];
-		std::vector<std::string> sr_split = split(url_sr, "/");
-		std::string ref_orig = sr_split.back();
-		ref_orig = replace_all(ref_orig, "%3a", ":");
-		newRef = eServiceReferenceDVB(ref_orig);
-	}
+	eServiceReferenceDVB currentlyPlaying = eServiceReferenceDVB(ref_s);
+	bool res = currentlyPlaying.getSROriginal(sRelayOrigSref);
 
 	ePtr<eDVBResourceManager> res_mgr;
 	bool remote_fallback_enabled = eConfigManager::getConfigBoolValue("config.usage.remote_fallback_enabled", false);
@@ -263,8 +244,8 @@ int eDVBService::isPlayable(const eServiceReference &ref, const eServiceReferenc
 		((const eServiceReferenceDVB&)ref).getChannelID(chid);
 		((const eServiceReferenceDVB&)ignore).getChannelID(chid_ignore);
 
-		if (newRef) {
-			newRef.getChannelID(chid_ignore_sr);
+		if (res) {
+			sRelayOrigSref.getChannelID(chid_ignore_sr);
 		} else {
 			chid_ignore_sr = eDVBChannelID();
 		}
@@ -397,15 +378,6 @@ bool eDVBService::cacheEmpty()
 	if (m_cache)
 		for (int i=0; i < cacheMax; ++i)
 			if (m_cache[i] != -1)
-				return false;
-	return true;
-}
-
-bool eDVBService::cacheAudioEmpty()
-{
-	if (m_cache)
-		for (int i=0; i < nAudioCacheTags; ++i)
-			if (m_cache[audioCacheTags[i]] != -1)
 				return false;
 	return true;
 }
@@ -2406,22 +2378,6 @@ RESULT eDVBDB::startQuery(ePtr<iDVBChannelListQuery> &query, eDVBChannelQuery *q
 	else
 		query = new eDVBDBQuery(this, source, q);
 	return 0;
-}
-
-bool eDVBDB::isValidService(int tsid, int onid, int sid)
-{
-	eServiceID Sid(sid);
-	eTransportStreamID Tsid(tsid);
-	eOriginalNetworkID Onid(onid);
-	for (std::map<eServiceReferenceDVB, ePtr<eDVBService> >::iterator sit(m_services.begin());
-		sit != m_services.end(); ++sit)
-	{
-		if (sit->first.getTransportStreamID() == Tsid &&
-			sit->first.getOriginalNetworkID() == Onid &&
-			sit->first.getServiceID() == Sid)
-			return true;
-	}
-	return false;
 }
 
 eServiceReference eDVBDB::searchReference(int tsid, int onid, int sid)

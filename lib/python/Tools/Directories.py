@@ -5,13 +5,17 @@ from os.path import basename as pathBasename, dirname as pathDirname, exists as 
 
 from os import access, chmod, listdir, makedirs, mkdir, readlink, rename, rmdir, sep, stat as os_stat, statvfs, symlink, utime, walk, F_OK, R_OK, W_OK
 
-from enigma import eEnv, getDesktop
+from enigma import eEnv, getDesktop, eGetEnigmaDebugLvl
 from re import compile, split, search
 from stat import S_IMODE
 from sys import _getframe as getframe
 from unicodedata import normalize
 from traceback import print_exc
 from xml.etree.cElementTree import Element, fromstring, parse
+
+forceDebug = eGetEnigmaDebugLvl() > 4
+
+DEFAULT_MODULE_NAME = __name__.split(".")[-1]
 
 SCOPE_HOME = 0  # DEBUG: Not currently used in Enigma2.
 SCOPE_LANGUAGE = 1
@@ -267,49 +271,70 @@ def getPrimarySkinResolution():
 	return resolution if resolution is not None else 720
 
 
-def fileReadLine(filename, default=None, *args, **kwargs):
+def fileReadLine(filename, default=None, source=DEFAULT_MODULE_NAME, debug=False):
+	line = None
 	try:
 		with open(filename, "r") as fd:
-			line = fd.read().strip().replace("\0", "")
+			line = fd.read().strip()
+		msg = "Read"
 	except (IOError, OSError) as err:
 		if err.errno != ENOENT:  # ENOENT - No such file or directory.
-			print_exc()
+			print("[%s] Error %d: Unable to read a line from file '%s'! (%s)" % (source, err.errno, filename, err.strerror))
 		line = default
+		msg = "Default"
+	if debug or forceDebug:
+		print("[%s] Line %d: %s '%s' from file '%s'." % (source, stack()[1][0].f_lineno, msg, line, filename))
 	return line
 
 
-def fileWriteLine(filename, line, *args, **kwargs):
+def fileWriteLine(filename, line, source=DEFAULT_MODULE_NAME, debug=False):
 	try:
 		with open(filename, "w") as fd:
 			fd.write(str(line))
-		return 1
-	except (IOError, OSError):
-		print_exc()
-		return 0
+		msg = "Wrote"
+		result = 1
+	except (IOError, OSError) as err:
+		print("[%s] Error %d: Unable to write a line to file '%s'! (%s)" % (source, err.errno, filename, err.strerror))
+		msg = "Failed to write"
+		result = 0
+	if debug or forceDebug:
+		print("[%s] Line %d: %s '%s' to file '%s'." % (source, stack()[1][0].f_lineno, msg, line, filename))
+	return result
 
 
-def fileReadLines(filename, default=None, *args, **kwargs):
+def fileReadLines(filename, default=None, source=DEFAULT_MODULE_NAME, debug=False):
+	lines = None
 	try:
 		with open(filename, "r") as fd:
 			lines = fd.read().splitlines()
+		msg = "Read"
 	except (IOError, OSError) as err:
 		if err.errno != ENOENT:  # ENOENT - No such file or directory.
-			print_exc()
+			print("[%s] Error %d: Unable to read lines from file '%s'! (%s)" % (source, err.errno, filename, err.strerror))
 		lines = default
+		msg = "Default"
+	if debug or forceDebug:
+		length = len(lines) if lines else 0
+		print("[%s] Line %d: %s %d lines from file '%s'." % (source, stack()[1][0].f_lineno, msg, length, filename))
 	return lines
 
 
-def fileWriteLines(filename, lines, *args, **kwargs):
+def fileWriteLines(filename, lines, source=DEFAULT_MODULE_NAME, debug=False):
 	try:
 		with open(filename, "w") as fd:
 			if isinstance(lines, list):
 				lines.append("")
 				lines = "\n".join(lines)
 			fd.write(lines)
-		return 1
-	except (IOError, OSError):
-		print_exc()
-		return 0
+		msg = "Wrote"
+		result = 1
+	except (IOError, OSError) as err:
+		print("[%s] Error %d: Unable to write %d lines to file '%s'! (%s)" % (source, err.errno, len(lines), filename, err.strerror))
+		msg = "Failed to write"
+		result = 0
+	if debug or forceDebug:
+		print("[%s] Line %d: %s %d lines to file '%s'." % (source, stack()[1][0].f_lineno, msg, len(lines), filename))
+	return result
 
 
 def comparePaths(leftPath, rightPath):

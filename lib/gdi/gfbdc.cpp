@@ -30,7 +30,6 @@ extern void bcm_accel_blit(
 extern void  dinobot_accel_register(void *p1,void *p2);
 extern void  dinibot_accel_notify(void);
 #endif
-
 gFBDC::gFBDC()
 {
 	fb=new fbClass;
@@ -330,6 +329,7 @@ void gFBDC::setResolution(int xres, int yres, int bpp)
 	if (gAccel::getInstance())
 		gAccel::getInstance()->setAccelMemorySpace(fb->lfb + fb_size, surface.data_phys + fb_size, fb->Available() - fb_size);
 #endif
+
 #ifdef HAVE_HISILICON_ACCEL
 	dinobot_accel_register(&surface,&surface_back);
 #endif

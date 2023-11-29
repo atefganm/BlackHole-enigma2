@@ -1,40 +1,27 @@
-ENIGMA2 SKINS
--------------
+enigma2 skins
+=============
 
-A skin file is an XML or set of XML file.  Review existing skins to get a 
-feel for how skin files are structured.
+A skin file is an XML file. Better read the existing skin file as an
+example.
 
+colors
+======
 
-COLORS:  <colors>
-=================
+you can define alias names for different colors. the "value" is given as
+#aarrggbb, or just #rrggbb.
 
-You can define alias names for different colors.  The "value" is given as
-#AARRGGBB, or just #RRGGBB hex values.  The AA value is the transparency 
-level where 00 if fully opaque and FF is fully transparent.  The RR, GG 
-and BB values are the red, green and blue, respectively, color levels 
-where 00 is no contribution of that colour through to FF where that color 
-is at full saturation.  Thus a color of 000000 is black while FFFFFF is 
-white.
+windowstyle
+===========
+here you can configure the "window style", i.e. the bord around windows.
 
-
-WINDOW STYLE:  <windowstyle>
-============================
-
-In this block you can specify default parameters that affect the default 
-display of screens.  Defaults include foreground and background colors, 
-title, menu and text colors, window borders etc.
-
-
-SCREENS:  <screen>
-==================
+screens
+=======
 
 these are the different widgets for the screens. they can also be embedded
 in the screens itself.
 
-
-PIXMAP PATHS:
-=============
-
+pixmap paths
+============
 there is no lookup order, but exactly one place to search for pixmaps.
 You can either:
  - specify a full pathname (PLEASE, don't!), with a leading slash.
@@ -48,69 +35,20 @@ You can either:
    place where the skin.xml is.
    use this if you are building a skin.
 
-Pixmap filenames in skins are resolved using
-Tools.Directories.resolveFilename(SCOPE_GUISKIN, pngPath, path_prefix)
-and resolveFilename(SCOPE_LCDSKIN, pngPath, path_prefix).
+A NOTE ABOUT PNGs
+=================
 
-See doc/RESOLVEFILENAME for details of the lookups for those resolutions.
-
-Worthy of note are:
-
-When an embedded a screen's embedded self.skin or an entry in the
-pixmaps attribute of a widget element implemented by
-Components.Pixmap.MultiPixmap uses the "~/" path prefix, the
-path_prefix parameter to resolveFilename() will be None unless the
-screen skin element defines the skin_path attribute.
-
-If the "~/" path prefix is used in a path resolved by resolveFilename()
-and its path_prefix parameter is None, resolveFilename() will raise
-an AssertionError exception and the whole readSkin() for the screen
-will be aborted.
-
-All skin pixmap attribute filenames are resolved by first resolving
-the name using SCOPE_LCDSKIN, and then using the resolution
-from SCOPE_GUISKIN if the pixmap file resolved using
-SCOPE_LCDSKIN does not exist, whether the skin is for the
-LCD display or not.
-
-The pixmaps list in Components.Pixmap.MultiPixmap is resolved in
-MultiPixmap.applySkin(), and resolves using SCOPE_SKINS,
-SCOPE_LCDSKIN and SCOPE_GUISKIN in that priority order.
-
-"~/" path prefix expansion does not work for expansion of pixmap filenames
-in the pixmaps attribute of MultiPixmap widgets, nor does it work for
-pixmap filenames used in the MultiContentEntryPixmap* functions in
-Components.MultiContent.
-
-Pixmaps loaded by the skin or MultiPixmap.applySkin() have any
-resolved path suffix starting with '#' stripped from the path.
-Using a '#' in a pixmap filename in that way will affect the pixmap
-path resolution, because resolveFilename() is unaware of this feature
-of skin.loadPixmap().
-
-Finally, if rc_model.rcIsDefault() is False and the resolved pixmap
-path contains either 'rc.png' or 'oldrc.png', the whole path is
-replaced by rc_model.getRcLocation() + 'rc.png'.
-
-
-A NOTE ABOUT PNGs:
-==================
-
-[ NB: The following is outdated and may be not accurate in a number of
-      areas. Modern enigma2 hardware is less constrained than the original
-      platform was at the time this was written. RTFS. ]
-
-Enigma can use either a 32bit argb or an 8bit pseudocolor output. In any
+Enigma can user either a 32bit argb or an 8bit pseudocolor output. In any
 case, enigma uses 8bit PNGs for skins.
 
 Though it would be easy to support 32bit pngs as well, it questionable if
 this would be a great idea.
 
-a.) the quality improvement is relative
+a.) the quality improvement is realative
 
 you can use another palette for each png. that gives you unique 256 colors
 for each skin element. Unless you have very big PNGs, you shouldn't be able
-to notice the difference between 32bit and 8bit.
+to notive the difference between 32bit and 8bit.
 
 b.) 32bit skins wouldn't be compatible to 8bit displays
 
@@ -129,6 +67,7 @@ lossless.
 We could use JPG, but jpgs don't offer a transparency channel, as far as i
 know.
 
+
 So, how to make your PNGs to look good?
 
 It's simple. Edit them as 32bit ARGB (photoshop, gimp should be able to do
@@ -138,8 +77,7 @@ alpha value of 0 / 255 (i.e. the extreme).
 When you're finished, use "pngquant 256 <filename>" to process your PNGs to
 be compatible with enigma.
 
-
-NOTE:
+note:
 =====
 
 if you're having less than 16 colors in your png file, pngquant generates a
@@ -147,8 +85,7 @@ if you're having less than 16 colors in your png file, pngquant generates a
 (evil workaround), fix enigma (good idea!) or patch pngquant to
 always create 8bit pngs.
 
-
-TRANSPARENCY:
+transparency:
 =============
 
 First, do not mix up transparency with alpha. I agree, both terms refer to
@@ -180,8 +117,7 @@ only video), and alphablend on this, we generalized the problem enough that
 we can handle both cases the same. But currently, we have to differentiate
 between them, as we can't always alphablend simply for performance reasons.
 
-
-LCD:
+lcd:
 ====
 
 Right now, most lcd-skins ("summary screens") are implemented right in the
@@ -201,14 +137,11 @@ So, bottom line:
 Design LCD skins for 132x64, with no important items (text etc.) at the
 outermost 6 pixels on each side. In doubt, leave them white.
 
-
-LCD COLOR SPACE:
-================
+LCD colorspace:
+===============
 
 current LCDs are not able to display grayscale graphics. For this, there
 will be a 1bit quantization. However, skins should be designed for 8bit
 grayscale (and still look good in 1bit!), because some next-generation
 display might be able to display some shades of gray - likely not 256, but
 maybe 16 or so.
-
----END---

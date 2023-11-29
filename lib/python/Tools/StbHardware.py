@@ -1,19 +1,26 @@
 from fcntl import ioctl
 from struct import pack, unpack
 from os import path
+from Tools.HardwareInfo import HardwareInfo
 
 
 def getFPVersion():
 	ret = None
 	try:
-		ret = int(open("/proc/stb/fp/version", "r").read())
+		if HardwareInfo().get_device_model() in ('dm7080', 'dm820', 'dm520', 'dm525', 'dm900', 'dm920'):
+			ret = open("/proc/stb/fp/version", "r").read()
+		elif HardwareInfo().get_device_model() in ('one', 'two'):
+			ret = open("/proc/stb/fp/fp_version", "r").read()
 	except IOError:
 		try:
 			fp = open("/dev/dbox/fp0")
 			ret = ioctl(fp.fileno(), 0)
 			fp.close()
 		except IOError:
-			print("[StbHardware] Error: getFPVersion failed!")
+			try:
+				ret = open("/sys/firmware/devicetree/base/bolt/tag", "r").read().rstrip("\0")
+			except:
+				print("getFPVersion failed!")
 	return ret
 
 

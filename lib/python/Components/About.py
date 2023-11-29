@@ -6,8 +6,10 @@ import fcntl
 import struct
 
 from boxbranding import getDriverDate, getImageVersion, getMachineBuild, getBoxType
-from Tools.Directories import fileReadLine, fileReadLines
+
 from enigma import getEnigmaVersionString
+
+from Tools.Directories import fileReadLine, fileReadLines
 
 MODULE_NAME = __name__.split(".")[-1]
 
@@ -35,7 +37,7 @@ def getLastUpdate():
 def _formatDate(Date):
 	# expected input = "YYYYMMDD"
 	if len(Date) != 8 or not Date.isnumeric():
-		return _("unknown")
+		return _("unknown")					
 	from Components.config import config
 	return config.usage.date.dateFormatAbout.value % {"year": Date[0:4], "month": Date[4:6], "day": Date[6:8]}
 
@@ -110,8 +112,6 @@ def getCPUSpeedMHzInt():
 					cpu_speed = round(int(binascii.hexlify(clockfrequency), 16) // 1000000, 1)
 			except IOError:
 				cpu_speed = 1700
-		if getMachineBuild() in ("h8", "sfx6008"):
-			cpu_speed = 1200
 		else:
 			try: # Solo4K sf8008
 				with open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", "r") as file:
@@ -122,51 +122,14 @@ def getCPUSpeedMHzInt():
 
 
 def getCPUSpeedString():
-	if getMachineBuild() in ('u41', 'u42', 'u43', 'u45'):
-		return _("%s GHz") % "1,0"
-	elif getMachineBuild() in ('dags72604', 'vusolo4k', 'vuultimo4k', 'vuzero4k', 'gb72604', 'vuduo4kse'):
-		return _("%s GHz") % "1,5"
-	elif getMachineBuild() in ('formuler1tc', 'formuler1', 'triplex', 'tiviaraplus'):
-		return _("%s GHz") % "1,3"
-	elif getMachineBuild() in ('dagsmv200', 'gbmv200', 'u51', 'u52', 'u53', 'u532', 'u533', 'u54', 'u55', 'u56', 'u57', 'u571', 'u5', 'u5pvr', 'h9', 'i55se', 'h9se', 'h9combose', 'h9combo', 'h10', 'h11', 'cc1', 'sf8008', 'sf8008m', 'sf8008opt', 'hd60', 'hd61', 'pulse4k', 'pulse4kmini', 'i55plus', 'ustym4kpro', 'beyonwizv2', 'viper4k', 'multibox', 'multiboxse'):
-		return _("%s GHz") % "1,6"
-	elif getMachineBuild() in ('vuuno4kse', 'vuuno4k', 'dm900', 'dm920', 'gb7252', 'dags7252', 'xc7439', '8100s'):
-		return _("%s GHz") % "1,7"
-	elif getMachineBuild() in ('alien5', 'hzero', 'h8'):
-		return _("%s GHz") % "2,0"
-	elif getMachineBuild() in ('vuduo4k',):
-		return _("%s GHz") % "2,1"
-	elif getMachineBuild() in ('hd51', 'hd52', 'sf4008', 'vs1500', 'et1x000', 'h7', 'et13000', 'sf5008', 'osmio4k', 'osmio4kplus', 'osmini4k'):
-		try:
-			from binascii import hexlify
-			f = open('/sys/firmware/devicetree/base/cpus/cpu@0/clock-frequency', 'rb')
-			clockfrequency = f.read()
-			f.close()
-			CPUSpeed_Int = round(int(hexlify(clockfrequency), 16) / 1000000, 1)
-			if CPUSpeed_Int >= 1000:
-				return _("%s GHz") % str(round(CPUSpeed_Int / 1000, 1))
-			else:
-				return _("%s MHz") % str(round(CPUSpeed_Int, 1))
-		except:
-			return _("%s GHz") % "1,7"
-	else:
-		try:
-			file = open('/proc/cpuinfo', 'r')
-			lines = file.readlines()
-			for x in lines:
-				splitted = x.split(': ')
-				if len(splitted) > 1:
-					splitted[1] = splitted[1].replace('\n', '')
-					if splitted[0].startswith("cpu MHz"):
-						mhz = float(splitted[1].split(' ')[0])
-						if mhz and mhz >= 1000:
-							mhz = _("%s GHz") % str(round(mhz / 1000, 1))
-						else:
-							mhz = _("%s MHz") % str(round(mhz, 1))
-			file.close()
-			return mhz
-		except IOError:
-			return "unavailable"
+	cpu_speed = float(getCPUSpeedMHzInt())
+	if cpu_speed > 0:
+		if cpu_speed >= 1000:
+			cpu_speed = "%s GHz" % str(round(cpu_speed / 1000, 1))
+		else:
+			cpu_speed = "%s MHz" % str(int(cpu_speed))
+		return cpu_speed
+	return _("unavailable")
 
 
 def getCPUArch():
@@ -194,12 +157,12 @@ def getCpuCoresInt():
 def getCpuCoresString():
 	cores = getCpuCoresInt()
 	return {
-			0: _("Unavailable"),
-			1: _("Single Core"),
-			2: _("Dual Core"),
-			4: _("Quad Core"),
-			8: _("Octo Core")
-			}.get(cores, _("%d cores") % cores)
+		0: _("unavailable"),
+		1: _("Single core"),
+		2: _("Dual core"),
+		4: _("Quad core"),
+		8: _("Octo core")
+	}.get(cores, _("%d cores") % cores)
 
 
 def _ifinfo(sock, addr, ifname):
@@ -244,36 +207,12 @@ def getPythonVersionString():
 
 
 def getEnigmaUptime():
-	location = "/etc/enigma2/profile"
-	try:
-		seconds = int(time() - ospath.getmtime(location))
-		return formatUptime(seconds)
-	except:
-		return ''
-
-
-def formatUptime(seconds):
-	out = ''
-	if seconds > 86400:
-		days = int(seconds / 86400)
-		out += ("1 day" if days == 1 else "%d days" % days) + ", "
-	if seconds > 3600:
-		hours = int((seconds % 86400) / 3600)
-		out += ("1 hour" if hours == 1 else "%d hours" % hours) + ", "
-	if seconds > 60:
-		minutes = int((seconds % 3600) / 60)
-		out += ("1 minute" if minutes == 1 else "%d minutes" % minutes) + " "
-	else:
-		out += ("1 second" if seconds == 1 else "%d seconds" % seconds) + " "
-	return out
-
-
-def getEnigmaUptime():
 	try:
 		seconds = int(time() - ospath.getmtime("/etc/enigma2/profile"))
 		return formatUptime(seconds)
 	except:
 		return ''
+
 
 def getBoxUptime():
 	try:
@@ -298,6 +237,7 @@ def formatUptime(seconds):
 	else:
 		out += (_("1 second") if seconds == 1 else _("%d seconds") % seconds) + " "
 	return out
+
 
 # For modules that do "from About import about"
 about = modules[__name__]

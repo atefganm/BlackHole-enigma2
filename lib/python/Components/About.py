@@ -9,10 +9,6 @@ from boxbranding import getDriverDate, getImageVersion, getMachineBuild, getBoxT
 
 from enigma import getEnigmaVersionString
 
-from Tools.Directories import fileReadLine, fileReadLines
-
-MODULE_NAME = __name__.split(".")[-1]
-
 
 def getVersionString():
 	return getImageVersion()
@@ -37,7 +33,7 @@ def getLastUpdate():
 def _formatDate(Date):
 	# expected input = "YYYYMMDD"
 	if len(Date) != 8 or not Date.isnumeric():
-		return _("unknown")					
+		return _("unknown")
 	from Components.config import config
 	return config.usage.date.dateFormatAbout.value % {"year": Date[0:4], "month": Date[4:6], "day": Date[6:8]}
 
@@ -69,27 +65,11 @@ def getIsBroadcom():
 	return False
 
 
-def getModelString():
-	model = getBoxType()
-	return model
-
-
 def getChipSetString():
-	if getMachineBuild() in ('dm7080', 'dm820'):
-		return "7435"
-	elif getMachineBuild() in ('dm520', 'dm525'):
-		return "73625"
-	elif getMachineBuild() in ('dm900', 'dm920', 'et13000', 'sf5008'):
-		return "7252S"
-	elif getMachineBuild() in ('hd51', 'vs1500', 'h7'):
-		return "7251S"
-	elif getMachineBuild() in ('alien5',):
-		return "S905D"
-	else:
-		chipset = fileReadLine("/proc/stb/info/chipset", source=MODULE_NAME)
-		if chipset is None:
-			return _("Undefined")
-		return str(chipset.lower().replace('\n', '').replace('bcm', '').replace('brcm', '').replace('sti', ''))
+	try:
+		return str(open("/proc/stb/info/chipset").read().lower().replace("\n", "").replace("brcm", "").replace("bcm", ""))
+	except:
+		return _("unavailable")
 
 
 def getCPUSpeedMHzInt():
@@ -112,8 +92,10 @@ def getCPUSpeedMHzInt():
 					cpu_speed = round(int(binascii.hexlify(clockfrequency), 16) // 1000000, 1)
 			except IOError:
 				cpu_speed = 1700
+		if getMachineBuild() in ("h8", "sfx6008"):
+			cpu_speed = 1200
 		else:
-			try: # Solo4K sf8008
+			try:  # Solo4K sf8008
 				with open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", "r") as file:
 					cpu_speed = float(file.read()) // 1000
 			except IOError:
@@ -157,7 +139,7 @@ def getCpuCoresInt():
 def getCpuCoresString():
 	cores = getCpuCoresInt()
 	return {
-		0: _("unavailable"),
+		0: _("Unavailable"),
 		1: _("Single core"),
 		2: _("Dual core"),
 		4: _("Quad core"),
@@ -179,10 +161,10 @@ def getIfConfig(ifname):
 	infos = {}
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	# offsets defined in /usr/include/linux/sockios.h on linux 2.6
-	infos["addr"] = 0x8915 # SIOCGIFADDR
-	infos["brdaddr"] = 0x8919 # SIOCGIFBRDADDR
-	infos["hwaddr"] = 0x8927 # SIOCSIFHWADDR
-	infos["netmask"] = 0x891b # SIOCGIFNETMASK
+	infos["addr"] = 0x8915  # SIOCGIFADDR
+	infos["brdaddr"] = 0x8919  # SIOCGIFBRDADDR
+	infos["hwaddr"] = 0x8927  # SIOCSIFHWADDR
+	infos["netmask"] = 0x891b  # SIOCGIFNETMASK
 	try:
 		for k, v in infos.items():
 			ifreq[k] = _ifinfo(sock, v, ifname)
@@ -206,18 +188,18 @@ def getPythonVersionString():
 	return "%s.%s.%s" % (version_info.major, version_info.minor, version_info.micro)
 
 
-def getEnigmaUptime():
+def getBoxUptime():
 	try:
-		seconds = int(time() - ospath.getmtime("/etc/enigma2/profile"))
+		with open("/proc/uptime", "rb") as f:
+			seconds = int(f.readline().split('.')[0])
 		return formatUptime(seconds)
 	except:
 		return ''
 
 
-def getBoxUptime():
+def getEnigmaUptime():
 	try:
-		with open("/proc/uptime", "rb") as f:
-			seconds = int(f.readline().split('.')[0])
+		seconds = int(time() - ospath.getmtime("/etc/enigma2/profile"))
 		return formatUptime(seconds)
 	except:
 		return ''

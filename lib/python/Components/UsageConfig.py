@@ -2,7 +2,6 @@ import io
 import locale
 import os
 import skin
-from time import time
 from boxbranding import getBrandOEM, getDisplayType
 
 from enigma import eDVBDB, eEPGCache, setTunerTypePriorityOrder, setPreferredTuner, setSpinnerOnOff, setEnableTtCachingOnOff, eEnv, Misc_Options, eBackgroundFileEraser, eServiceEvent, RT_HALIGN_LEFT, RT_HALIGN_RIGHT, RT_HALIGN_CENTER, RT_VALIGN_CENTER, RT_WRAP
@@ -85,7 +84,6 @@ def InitUsageConfig():
 		("keep reverseB", _("Keep service") + " + " + _("Reverse bouquet buttons"))])
 
 	config.usage.multiepg_ask_bouquet = ConfigYesNo(default=False)
-	config.usage.showpicon = ConfigYesNo(default = True)
 
 	config.usage.panicbutton = ConfigYesNo(default=True)
 	config.usage.quickzap_bouquet_change = ConfigYesNo(default=False)
@@ -825,30 +823,6 @@ def InitUsageConfig():
 	])
 	config.epg.correct_invalid_epgdata.addNotifier(correctInvalidEPGDataChange)
 
-# storm - previous code were placed in VideoHardware to where its belong
-
-	config.osd.dst_left = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=720, wraparound=False)
-	config.osd.dst_width = ConfigSelectionNumber(default=720, stepwidth=1, min=0, max=720, wraparound=False)
-	config.osd.dst_top = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=576, wraparound=False)
-	config.osd.dst_height = ConfigSelectionNumber(default=576, stepwidth=1, min=0, max=576, wraparound=False)
-
-	config.osd.alpha = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.osd.alpha_teletext = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.osd.alpha_webbrowser = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.av.osd_alpha = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.osd.threeDmode = ConfigSelection(default="auto", choices=[
-		("off", _("Off")),
-		("auto", _("Auto")),
-		("sidebyside", _("Side by Side")),
-		("topandbottom", _("Top and Bottom"))
-	])
-	config.osd.threeDznorm = ConfigSlider(default=50, increment=1, limits=(0, 100))
-	config.osd.show3dextensions = ConfigYesNo(default=False)
-	config.osd.threeDsetmode = ConfigSelection(default="mode1", choices=[
-		("mode1", _("Mode 1")),
-		("mode2", _("Mode 2"))
-	])
-
 	hddchoices = [("/etc/enigma2/", "Internal Flash")]
 	for p in harddiskmanager.getMountedPartitions():
 		if os.path.exists(p.mountpoint):
@@ -1017,13 +991,6 @@ def InitUsageConfig():
 		config.misc.zapmode = ConfigSelection(default="mute", choices=[
 			("mute", _("Black screen")), ("hold", _("Hold screen")), ("mutetilllock", _("Black screen till locked")), ("holdtilllock", _("Hold till locked"))])
 		config.misc.zapmode.addNotifier(setZapmode, immediate_feedback=False)
-
-	if not SystemInfo["ZapMode"] and os.path.exists("/proc/stb/info/model"):
-		def setZapmodeDM(el):
-			print('[UsageConfig] >>> zapmodeDM')
-		config.misc.zapmodeDM = ConfigSelection(default="black", choices=[("black", _("Black screen")), ("hold", _("Hold screen"))])
-		config.misc.zapmodeDM.addNotifier(setZapmodeDM, immediate_feedback = False)
-
 	config.usage.historymode = ConfigSelection(default="1", choices=[("0", _("Just zap")), ("1", _("Show menu"))])
 
 	config.subtitles = ConfigSubsection()

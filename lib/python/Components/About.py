@@ -8,12 +8,9 @@ import struct
 from boxbranding import getDriverDate, getImageVersion, getMachineBuild, getBoxType
 
 from enigma import getEnigmaVersionString
-from Components.SystemInfo import BoxInfo
 from Tools.Directories import fileReadLine, fileReadLines
 
 MODULE_NAME = __name__.split(".")[-1]
-
-socfamily = BoxInfo.getItem("socfamily")
 
 def getModelString():
 	model = getBoxType()

@@ -358,7 +358,8 @@ class ChannelContextMenu(Screen):
 		self.close()
 
 	def toggleStreamrelay(self):
-		Screens.InfoBar.InfoBar.instance.ToggleStreamrelay(self.csel.getCurrentSelection())
+		from Screens.InfoBarGenerics import streamrelay
+		streamrelay.toggle(self.session.nav, self.csel.getCurrentSelection())
 		self.close()
 
 	def addCenterDVBSubsFlag(self):
@@ -2547,6 +2548,8 @@ class ChannelSelection(ChannelSelectionEdit, ChannelSelectionBase, ChannelSelect
 			self.setHistoryPath()
 
 	def cancel(self):
+		if self.movemode:
+			self.toggleMoveMode()
 		if self.revertMode is None:
 			self.restoreRoot()
 			if self.dopipzap:

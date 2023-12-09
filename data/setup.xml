@@ -54,7 +54,7 @@
 	</setup>
 	<setup key="userinterface" title="GUI settings">
 		<item level="0" text="1st Infobar timeout" description="Set the time delay before hiding the infobar.">config.usage.infobar_timeout</item>
-		<item level="0" text="Show second infobar" description="Configure whether (and for how long) a second infobar will be shown when OK is pressed twice. The second infobar contains additional information about the current channel.">config.usage.show_second_infobar</item>
+		<item level="2" text="Show second infobar" description="Configure whether (and for how long) a second infobar will be shown when OK is pressed twice. The second infobar contains additional information about the current channel.">config.usage.show_second_infobar</item>
 		<item level="2" text="Second infobar style*" description="Choose the style of the second infobar. The 'Standard' view normally includes technical data. The 'Simple' view shows minimal technical data." conditional="findSkinScreen('SecondInfoBarSimple')">config.usage.second_infobar_simple</item>
 		<item level="0" text="Always use second infobar" description="Always show second infobar instead of standard infobar.">config.usage.fix_second_infobar</item>
 		<item level="0" text="Enable infobar fade-out" description="Fade the infobar when hiding">config.usage.show_infobar_do_dimming</item>
@@ -221,7 +221,7 @@
 		<item level="2" text="Timer recording location" description="Set the default location for your timers. Press OK to add new locations, LEFT/RIGHT to select from any existing locations.">config.usage.timer_path</item>
 		<item level="2" text="Instant recording location" description="Set the default location for your instant recordings. Press OK to add new locations, LEFT/RIGHT to select from any existing locations.">config.usage.instantrec_path</item>
 		<item level="2" text="Recordings - convert IPTV servicetypes to  1" description="Recording 4097, 5001 and 5002 streams not possible with external players, so convert recordings to servicetype 1.">config.recording.setstreamto1</item>
-<!--		<item level="2" text="Preferred tuner for recordings" description="Configure which tuner will be preferred for recordings, when more than one tuner is available. 'Disabled' would select a tuner based on preferred tuner in customise screen. 'Auto' would choose based on E2's default rules, ignoring preferred tuner in customise screen.">config.usage.recording_frontend_priority</item>-->
+		<!-- <item level="2" text="Preferred tuner for recordings" description="Configure which tuner will be preferred for recordings, when more than one tuner is available. 'Disabled' would select a tuner based on preferred tuner in customise screen. 'Auto' would choose based on E2's default rules, ignoring preferred tuner in customise screen.">config.usage.recording_frontend_priority</item> -->
 		<item level="1" text="Recordings always have priority" description="When enabled, a recording is allowed to interrupt live TV, when there are no free tuners.">config.recording.asktozap</item>
 		<item level="0" text="Margin before recording (minutes)" description="When nonzero, a recording will start earlier than the starting time indicated by the EPG.">config.recording.margin_before</item>
 		<item level="0" text="Margin after recording (minutes)" description="When nonzero, a recording will stop later than the ending time indicated by the EPG.">config.recording.margin_after</item>
@@ -252,7 +252,7 @@
 		<item level="2" text="Remove finished timer logs after (days)" description="Configure the number of days old timers' log details are kept before they're automatically removed.">config.recording.keep_finished_timer_logs</item>
 		<item level="2" text="Offline decode delay (ms)" description="Configure the offline decoding delay (in milliseconds). The configured delay is observed at each control word parity change.">config.recording.offline_decode_delay</item>
 		<item level="2" text="Default recording type" description="Descramble &amp; record ECM' gives the option to descramble afterwards if descrambling on recording failed. 'Don't descramble, record ECM' save a scramble recording that can be descrambled on playback. 'Normal' means descramble the recording and don't record ECM.">config.recording.ecm_data</item>
-		<item level="2" text="Record icon match" description="Select display of record icon based on 'Sref only' or 'Sref + Stream url' where applicable.">config.recording.record_icon_match</item>
+		<item level="2" text="Record icon match" description="Select display of record icon based on 'Sref Only' or 'Sref + Stream Url' where applicable.">config.recording.record_icon_match</item>
 	</setup>
 	<setup key="harddisk" title="HDD settings">
 		<item level="0" text="Hard disk standby after" description="Configure duration of inactivity before the hard disk drive goes to standby">config.usage.hdd_standby</item>
@@ -371,8 +371,8 @@
 		<item level="1" text="Show warning when timeshift is stopped" description="When enabled, a warning will be displayed and the user will get an option to stop or to continue the timeshift.">config.usage.check_timeshift</item>
 		<item level="2" text="Timeshift-save action on zap" description="Select if timeshift should continue when set to record.">config.timeshift.favoriteSaveAction</item>
 		<item level="2" text="Stop timeshift while recording?" description="Stops timeshift being used if a recording is in progress. (Advisable for USB sticks)">config.timeshift.stopwhilerecording</item>
-		<item level="2" text="Skip jumping to live TV while timeshifting with plugins" description="If set to 'yes', allows you to use timeshift with alternative audio plugins.">config.usage.timeshift_skipreturntolive</item>
 		<item level="2" text="Use timeshift seekbar while timeshifting?" description="If set to 'yes', allows you to use the seekbar to jump to a point within the event.">config.timeshift.showinfobar</item>
+		<item level="2" text="Skip jumping to live TV while timeshifting with plugins" description="If set to 'yes', allows you to use timeshift with alternative audio plugins.">config.usage.timeshift_skipreturntolive</item>
 	</setup>
 	<setup key="epgchannel" title="Channel EPG">
 		<item level="2" text="Sort list by" description="You can have the list sorted by time or alphanumerical.">config.epgselection.sort</item>
@@ -540,7 +540,7 @@
 		<item level="0" text="Disk space to reserve for recordings (in GB)" description="Configure the minimum amount of disk space to be available for recordings. When the amount of space drops below this value, deleted items will be removed from the trash can.">config.usage.movielist_trashcan_reserve</item>
 		<item level="0" text="Font size" description="This allows you change the font size relative to skin size, so 1 increases by 1 point size, and -1 decreases by 1 point size">config.movielist.fontsize</item>
 		<item level="0" text="Number of rows" description="Number of rows to display">config.movielist.itemsperpage</item>
-		<item level="0" text="Use Alternative screen" description="Use the alternative screen">config.movielist.useslim</item>
+		<item level="0" text="Use slim screen" description="Use the alternative screen">config.movielist.useslim</item>
 		<item level="0" text="Use adaptive date display" description="Adaptive date display allows recent dates to be displayed as 'Today' or 'Yesterday'.  It hides the year for recordings made this year.  It hides the day of the week for recordings made in previous years.">config.movielist.use_fuzzy_dates</item>
 		<item level="0" text="Enable automatic collections" description="When enabled, recordings are grouped by name into collections automatically.">config.movielist.enable_collections</item>
 		<item level="0" text="Sort" description="Set the default sorting method.">self.cfg.moviesort</item>

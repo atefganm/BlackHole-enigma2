@@ -7,16 +7,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2 3.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"POT-Creation-Date: 2021-05-18 14:44+0200\n"
-"PO-Revision-Date: 2021-12-20 00:11+0000\n"
-"Last-Translator: Ev0\n"
-"Language-Team: OpenBh Team\n"
+"POT-Creation-Date: 2021-12-17 11:46+0000\n"
+"PO-Revision-Date: 2017-01-05 20:28+0100\n"
+"Last-Translator: Abu Baniaz\n"
+"Language-Team: ViX\n"
+"Language: en_GB\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: en_GB\n"
-"X-Generator: Poedit 3.0\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Generator: Poedit 1.8.6\n"
 
 #, python-format
 msgid ""
@@ -1015,9 +1016,9 @@ msgid_plural "%d channels found"
 msgstr[0] "%d channel found"
 msgstr[1] "%d channels found"
 
-#, python-format
+#, fuzzy, python-format
 msgid "%d cores"
-msgstr ""
+msgstr "Red colored"
 
 #, python-format
 msgid "%d days"
@@ -2092,10 +2093,10 @@ msgid ""
 "OK to close the video fine-tuning, or use the number keys to select other "
 "test screens."
 msgstr ""
-"Adjust the colour settings so that all the colour shades are "
-"distinguishable, but appear as saturated as possible. If you are happy with "
-"the result, press OK to close the video fine-tuning, or use the number keys "
-"to select other test screens."
+"Adjust the color settings so that all the color shades are distinguishable, "
+"but appear as saturated as possible. If you are happy with the result, press "
+"OK to close the video fine-tuning, or use the number keys to select other "
+"test screens."
 
 msgid "Adult Audience, Strong Violence 15+"
 msgstr ""
@@ -2723,7 +2724,7 @@ msgid "Background check"
 msgstr "Background check"
 
 msgid "Background color"
-msgstr "Background colour"
+msgstr "Background color"
 
 msgid "Background delete option"
 msgstr "Background delete option"
@@ -2786,19 +2787,19 @@ msgid "Begin time"
 msgstr "Begin time"
 
 msgid "Behavior of 'pause' when paused"
-msgstr "Behaviour of 'pause' when paused"
+msgstr "Behavior of 'pause' when paused"
 
 msgid "Behavior of 0 key in PiP-mode"
-msgstr "Behaviour of 0 key in PiP-mode"
+msgstr "Behavior of 0 key in PiP-mode"
 
 msgid "Behavior when a movie is started"
-msgstr "Behaviour when a movie is started"
+msgstr "Behavior when a movie is started"
 
 msgid "Behavior when a movie is stopped"
-msgstr "Behaviour when a movie is stopped"
+msgstr "Behavior when a movie is stopped"
 
 msgid "Behavior when a movie reaches the end"
-msgstr "Behaviour when a movie reaches the end"
+msgstr "Behavior when a movie reaches the end"
 
 msgid "Belarus"
 msgstr ""
@@ -2976,8 +2977,8 @@ msgstr "Button setup for"
 msgid "ButtonSetup"
 msgstr "ButtonSetup"
 
-msgid "By OpenBh Team"
-msgstr "From the OpenBh Team"
+msgid "By Team ViX"
+msgstr "By Team ViX"
 
 msgid "Bypass HDMI EDID Check"
 msgstr "Bypass HDMI EDID Check"
@@ -3246,19 +3247,21 @@ msgid "Change step size"
 msgstr "Change step size"
 
 msgid "Change the Colordepth for UHD"
-msgstr "This option allows you to change the Colourdepth for UHD"
+msgstr ""
 
 msgid "Change the Colorimetry for HDR"
-msgstr "This option allows you to change the Colourimetry for HDR"
+msgstr ""
 
+#, fuzzy
 msgid "Change the Colorspace from Auto to RGB"
-msgstr "This option allows you to change the Colourspace from Auto to RGB"
+msgstr "This option allows you to change the Colorspace from Auto to RGB"
 
 msgid "Channel"
 msgstr "Channel"
 
+#, fuzzy
 msgid "Channel EPG"
-msgstr ""
+msgstr "Channel"
 
 msgid "Channel List"
 msgstr "Channel List"
@@ -3282,7 +3285,7 @@ msgid "Channel info"
 msgstr "Channel info"
 
 msgid "Channel list cursor behavior"
-msgstr "Channel list cursor behaviour"
+msgstr "Channel list cursor behavior"
 
 msgid "Channel list on mode change"
 msgstr "Channel list on mode change"
@@ -3644,14 +3647,15 @@ msgstr "Collection name"
 msgid "Collection settings"
 msgstr "Collection settings"
 
+#, fuzzy
 msgid "Colombia"
-msgstr ""
+msgstr "Color format"
 
 msgid "Color format"
-msgstr "Colour format"
+msgstr "Color format"
 
 msgid "Color space"
-msgstr "Colour space"
+msgstr "Color space"
 
 msgid "Combined"
 msgstr ""
@@ -3857,20 +3861,20 @@ msgid ""
 "Configure the behavior of the 'pause' key when movie playback is already "
 "paused."
 msgstr ""
-"Configure the behaviour of the 'pause' key when movie playback is already "
+"Configure the behavior of the 'pause' key when movie playback is already "
 "paused."
 
 msgid "Configure the behavior when movie playback is manually stopped."
-msgstr "Configure the behaviour when movie playback is manually stopped."
+msgstr "Configure the behavior when movie playback is manually stopped."
 
 msgid "Configure the behavior when movie playback is started."
-msgstr "Configure the behaviour when movie playback is started."
+msgstr "Configure the behavior when movie playback is started."
 
 msgid ""
 "Configure the behavior when reaching the end of a movie, during movie "
 "playback."
 msgstr ""
-"Configure the behaviour when reaching the end of a movie, during movie "
+"Configure the behavior when reaching the end of a movie, during movie "
 "playback."
 
 msgid ""
@@ -3902,11 +3906,11 @@ msgid ""
 "Configure the color of the external subtitles, alternative (normal in white, "
 "italic in yellow, bold in cyan, underscore in green), white or yellow."
 msgstr ""
-"Configure the colour of the external subtitles, alternative (normal in "
-"white, italic in yellow, bold in cyan, underscore in green), white or yellow."
+"Configure the color of the external subtitles, alternative (normal in white, "
+"italic in yellow, bold in cyan, underscore in green), white or yellow."
 
 msgid "Configure the color of the teletext subtitles."
-msgstr "Configure the colour of the teletext subtitles."
+msgstr "Configure the color of the teletext subtitles."
 
 msgid "Configure the contrast level of the front panel display."
 msgstr "Configure the contrast level of the front panel display."
@@ -3916,7 +3920,7 @@ msgid ""
 "the channel selection list you can remain on the current service or already "
 "select up/down and you are able to revert the B+/B- buttons."
 msgstr ""
-"Configure the cursor behaviour in the channel selection list. When opening "
+"Configure the cursor behavior in the channel selection list. When opening "
 "the channel selection list you can remain on the current service or already "
 "select up/down and you are able to revert the B+/B- buttons."
 
@@ -4142,7 +4146,7 @@ msgid "Configure whether service picons will be shown in number zap."
 msgstr "Configure if and how service type icons will be shown."
 
 msgid "Configure which color format should be used on the SCART output."
-msgstr "Configure which colour format should be used on the SCART output."
+msgstr "Configure which color format should be used on the SCART output."
 
 msgid ""
 "Configure which tuner for recordings will be preferred, when more than one "
@@ -5715,10 +5719,10 @@ msgid "Enable multiple bouquets"
 msgstr "Enable multiple bouquets"
 
 msgid "Enable or disable the 10 Bit Color Mode"
-msgstr "Enable or disable the 10 Bit Colour Mode"
+msgstr ""
 
 msgid "Enable or disable the 12 Bit Color Mode"
-msgstr "Enable or disable the 12 Bit Colour Mode"
+msgstr ""
 
 msgid "Enable or disable to force HDR Modes for UHD"
 msgstr ""
@@ -5856,7 +5860,7 @@ msgstr "Enter the service pin"
 
 msgid ""
 "Enter the FTP password of the host receiver (required for any server running "
-"OpenBh %s)."
+"OpenViX 5.4 or greater)."
 msgstr ""
 
 msgid "Enter the FTP port of the host receiver (normally '21')."
@@ -6150,10 +6154,10 @@ msgid "External PiP"
 msgstr "External PiP"
 
 msgid "External subtitle color"
-msgstr "External subtitle colour"
+msgstr "External subtitle color"
 
 msgid "External subtitle dialog colorisation"
-msgstr "External subtitle dialog colourisation"
+msgstr "External subtitle dialog colorisation"
 
 msgid "External subtitle switch fonts"
 msgstr "External subtitle switch fonts"
@@ -6842,14 +6846,16 @@ msgstr "HDMI"
 msgid "HDMI CEC"
 msgstr "HDMI CEC"
 
+#, fuzzy
 msgid "HDMI Colordepth"
-msgstr "HDMI Colourdepth"
+msgstr "HDMI Colorspace"
 
+#, fuzzy
 msgid "HDMI Colorimetry"
-msgstr "HDMI Colourimetry"
+msgstr "HDMI Colorspace"
 
 msgid "HDMI Colorspace"
-msgstr "HDMI Colourspace"
+msgstr "HDMI Colorspace"
 
 msgid "HDMI HDR Type"
 msgstr ""
@@ -6858,8 +6864,9 @@ msgstr ""
 msgid "HDMI input"
 msgstr "HDMIin"
 
+#, fuzzy
 msgid "HDMI-CEC address editing actions"
-msgstr ""
+msgstr "MAC address settings"
 
 msgid "HDMIin"
 msgstr "HDMIin"
@@ -6867,8 +6874,9 @@ msgstr "HDMIin"
 msgid "HDR, 12bit 4:2:0/4:2:2, no PIP"
 msgstr ""
 
+#, fuzzy
 msgid "HDR10 Support"
-msgstr ""
+msgstr "DLNA support"
 
 msgid "HELP"
 msgstr ""
@@ -6879,8 +6887,9 @@ msgstr ""
 msgid "HH:mm:ss"
 msgstr ""
 
+#, fuzzy
 msgid "HLG Support"
-msgstr ""
+msgstr "DLNA support"
 
 #, fuzzy
 msgid "Haiti"
@@ -6901,8 +6910,9 @@ msgstr "Harddisk setup"
 msgid "HbbTV"
 msgstr ""
 
+#, fuzzy
 msgid "Hdmi-CEC setup"
-msgstr ""
+msgstr "Harddisk setup"
 
 msgid "Heard Island and McDonald Islands"
 msgstr ""
@@ -6922,8 +6932,9 @@ msgstr "Help long"
 msgid "Helps setting up your antenna"
 msgstr "Helps setting up your antenna"
 
+#, fuzzy
 msgid "Hidden / Blank"
-msgstr ""
+msgstr "Hidden network"
 
 msgid "Hidden network"
 msgstr "Hidden network"
@@ -6940,8 +6951,9 @@ msgstr "Hide any zap error messages."
 msgid "Hide error messages from the Common Interface module."
 msgstr "Hide error messages from the Common Interface module."
 
+#, fuzzy
 msgid "Hide infobar display"
-msgstr ""
+msgstr "fine-tune your display"
 
 msgid "Hide infobar display and ask whether to close PiP"
 msgstr ""
@@ -6952,8 +6964,9 @@ msgstr ""
 msgid "Hide known extensions"
 msgstr "Hide known extensions"
 
+#, fuzzy
 msgid "Hide number markers"
-msgstr ""
+msgstr "insert mark here"
 
 msgid "Hide parental locked services"
 msgstr "Hide parental locked services"
@@ -6980,8 +6993,9 @@ msgstr ""
 msgid "History Zap"
 msgstr "History zap..."
 
+#, fuzzy
 msgid "History Zap Actions"
-msgstr ""
+msgstr "History zap..."
 
 msgid "History back"
 msgstr "History back"
@@ -7023,8 +7037,9 @@ msgstr "Horizontal"
 msgid "Horizontal turning speed"
 msgstr "Horizontal turning speed"
 
+#, fuzzy
 msgid "Host domain"
-msgstr ""
+msgstr "shut down"
 
 msgid "Host receiver FTP password"
 msgstr ""
@@ -7035,14 +7050,16 @@ msgstr ""
 msgid "Host receiver FTP username"
 msgstr ""
 
+#, fuzzy
 msgid "Host receiver IP address"
-msgstr ""
+msgstr "Configure the IP address."
 
 msgid "Host receiver address type"
 msgstr ""
 
+#, fuzzy
 msgid "Host receiver streaming port"
-msgstr ""
+msgstr "Fallback remote receiver streaming port"
 
 msgid "Hostname:"
 msgstr "Hostname:"
@@ -7094,8 +7111,9 @@ msgstr "IMDb Search"
 msgid "INFO"
 msgstr ""
 
+#, fuzzy
 msgid "INFO button action"
-msgstr ""
+msgstr "OK button (long)"
 
 msgid "INS"
 msgstr ""
@@ -7443,8 +7461,9 @@ msgstr "Infobar frontend data source"
 msgid "Information"
 msgstr "Information"
 
+#, fuzzy
 msgid "Infotainment"
-msgstr ""
+msgstr "CI assignment"
 
 msgid "Init"
 msgstr "Init"
@@ -7474,11 +7493,12 @@ msgstr "Initial signal quality:"
 msgid "Initialize"
 msgstr "Initialise"
 
+#, fuzzy
 msgid "Initialize Devices"
-msgstr "Initialise Devices"
+msgstr "Initialise"
 
 msgid "Initializing storage device..."
-msgstr "Initialising storage device..."
+msgstr "Initializing storage device..."
 
 msgid "Inotify Monitoring"
 msgstr "Inotify Monitoring"
@@ -10421,8 +10441,8 @@ msgstr "Protect standby menu"
 msgid "Protect timer menu"
 msgstr "Protect timer menu"
 
-msgid "Protect openbh menu"
-msgstr "Protect openbh menu"
+msgid "Protect vix menu"
+msgstr "Protect vix menu"
 
 msgid "Protek 4K UHD/HD61"
 msgstr ""
@@ -10478,8 +10498,9 @@ msgstr "Python:\t%s\n"
 msgid "Qatar"
 msgstr ""
 
+#, fuzzy
 msgid "Quad core"
-msgstr ""
+msgstr "Red colored"
 
 msgid "Question"
 msgstr "Question"
@@ -10712,7 +10733,7 @@ msgid "Red button..."
 msgstr "Red button..."
 
 msgid "Red colored"
-msgstr "Red coloured"
+msgstr "Red colored"
 
 msgid "Red long"
 msgstr "Red long"
@@ -10983,7 +11004,7 @@ msgid ""
 "Replace `- ` in dialogs with colored text per speaker (like teletext "
 "subtitles for the hearing impaired)"
 msgstr ""
-"Replace `- ` in dialogs with coloured text per speaker (like teletext "
+"Replace `- ` in dialogs with colored text per speaker (like teletext "
 "subtitles for the hearing impaired)"
 
 #, fuzzy
@@ -11199,7 +11220,7 @@ msgid "SABnzbd Setup"
 msgstr "SABnzbd Setup"
 
 msgid "SCPC optimized search range"
-msgstr "SCPC optimised search range"
+msgstr ""
 
 #, fuzzy
 msgid "SCR (Unicable/JESS)"
@@ -12228,7 +12249,7 @@ msgid "Set HDMI-CEC fixed address"
 msgstr "Using fixed address"
 
 msgid "Set LED Color or disable the LED."
-msgstr "Set LED Colour or disable the LED."
+msgstr ""
 
 msgid "Set a temporary sort method for this directory"
 msgstr ""
@@ -12409,7 +12430,7 @@ msgstr ""
 
 #, python-format
 msgid ""
-"Setting a network password is mandatory in OpenBh %s if you wish to use "
+"Setting a network password is mandatory in OpenViX %s if you wish to use "
 "network services. \n"
 "To set a password using the virtual keyboard press the 'text' button on your "
 "remote control."
@@ -12596,8 +12617,8 @@ msgstr ""
 msgid "Show VCR scart on main menu"
 msgstr "Show VCR scart on main menu"
 
-msgid "Show OpenBh spinning logo when the system is busy."
-msgstr "Show OpenBh spinning logo when the system is busy."
+msgid "Show ViX spinning logo when the system is busy."
+msgstr "Show ViX spinning logo when the system is busy."
 
 msgid "Show WLAN status"
 msgstr "Show WLAN status"
@@ -12765,7 +12786,7 @@ msgid "Show or hide the extended description, (skin dependant)."
 msgstr "Show or hide the extended description, (skin dependant)."
 
 msgid "Show picon background color"
-msgstr "Show picon background colour"
+msgstr "Show picon background color"
 
 #, fuzzy
 msgid "Show picons during channel number input"
@@ -13219,10 +13240,10 @@ msgstr "Some plugins are not available:\n"
 
 msgid ""
 "Sorry feeds are down for maintenance, please try again later. If this issue "
-"persists please check www.openbh.net."
+"persists please check openvix.co.uk or world-of-satellite.com."
 msgstr ""
 "Sorry feeds are down for maintenance, please try again later. If this issue "
-"persists please check www.openbh.net."
+"persists please check openvix.co.uk or world-of-satellite.com."
 
 msgid ""
 "Sorry feeds seem be in an unstable state, if you wish to use them please "
@@ -13917,7 +13938,7 @@ msgid "Teletext"
 msgstr "Teletext"
 
 msgid "Teletext subtitle color"
-msgstr "Teletext subtitle colour"
+msgstr "Teletext subtitle color"
 
 #, fuzzy
 msgid "Telnet"
@@ -13971,7 +13992,7 @@ msgid "Text View On"
 msgstr ""
 
 msgid "Text color"
-msgstr "Text colour"
+msgstr "Text color"
 
 msgid "Thai"
 msgstr "Thai"
@@ -14191,10 +14212,10 @@ msgstr "There are no updates available."
 
 msgid ""
 "There has been an error, please try again later. If this issue persists, "
-"please check www.openbh.net"
+"please check openvix.co.uk or world-of-satellite.com"
 msgstr ""
 "There has been an error, please try again later. If this issue persists, "
-"please check www.openbh.net"
+"please check openvix.co.uk or world-of-satellite.com"
 
 msgid "There is no signal to lock on !"
 msgstr "There is no signal to lock on !"
@@ -14296,7 +14317,7 @@ msgstr ""
 msgid ""
 "This option allows you choose the background color of transparent picons."
 msgstr ""
-"This option allows you choose the background colour of transparent picons."
+"This option allows you choose the background color of transparent picons."
 
 msgid ""
 "This option allows you enable smoothing filter to control the dithering "
@@ -14535,7 +14556,7 @@ msgid "This option sets the picture brightness."
 msgstr "This option sets the picture brightness."
 
 msgid "This option sets the picture color space."
-msgstr "This option sets the picture colour space."
+msgstr "This option sets the picture color space."
 
 #, fuzzy
 msgid "This option sets the picture contrast."
@@ -15382,7 +15403,7 @@ msgid "Use original teletext position"
 msgstr "Use original teletext position"
 
 msgid "Use piconlcd directory for picons on color LCD"
-msgstr "Use piconlcd directory for picons on colour LCD"
+msgstr ""
 
 msgid "Use power measurement"
 msgstr "Use power measurement"
@@ -15596,7 +15617,7 @@ msgid "Vertical turning speed"
 msgstr "Vertical turning speed"
 
 #, fuzzy, python-format
-msgid "OpenBh version: %s"
+msgid "ViX version: %s"
 msgstr "Version: %s"
 
 #, fuzzy
@@ -15886,7 +15907,7 @@ msgid "Weighted position"
 msgstr "Weighted position"
 
 msgid ""
-"Welcome to OpenBh!\n"
+"Welcome to OpenViX!\n"
 "\n"
 "NOTE: This section of the wizard is intended for people who cannot disable "
 "overscan on their television / display.  Please first try to disable "
@@ -16122,7 +16143,7 @@ msgid ""
 "of the original color."
 msgstr ""
 "When enabled, graphical DVB subtitles will be displayed in yellow, instead "
-"of the original colour."
+"of the original color."
 
 msgid ""
 "When enabled, http streams are descrambled on the server side. The (remote) "
@@ -16658,10 +16679,10 @@ msgstr ""
 #, fuzzy, python-format
 msgid ""
 "Your %s %s is not able to connect to the feeds, please try again later. If "
-"this persists please report on the www.openbh.net."
+"this persists please report on the OpenViX forum at world-of-satellite.com."
 msgstr ""
 "Sorry feeds are down for maintenance, please try again later. If this issue "
-"persists please check www.openbh.net."
+"persists please check openvix.co.uk or world-of-satellite.com."
 
 #, python-format
 msgid ""
@@ -16818,8 +16839,6 @@ msgid ""
 "Your receiver can use SCPC optimized search range. Consult your receiver's "
 "manual for more information."
 msgstr ""
-"Your receiver can use SCPC optimised search range. Consult your receiver's "
-"manual for more information."
 
 msgid ""
 "Your receiver can use tone amplitude. Consult your receiver's manual for "
@@ -18282,7 +18301,7 @@ msgstr "Downloads"
 msgid "%s: "
 msgstr ""
 
-msgid "- Max backups to keep (0 = all)"
+msgid "- Max backups to keep (0==all)"
 msgstr ""
 
 msgid "- Query before backup starts"
@@ -18613,10 +18632,10 @@ msgstr "Enable Startup"
 msgid "Enough retries, delaying till next schedule."
 msgstr "Enough Retries, delaying till next schedule."
 
-msgid "Enter your OpenBh developer password."
+msgid "Enter your OpenViX developer password."
 msgstr ""
 
-msgid "Enter your OpenBh developer username."
+msgid "Enter your OpenViX developer username."
 msgstr ""
 
 msgid "Erase"
@@ -18663,8 +18682,8 @@ msgid "IPK installer"
 msgstr "IPK Installer"
 
 msgid ""
-"If you are an OpenBh developer you can enter your login details to have "
-"direct access to OpenBh developer images for your receiver. This feature is "
+"If you are an OpenViX developer you can enter your login details to have "
+"direct access to OpenViX developer images for your receiver. This feature is "
 "only available via 'https' connections."
 msgstr ""
 
@@ -18713,7 +18732,7 @@ msgstr ""
 msgid "Location of where the image backup should be saved."
 msgstr ""
 
-msgid "Login as an OpenBh developer"
+msgid "Login as an OpenViX developer"
 msgstr ""
 
 #, fuzzy
@@ -18761,7 +18780,7 @@ msgstr ""
 
 #, fuzzy
 msgid "Multiboot image manager"
-msgstr "OpenBh Image Manager"
+msgstr "ViX Image Manager"
 
 msgid "Multiboot only able to restore this backup to mmc slot1"
 msgstr ""
@@ -19200,32 +19219,32 @@ msgstr "Use as HDD"
 msgid "Use the cursor keys to select an installed image and then Erase button."
 msgstr ""
 
-msgid "OpenBh"
-msgstr "OpenBh"
+msgid "ViX"
+msgstr "ViX"
 
 #, fuzzy
-msgid "OpenBh Backup manager"
-msgstr "OpenBh Backup Manager"
+msgid "ViX Backup manager"
+msgstr "ViX Backup Manager"
 
 #, fuzzy
-msgid "OpenBh Image Management"
-msgstr "OpenBh Image Manager"
+msgid "ViX Image Management"
+msgstr "ViX Image Manager"
 
 #, fuzzy
-msgid "OpenBh Image manager"
-msgstr "OpenBh Image Manager"
+msgid "ViX Image manager"
+msgstr "ViX Image Manager"
 
 #, fuzzy
-msgid "OpenBh Mount manager"
-msgstr "OpenBh Mount Manager"
+msgid "ViX Mount manager"
+msgstr "ViX Mount Manager"
 
 #, fuzzy
-msgid "OpenBh SWAP manager"
-msgstr "OpenBh Swap Manager"
+msgid "ViX SWAP manager"
+msgstr "ViX Swap Manager"
 
 #, fuzzy
-msgid "OpenBh Script runner"
-msgstr "OpenBh Script Runner"
+msgid "ViX Script runner"
+msgstr "ViX Script Runner"
 
 #, fuzzy
 msgid "View progress"

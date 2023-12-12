@@ -19,7 +19,8 @@ do_reader_kill=0
 if [ -e /proc/stb/info/boxtype ]; then
 # Set relevant boxtypes to 1 - missing ones are treated as 0.
 	declare -A boxtest=(
-		sf8008 1   sx988 1   sx88v2 1   sfx6008 1   gbmv200 1
+		viper4k 1   beyonwizv2 1    sf8008 1    sf8008m 1
+		sfx6008 1   sx988 1         sx88v2 1    gbmv200 1
 	)
 	stbcheck=`cat /proc/stb/info/boxtype`
 	if [ ${boxtest[$stbcheck]:-0} -eq 1 ]; then
@@ -374,9 +375,7 @@ case $ret in
 		/sbin/reboot
 		;;
 	12)
-		if [ -e /dev/block/by-name/flag ]; then
-			echo -n "0" > /dev/block/by-name/flag
-		elif [ -e /dev/block/by-name/bootoptions ]; then
+		if [ -e /dev/block/by-name/bootoptions ]; then
 			mkdir -p /tmp/bootoptions
 			mount /dev/block/by-name/bootoptions /tmp/bootoptions
 			cp -f /tmp/bootoptions/STARTUP_ANDROID /tmp/bootoptions/STARTUP_ONCE

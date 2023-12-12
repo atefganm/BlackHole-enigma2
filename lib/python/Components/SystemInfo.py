@@ -172,7 +172,7 @@ def countFrontpanelLEDs():
 
 
 def hasInitCam():
-	return bool([f for f in listdir("/etc/init.d") if f.startswith("softcam.") and f != "softcam.None"])
+	return bool([f for f in listdir("/usr/camscript") if f.startswith("Ncam_") and f != "Ncam_Ci.sh"])
 
 
 def getModuleLayout():

@@ -135,7 +135,7 @@ int eDVBAudio::startPid(int pid, int type)
 		case aAAC:
 			bypass = 8;
 			break;
-		case aHEAAC:
+		case aAACHE:
 			bypass = 9;
 			break;
 		case aLPCM:
@@ -744,7 +744,7 @@ eDVBPCR::eDVBPCR(eDVBDemux *demux, int dev): m_demux(demux), m_dev(dev)
 	if (tmp_fd == 0)
 	{
 		::close(tmp_fd);
-		tmp_fd = -1;
+		tmp_fd = -1;	
 		fd0lock = ::open("/dev/null", O_RDONLY | O_CLOEXEC);
 		/* eDebug("[decoder][eDVBPCR] opening null fd returned: %d", fd0lock); */
 	}
@@ -829,7 +829,7 @@ eDVBTText::eDVBTText(eDVBDemux *demux, int dev)
 	if (tmp_fd == 0)
 	{
 		::close(tmp_fd);
-		tmp_fd = -1;
+		tmp_fd = -1;	
 		fd0lock = ::open("/dev/null", O_RDONLY | O_CLOEXEC);
 		/* eDebug("[decoder][eDVBText] opening null fd returned: %d", fd0lock); */
 	}

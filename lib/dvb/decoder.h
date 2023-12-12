@@ -13,7 +13,7 @@ private:
 	ePtr<eDVBDemux> m_demux;
 	int m_fd, m_fd_demux, m_dev, m_is_freezed;
 public:
-	enum { aMPEG, aAC3, aDTS, aAAC, aHEAAC, aLPCM, aDTSHD, aDDP, aDRA, aAC4 };
+	enum { aMPEG, aAC3, aDTS, aAAC, aAACHE, aLPCM, aDTSHD, aDDP, aDRA, aAC4 };
 	eDVBAudio(eDVBDemux *demux, int dev);
 	enum { aMonoLeft, aStereo, aMonoRight };
 	void setChannel(int channel);
@@ -186,7 +186,7 @@ public:
 	static RESULT setHwPCMDelay(int delay);
 	static RESULT setHwAC3Delay(int delay);
 
-	enum 
+	enum
 	{
 		fcc_state_stop,
 		fcc_state_ready,

@@ -8,6 +8,8 @@ from Screens.Screen import Screen
 from Screens.MessageBox import MessageBox
 from Components.Label import Label
 from Components.Pixmap import MultiPixmap
+from Components.PluginComponent import plugins
+from Plugins.Plugin import PluginDescriptor
 from Components.SystemInfo import SystemInfo
 
 profile("LOAD:enigma")
@@ -16,13 +18,13 @@ import enigma  # noqa: E402
 profile("LOAD:InfoBarGenerics")
 from Screens.InfoBarGenerics import InfoBarShowHide, \
 	InfoBarNumberZap, InfoBarChannelSelection, InfoBarMenu, InfoBarRdsDecoder, \
-	InfoBarEPG, InfoBarSeek, InfoBarInstantRecord, InfoBarRedButton, InfoBarTimerButton, InfoBarVmodeButton, \
+	InfoBarEPG, InfoBarSeek, InfoBarInstantRecord, InfoBarResolutionSelection, InfoBarAspectSelection, InfoBarRedButton, InfoBarTimerButton, InfoBarVmodeButton, \
 	InfoBarAudioSelection, InfoBarVideoSetup, InfoBarAdditionalInfo, InfoBarNotifications, InfoBarDish, InfoBarUnhandledKey, InfoBarLongKeyDetection, \
 	InfoBarSubserviceSelection, InfoBarShowMovies,  \
 	InfoBarServiceNotifications, InfoBarPVRState, InfoBarCueSheetSupport, InfoBarBuffer, \
 	InfoBarSummarySupport, InfoBarMoviePlayerSummarySupport, InfoBarTimeshiftState, InfoBarTeletextPlugin, InfoBarExtensions, \
 	InfoBarSubtitleSupport, InfoBarPiP, InfoBarPlugins, InfoBarServiceErrorPopupSupport, InfoBarJobman, InfoBarZoom, \
-	InfoBarHdmi, setResumePoint, delResumePoint # noqa: E402
+	InfoBarHdmi, setResumePoint, delResumePoint  # noqa: E402
 from Screens.ButtonSetup import InfoBarButtonSetup  # noqa: E402
 
 profile("LOAD:InitBar_Components")
@@ -37,7 +39,7 @@ from Screens.HelpMenu import HelpableScreen  # noqa: E402
 
 class InfoBar(InfoBarBase, InfoBarShowHide,
 	InfoBarNumberZap, InfoBarChannelSelection, InfoBarMenu, InfoBarEPG, InfoBarRdsDecoder,
-	InfoBarInstantRecord, InfoBarAudioSelection, InfoBarVideoSetup, InfoBarRedButton, InfoBarTimerButton, InfoBarVmodeButton,
+	InfoBarInstantRecord, InfoBarAudioSelection, InfoBarVideoSetup, InfoBarRedButton, InfoBarTimerButton, InfoBarResolutionSelection, InfoBarAspectSelection, InfoBarVmodeButton,
 	HelpableScreen, InfoBarAdditionalInfo, InfoBarNotifications, InfoBarDish, InfoBarUnhandledKey, InfoBarLongKeyDetection,
 	InfoBarSubserviceSelection, InfoBarTimeshift, InfoBarSeek, InfoBarCueSheetSupport, InfoBarBuffer,
 	InfoBarSummarySupport, InfoBarTimeshiftState, InfoBarTeletextPlugin, InfoBarExtensions,
@@ -55,6 +57,10 @@ class InfoBar(InfoBarBase, InfoBarShowHide,
 				"showRadio": (self.keyRadio, _("Show the radio player")),
 				"showTv": (self.keyTV, _("Show the tv player")),
 				"openBouquetList": (self.openBouquetList, _("Open bouquet list")),
+				"showWWW": (self.showPORTAL, _("Open XStreamity")),
+				"showKodi": (self.showKodi, _("Open Kodi")),
+				"showNetflix": (self.showNetflix, _("Open Netflix")),
+				"showYoutube": (self.showYoutube, _("Open Youtube")),
 			}, prio=2, description=_("Basic functions"))
 
 		self["key_red"] = Label()
@@ -69,10 +75,11 @@ class InfoBar(InfoBarBase, InfoBarShowHide,
 			HelpableScreen, InfoBarBase, InfoBarShowHide, InfoBarNumberZap, InfoBarChannelSelection, InfoBarMenu,
 			InfoBarEPG, InfoBarRdsDecoder, InfoBarInstantRecord, InfoBarAudioSelection, InfoBarVideoSetup,
 			InfoBarRedButton, InfoBarTimerButton, InfoBarUnhandledKey, InfoBarLongKeyDetection, InfoBarVmodeButton,
-			InfoBarAdditionalInfo, InfoBarNotifications, InfoBarDish, InfoBarSubserviceSelection, InfoBarBuffer,
-			InfoBarTimeshift, InfoBarSeek, InfoBarCueSheetSupport, InfoBarSummarySupport, InfoBarTimeshiftState,
-			InfoBarTeletextPlugin, InfoBarExtensions, InfoBarPiP, InfoBarSubtitleSupport, InfoBarJobman, InfoBarZoom,
-			InfoBarHdmi, InfoBarPlugins, InfoBarServiceErrorPopupSupport, InfoBarButtonSetup,
+			InfoBarAdditionalInfo, InfoBarNotifications, InfoBarDish, InfoBarSubserviceSelection,
+			InfoBarResolutionSelection, InfoBarAspectSelection, InfoBarBuffer, InfoBarTimeshift, InfoBarSeek,
+			InfoBarCueSheetSupport, InfoBarSummarySupport, InfoBarTimeshiftState, InfoBarTeletextPlugin,
+			InfoBarExtensions, InfoBarPiP, InfoBarSubtitleSupport, InfoBarJobman, InfoBarZoom, InfoBarHdmi,
+			InfoBarPlugins, InfoBarServiceErrorPopupSupport, InfoBarButtonSetup,
 		):
 			x.__init__(self)
 
@@ -106,19 +113,19 @@ class InfoBar(InfoBarBase, InfoBarShowHide,
 		self.mainMenu()
 
 	def doButtonsCheck(self):
-		if config.vixsettings.ColouredButtons.value:
-			self["key_yellow"].setText(_("Search"))
+		if config.obhsettings.ColouredButtons.value:
+			self["key_yellow"].setText(_("Audio Panel"))
 
 			if config.usage.defaultEPGType.value == "Grid EPG":
 				self["key_red"].setText(_("Single EPG"))
 			else:
 				self["key_red"].setText(_("Grid EPG"))
 
-			if not config.vixsettings.Subservice.value:
-				self["key_green"].setText(_("Timers"))
+			if not config.obhsettings.Subservice.value:
+				self["key_green"].setText(_("Green Panel"))
 			else:
 				self["key_green"].setText(_("Subservices"))
-		self["key_blue"].setText(_("Extensions"))
+		self["key_blue"].setText(_("Blue Panel"))
 
 	def __eventInfoChanged(self):
 		if self.execing:
@@ -230,6 +237,38 @@ class InfoBar(InfoBarBase, InfoBarShowHide,
 			LastService = self.session.nav.getCurrentlyPlayingServiceOrGroup()
 		self.session.open(MoviePlayer, ref, slist=self.servicelist, lastservice=LastService)
 
+	def showPORTAL(self):
+		try:
+			from Plugins.Extensions.XStreamity.plugin import extensionsmenu
+			extensionsmenu(self.session)
+			no_plugin = False
+		except Exception as e:
+			self.session.open(MessageBox, _("XStreamity is not installed!\nPlease install it."), type=MessageBox.TYPE_INFO, timeout=10)
+
+	def showKodi(self):
+		try:
+			from Plugins.Extensions.Kodi.plugin import startLauncher
+			startLauncher(self.session)
+			no_plugin = False
+		except Exception as e:
+			self.session.open(MessageBox, _("Kodi is not installed!\nPlease install it."), type=MessageBox.TYPE_INFO, timeout=10)
+
+	def showNetflix(self):
+		try:
+			from Plugins.Extensions.Chromium.plugin import vod1
+			vod1(self.session)
+			no_plugin = False
+		except Exception as e:
+			self.session.open(MessageBox, _("Netflix is not installed!\nPlease install it."), type=MessageBox.TYPE_INFO, timeout=10)
+
+	def showYoutube(self):
+		try:
+			from Plugins.Extensions.Chromium.plugin import vod2
+			vod2(self.session)
+			no_plugin = False
+		except Exception as e:
+			self.session.open(MessageBox, _("YouTube is not installed!\nPlease install it."), type=MessageBox.TYPE_INFO, timeout=10)
+
 
 class MoviePlayer(InfoBarBase, InfoBarShowHide, InfoBarLongKeyDetection, InfoBarMenu, InfoBarEPG,
 				InfoBarSeek, InfoBarShowMovies, InfoBarInstantRecord, InfoBarAudioSelection, InfoBarVideoSetup, HelpableScreen, InfoBarNotifications,
@@ -303,10 +342,10 @@ class MoviePlayer(InfoBarBase, InfoBarShowHide, InfoBarLongKeyDetection, InfoBar
 			MoviePlayer.instance = self
 
 	def doButtonsCheck(self):
-		if config.vixsettings.ColouredButtons.value:
-			self["key_yellow"].setText(_("Search"))
-			self["key_green"].setText(_("Timers"))
-		self["key_blue"].setText(_("Extensions"))
+		if config.obhsettings.ColouredButtons.value:
+			self["key_yellow"].setText(_("Audio Panel"))
+#			self["key_green"].setText(_("Green Panel"))
+		self["key_blue"].setText(_("Blue Panel"))
 
 	def __onClose(self):
 		# clear the instance value so the skin reloader works correctly

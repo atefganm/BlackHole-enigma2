@@ -4,15 +4,16 @@ import os
 import skin
 from boxbranding import getBrandOEM, getDisplayType
 
-from enigma import eDVBDB, eEPGCache, setTunerTypePriorityOrder, setPreferredTuner, setSpinnerOnOff, setEnableTtCachingOnOff, eEnv, Misc_Options, eServiceEvent
+from enigma import eDVBDB, eEPGCache, setTunerTypePriorityOrder, setPreferredTuner, setSpinnerOnOff, setEnableTtCachingOnOff, eEnv, Misc_Options, eBackgroundFileEraser, eServiceEvent, RT_HALIGN_LEFT, RT_HALIGN_RIGHT, RT_HALIGN_CENTER, RT_VALIGN_CENTER, RT_WRAP
 
 from Components.Harddisk import harddiskmanager
-from Components.config import config, ConfigBoolean, ConfigDictionarySet, ConfigDirectory, ConfigInteger, ConfigIP, ConfigLocations, ConfigNumber, ConfigPassword, ConfigSelection, ConfigSelectionNumber, ConfigSet, ConfigSlider, ConfigSubsection, ConfigText, ConfigYesNo, NoSave
+from Components.config import config, ConfigBoolean, ConfigClock, ConfigDictionarySet, ConfigDirectory, ConfigInteger, ConfigIP, ConfigLocations, ConfigNumber, ConfigPassword, ConfigSelection, ConfigSelectionNumber, ConfigSet, ConfigSlider, ConfigSubsection, ConfigText, ConfigYesNo, NoSave
 from Tools.camcontrol import CamControl
 from Tools.Directories import resolveFilename, SCOPE_HDD, SCOPE_TIMESHIFT, defaultRecordingLocation
 from Components.NimManager import nimmanager
 from Components.ServiceList import refreshServiceList
 from Components.SystemInfo import SystemInfo
+from Tools.HardwareInfo import HardwareInfo
 
 # A raw writer for config changes to be read by the logger without
 # getting a time-stamp prepended.
@@ -101,6 +102,7 @@ def InitUsageConfig():
 		[(str(i), ngettext("%d second", "%d seconds", i) % i) for i in [3, 5, 7, 10, 15, 20, 30, 60]] + \
 		[("EPG", _("EPG")), ("INFOBAREPG", _("InfoBar EPG"))]
 	config.usage.show_second_infobar = ConfigSelection(default="5", choices=choicelist)
+	config.usage.fix_second_infobar = ConfigYesNo(default=False)
 
 	def showsecondinfobarChanged(configElement):
 		if config.usage.show_second_infobar.value != "INFOBAREPG":
@@ -309,25 +311,36 @@ def InitUsageConfig():
 	config.usage.serviceitems_per_page = ConfigSelection(default=0, choices=choices)
 	config.usage.show_servicelist = ConfigYesNo(default=True)
 	config.usage.servicelist_mode = ConfigSelection(default="standard", choices=[
-		("standard", _("Standard")),
-		("simple", _("Slim"))])
+					("standard", _("Standard")),
+					("simple", _("Slim"))])
 	config.usage.servicelistpreview_mode = ConfigYesNo(default=False)
 	config.usage.tvradiobutton_mode = ConfigSelection(default="BouquetList", choices=[
-		("ChannelList", _("Channel List")),
-		("BouquetList", _("Bouquet List")),
-		("MovieList", _("Movie List"))])
+					("ChannelList", _("Channel List")),
+					("BouquetList", _("Bouquet List")),
+					("MovieList", _("Movie List"))])
+	config.usage.okbutton_mode = ConfigSelection(default="0", choices=[
+					("0", _("InfoBar")),
+					("1", _("Channel List"))])
+	config.usage.channelbutton_mode = ConfigSelection(default="0", choices=[
+					("0", _("Just change channels")),
+					("1", _("Channel List")),
+					("2", _("Bouquet List")),
+					("3", _("Just change Bouquet"))])
+	config.usage.updownbutton_mode = ConfigSelection(default="1", choices=[
+					("0", _("Just change channels")),
+					("1", _("Channel List"))])
 	config.usage.show_bouquetalways = ConfigYesNo(default=False)
-	config.usage.show_event_progress_in_servicelist = ConfigSelection(default='barright', choices=[
-		('barleft', _("Progress bar left")),
-		('barright', _("Progress bar right")),
-		('percleft', _("Percentage left")),
-		('percright', _("Percentage right")),
-		('no', _("No"))])
+	config.usage.show_event_progress_in_servicelist = ConfigSelection(default='barleft', choices=[
+					('barleft', _("Progress bar left")),
+					('barright', _("Progress bar right")),
+					('percleft', _("Percentage left")),
+					('percright', _("Percentage right")),
+					('no', _("No"))])
 	config.usage.show_channel_numbers_in_servicelist = ConfigYesNo(default=True)
 	config.usage.show_channel_jump_in_servicelist = ConfigSelection(default="alpha", choices=[
-		("quick", _("Quick Actions")),
-		("alpha", _("Alpha")),
-		("number", _("Number"))])
+					("quick", _("Quick Actions")),
+					("alpha", _("Alpha")),
+					("number", _("Number"))])
 
 	config.usage.show_event_progress_in_servicelist.addNotifier(refreshServiceList)
 	config.usage.show_channel_numbers_in_servicelist.addNotifier(refreshServiceList)
@@ -344,30 +357,30 @@ def InitUsageConfig():
 	# standby
 	if getDisplayType() in ("textlcd7segment"):
 		config.usage.blinking_display_clock_during_recording = ConfigSelection(default="Rec", choices=[
-			("Rec", _("REC")),
-			("RecBlink", _("Blinking REC")),
-			("Nothing", _("Nothing"))])
+						("Rec", _("REC")),
+						("RecBlink", _("Blinking REC")),
+						("Nothing", _("Nothing"))])
 	else:
 		config.usage.blinking_display_clock_during_recording = ConfigYesNo(default=False)
 
 	# in use
 	if getDisplayType() in ("textlcd"):
 		config.usage.blinking_rec_symbol_during_recording = ConfigSelection(default="Channel", choices=[
-			("Rec", _("REC Symbol")),
-			("RecBlink", _("Blinking REC Symbol")),
-			("Channel", _("Channelname"))])
+						("Rec", _("REC Symbol")),
+						("RecBlink", _("Blinking REC Symbol")),
+						("Channel", _("Channelname"))])
 	if getDisplayType() in ("textlcd7segment"):
 		config.usage.blinking_rec_symbol_during_recording = ConfigSelection(default="Rec", choices=[
-			("Rec", _("REC")),
-			("RecBlink", _("Blinking REC")),
-			("Time", _("Time"))])
+						("Rec", _("REC")),
+						("RecBlink", _("Blinking REC")),
+						("Time", _("Time"))])
 	else:
 		config.usage.blinking_rec_symbol_during_recording = ConfigYesNo(default=True)
 
 	if getDisplayType() in ("textlcd7segment"):
 		config.usage.show_in_standby = ConfigSelection(default="time", choices=[
-			("time", _("Time")),
-			("nothing", _("Nothing"))])
+						("time", _("Time")),
+						("nothing", _("Nothing"))])
 
 	config.usage.show_message_when_recording_starts = ConfigYesNo(default=True)
 
@@ -915,6 +928,8 @@ def InitUsageConfig():
 	config.seek.selfdefined_46 = ConfigSelectionNumber(min=1, max=240, stepwidth=1, default=60, wraparound=True)
 	config.seek.selfdefined_79 = ConfigSelectionNumber(min=1, max=480, stepwidth=1, default=300, wraparound=True)
 
+	config.seek.vod_buttons = ConfigYesNo(default=False)
+
 	config.seek.speeds_forward = ConfigSet(default=[2, 4, 8, 16, 32, 64, 128], choices=[2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128])
 	config.seek.speeds_backward = ConfigSet(default=[2, 4, 8, 16, 32, 64, 128], choices=[1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128])
 	config.seek.speeds_slowmotion = ConfigSet(default=[2, 4, 8], choices=[2, 4, 6, 8, 12, 16, 25])
@@ -1138,18 +1153,16 @@ def InitUsageConfig():
 	config.logmanager.path = ConfigText(default="/")
 	config.logmanager.sentfiles = ConfigLocations(default='')
 
-	config.vixsettings = ConfigSubsection()
-	config.vixsettings.Subservice = ConfigYesNo(default=False)
-	config.vixsettings.ColouredButtons = ConfigYesNo(default=True)
-	config.vixsettings.InfoBarEpg_mode = ConfigSelection(default="3", choices=[
-		("0", _("as plugin in extended bar")),
-		("1", _("with long OK press")),
-		("2", _("with exit button")),
-		("3", _("with left/right buttons"))])
+	config.obhsettings = ConfigSubsection()
+	config.obhsettings.Subservice = ConfigYesNo(default=False)
+	config.obhsettings.ColouredButtons = ConfigYesNo(default=True)
+	config.obhsettings.InfoBarEpg_mode = ConfigSelection(default="0", choices=[
+					("0", _("as plugin in extended bar")),
+					("1", _("with long OK press")),
+					("2", _("with exit button")),
+					("3", _("with left/right buttons"))])
 
-	if not os.path.exists('/usr/softcams/'):
-		os.mkdir('/usr/softcams/', 0o755)
-	softcams = os.listdir('/usr/softcams/')
+	softcams = os.listdir('/usr/camscript/')
 	config.oscaminfo = ConfigSubsection()
 	config.oscaminfo.showInExtensions = ConfigYesNo(default=False)
 	config.oscaminfo.userdatafromconf = ConfigYesNo(default=True)
@@ -1187,10 +1200,10 @@ def InitUsageConfig():
 	config.cccaminfo.profiles = ConfigText(default="/media/cf/CCcamInfo.profiles", fixed_size=False)
 	SystemInfo["CCcamInstalled"] = False
 	for softcam in softcams:
-		if softcam.lower().startswith("cccam"):
+		if softcam.lower().startswith("ncam_cccam"):
 			config.cccaminfo.showInExtensions = ConfigYesNo(default=True)
 			SystemInfo["CCcamInstalled"] = True
-		elif softcam.lower().startswith('oscam') or softcam.lower().startswith('ncam'):
+		elif softcam.lower().startswith('ncam_oscam') or softcam.lower().startswith('ncam_ncam'):
 			config.oscaminfo.showInExtensions = ConfigYesNo(default=True)
 			SystemInfo["OScamInstalled"] = True
 

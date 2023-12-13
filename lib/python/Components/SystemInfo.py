@@ -172,7 +172,7 @@ def countFrontpanelLEDs():
 
 
 def hasInitCam():
-	return bool([f for f in listdir("/etc/init.d") if f.startswith("softcam.") and f != "softcam.None"])
+	return bool([f for f in listdir("/usr/camscript") if f.startswith("Ncam_") and f != "Ncam_Ci.sh"])
 
 
 def getModuleLayout():
@@ -199,7 +199,7 @@ SystemInfo["ArchIsARM64"] = "64" in ARCHITECTURE
 SystemInfo["HasInitCam"] = hasInitCam()
 SystemInfo["MachineBrand"] = getMachineBrand()
 SystemInfo["MachineName"] = getMachineName()
-SystemInfo["DeveloperImage"] = getImageType().lower() != "release"
+SystemInfo["DeveloperImage"] = fileExists("/etc/enigma2/dev")
 SystemInfo["CommonInterface"] = eDVBCIInterfaces.getInstance().getNumOfSlots()
 SystemInfo["CommonInterfaceCIDelay"] = fileCheck("/proc/stb/tsmux/rmx_delay")
 for cislot in range(0, SystemInfo["CommonInterface"]):

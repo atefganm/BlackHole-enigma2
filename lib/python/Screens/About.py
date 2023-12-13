@@ -26,9 +26,12 @@ class AboutBase(TextBox):
 	def __init__(self, session, labels=None):
 		TextBox.__init__(self, session, label="AboutScrollLabel")
 		if labels:
-			self["lab1"] = StaticText(_("Virtuosso Image Xtreme"))
-			self["lab2"] = StaticText(_("By Team ViX"))
-			self["lab3"] = StaticText(_("Support at") + " www.world-of-satellite.com")
+			self["lab1"] = StaticText(_("OpenBh"))
+			self["lab2"] = StaticText(_("From the OpenBh Team"))
+			if getImageType() == "release":
+				self["lab3"] = StaticText(_("Support at") + " www.openbh.net")
+			elif getImageType() == "community":
+				self["lab3"] = StaticText(_("Support at") + " blackhole-community.com")
 
 	def createSummary(self):
 		return AboutSummary
@@ -622,7 +625,7 @@ class AboutSummary(ScreenSummary):
 		self.skinName = "AboutSummary"
 		self.aboutText = []
 		self["AboutText"] = StaticText()
-		self.aboutText.append(_("OpenViX: %s") % getImageVersion() + "." + getImageBuild() + "\n")
+		self.aboutText.append(_("OpenBh: %s") % getImageVersion() + "." + getImageBuild() + "\n")
 		self.aboutText.append(_("Model: %s %s\n") % (getMachineBrand(), getMachineName()))
 		self.aboutText.append(_("Updated: %s") % about.getLastUpdate() + "\n")
 		tempinfo = ""

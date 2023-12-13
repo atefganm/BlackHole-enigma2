@@ -467,6 +467,11 @@ class ChannelContextMenu(Screen):
 		else:
 			return 0
 
+	def reloadServices(self):
+		eDVBDB.getInstance().reloadBouquets()
+		eDVBDB.getInstance().reloadServicelist()
+		self.session.openWithCallback(self.close, MessageBox, _("The service list is reloaded."), MessageBox.TYPE_INFO, timeout=5)
+
 	def okbuttonClick(self):
 		self["menu"].getCurrent()[0][1]()
 
@@ -2542,6 +2547,8 @@ class ChannelSelection(ChannelSelectionEdit, ChannelSelectionBase, ChannelSelect
 			self.setHistoryPath()
 
 	def cancel(self):
+		if self.movemode:
+			self.toggleMoveMode()
 		if self.revertMode is None:
 			self.restoreRoot()
 			if self.dopipzap:

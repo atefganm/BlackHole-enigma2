@@ -130,7 +130,7 @@ class MovingPixmap(Pixmap):
 			self.currDest += 1
 			self.moveTimer.stop()
 			self.moving = False
-			if self.currDest >= len(self.path):  # end of path
+			if self.currDest >= len(self.path): # end of path
 				if self.repeated:
 					self.currDest = 0
 					self.moving = False

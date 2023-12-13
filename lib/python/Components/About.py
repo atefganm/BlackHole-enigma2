@@ -13,10 +13,6 @@ from Tools.Directories import fileReadLine, fileReadLines
 
 MODULE_NAME = __name__.split(".")[-1]
 
-def getModelString():
-	model = getBoxType()
-	return model
-
 
 def getVersionString():
 	return getImageVersion()
@@ -41,7 +37,7 @@ def getLastUpdate():
 def _formatDate(Date):
 	# expected input = "YYYYMMDD"
 	if len(Date) != 8 or not Date.isnumeric():
-		return _("unknown")
+		return _("unknown")					
 	from Components.config import config
 	return config.usage.date.dateFormatAbout.value % {"year": Date[0:4], "month": Date[4:6], "day": Date[6:8]}
 

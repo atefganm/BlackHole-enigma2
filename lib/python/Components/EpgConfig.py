@@ -67,7 +67,7 @@ def InitEPGConfig():
 	config.epgselection.infobar.btn_reclong = ConfigSelection(choices=recActions, default="addEditZapTimerSilent")
 
 	config.epgselection.single = ConfigSubsection()
-	config.epgselection.single.browse_mode = ConfigSelection(default="currentservice", choices=singleBrowseModeChoices)
+	config.epgselection.single.browse_mode = ConfigSelection(default="lastepgservice", choices=singleBrowseModeChoices)
 	config.epgselection.single.preview_mode = ConfigYesNo(default=True)
 	config.epgselection.single.eventfs = ConfigSelectionNumber(default=0, stepwidth=1, min=-8, max=10, wraparound=True)
 	choices = [(0, _("Use skin default"))] + [(i, _("%d") % i) for i in range(1, 41)]

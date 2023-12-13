@@ -6,8 +6,8 @@ from Components.Converter.Poll import Poll
 from Components.Converter.VAudioInfo import StdAudioDesc
 from Tools.Transponder import ConvertToHumanReadable
 
-WIDESCREEN = [3, 4, 7, 8, 0xB, 0xC, 0xF, 0x10]
 
+WIDESCREEN = [1, 3, 4, 7, 8, 0xB, 0xC, 0xF, 0x10]
 
 def getProcVal(pathname, base=10):
 	val = None
@@ -162,7 +162,7 @@ class ServiceInfo(Poll, Converter):
 			"IsHLG": (self.IS_HLG, (iPlayableService.evVideoGammaChanged, iPlayableService.evUpdatedInfo, iPlayableService.evStart)),
 			"IsVideoMPEG2": (self.IS_VIDEO_MPEG2, (iPlayableService.evUpdatedInfo, iPlayableService.evStart)),
 			"IsVideoAVC": (self.IS_VIDEO_AVC, (iPlayableService.evUpdatedInfo, iPlayableService.evStart)),
-			"IsVideoHEVC": (self.IS_VIDEO_HEVC, (iPlayableService.evUpdatedInfo, iPlayableService.evStart)),
+			"IsVideoHEVC": (self.IS_VIDEO_HEVC, (iPlayableService.evUpdatedInfo, iPlayableService.evVideoSizeChanged)),
 		}[type]
 
 	def isVideoService(self, info):
@@ -184,8 +184,10 @@ class ServiceInfo(Poll, Converter):
 		if not info:
 			return False
 		video_height = None
+		video_width = None
 		video_aspect = None
 		video_height = getVideoHeight(info)
+		video_width = getVideoWidth(info)
 		video_aspect = info.getInfo(iServiceInformation.sAspect)
 		if self.type == self.HAS_TELETEXT:
 			tpid = info.getInfo(iServiceInformation.sTXTPID)
@@ -228,32 +230,35 @@ class ServiceInfo(Poll, Converter):
 		elif self.type == self.EDITMODE:
 			return hasattr(self.source, "editmode") and not not self.source.editmode
 		elif self.type == self.IS_STREAM:
-			return service.streamed() is not None
+			refstr = info.getInfoString(iServiceInformation.sServiceref)
+			if "%3a//" in refstr.lower() and "127.0.0.1" not in refstr and "localhost" not in refstr:
+				return service.streamed() is not None
+			return False
 		elif self.isVideoService(info):
 			if self.type == self.IS_WIDESCREEN:
 				return video_aspect in WIDESCREEN
 			elif self.type == self.IS_NOT_WIDESCREEN:
 				return video_aspect not in WIDESCREEN
-			elif self.type == self.IS_SD:
-				return video_height < 720
 			elif self.type == self.IS_HD:
-				return video_height >= 720 and video_height < 1500
+				return video_width > 1025 and video_width <= 1920 and video_height >= 481 and video_height < 1440 or video_width >= 960 and video_height == 720
+			elif self.type == self.IS_SD:
+				return video_width > 1 and video_width <= 1024 and video_height > 1 and video_height <= 578
 			elif self.type == self.IS_SD_AND_WIDESCREEN:
-				return video_height < 720 and video_aspect in WIDESCREEN
+				return video_height < 578 and video_aspect in WIDESCREEN
 			elif self.type == self.IS_SD_AND_NOT_WIDESCREEN:
-				return video_height < 720 and video_aspect not in WIDESCREEN
+				return video_height < 578 and video_aspect not in WIDESCREEN
 			elif self.type == self.IS_1080:
-				return video_height > 1000 and video_height <= 1080
+				return video_width >= 1367 and video_width <= 1920 and video_height >= 768 and video_height <= 1440
 			elif self.type == self.IS_720:
-				return video_height > 700 and video_height <= 720
+				return video_width >= 1025 and video_width <= 1366 and video_height >= 481 and video_height <= 768 or video_width >= 960 and video_height == 720
 			elif self.type == self.IS_576:
-				return video_height > 500 and video_height <= 576
+				return video_width > 1 and video_width <= 1024 and video_height > 481 and video_height <= 578
 			elif self.type == self.IS_480:
-				return video_height > 0 and video_height <= 480
+ 				return video_width > 1 and video_width <= 1024 and video_height > 1 and video_height <= 480
 			elif self.type == self.IS_4K:
-				return video_height >= 1500
+				return video_height >= 1460
 			elif self.type == self.PROGRESSIVE:
-				return bool(getProgressive(info))
+				return bool(self._getProgressive(info))
 			elif self.type == self.IS_SDR:
 				return info.getInfo(iServiceInformation.sGamma) == 0
 			elif self.type == self.IS_HDR:

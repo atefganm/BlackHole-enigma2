@@ -33,6 +33,7 @@ class VolumeControl:
 		vol = config.audio.volume.value
 		self.volctrl = eDVBVolumecontrol.getInstance()
 		self.volctrl.setVolume(vol, vol)
+		self.last_vol = vol
 
 		self.openDialogs()
 
@@ -73,9 +74,9 @@ class VolumeControl:
 		vol = self.volctrl.getVolume()
 		self.volumeDialog.show()
 		if is_muted:
-			self.volMute() # unmute
+			self.volMute()  # unmute
 		elif not vol:
-			self.volMute(False, True) # mute but dont show mute symbol
+			self.volMute(False, True)  # mute but dont show mute symbol
 		if self.volctrl.isMuted():
 			self.volumeDialog.setValue(0)
 		else:
@@ -85,7 +86,14 @@ class VolumeControl:
 
 	def volHide(self):
 		self.volumeDialog.hide()
-		self.muteDialog.hide()
+		#//set volume on if muted and volume is changed in webif
+		vol = self.volctrl.getVolume()
+		if self.volctrl.isMuted() and self.last_vol != vol:
+			self.volctrl.volumeUnMute()
+		self.last_vol = vol
+		#//
+		if not self.volctrl.isMuted() or config.av.volume_hide_mute.value:
+			self.muteDialog.hide()
 
 	def showMute(self):
 		if self.volctrl.isMuted():

@@ -238,7 +238,10 @@ def InitLcd():
 			f = open("/proc/stb/fp/ledpowercolor", "w")
 			f.write(configElement.value)
 			f.close()
-		config.lcd.ledpowercolor = ConfigSelection(default="1", choices=[("0", _("off")), ("1", _("blue")), ("2", _("red")), ("3", _("violet"))])
+		if getBoxType() in ('dual',):
+			config.lcd.ledpowercolor = ConfigSelection(default="1", choices=[("0", _("off")), ("1", _("blue"))])
+		else:
+			config.lcd.ledpowercolor = ConfigSelection(default="1", choices=[("0", _("off")), ("1", _("blue")), ("2", _("red")), ("3", _("violet"))])
 		config.lcd.ledpowercolor.addNotifier(setLedPowerColor)
 
 	if SystemInfo["LedStandbyColor"]:
@@ -246,7 +249,10 @@ def InitLcd():
 			f = open("/proc/stb/fp/ledstandbycolor", "w")
 			f.write(configElement.value)
 			f.close()
-		config.lcd.ledstandbycolor = ConfigSelection(default="3", choices=[("0", _("off")), ("1", _("blue")), ("2", _("red")), ("3", _("violet"))])
+		if getBoxType() in ('dual',):
+			config.lcd.ledstandbycolor = ConfigSelection(default="1", choices=[("0", _("off")), ("1", _("blue"))])
+		else:
+			config.lcd.ledstandbycolor = ConfigSelection(default="3", choices=[("0", _("off")), ("1", _("blue")), ("2", _("red")), ("3", _("violet"))])
 		config.lcd.ledstandbycolor.addNotifier(setLedStandbyColor)
 
 	if SystemInfo["LedSuspendColor"]:
@@ -254,7 +260,10 @@ def InitLcd():
 			f = open("/proc/stb/fp/ledsuspendledcolor", "w")
 			f.write(configElement.value)
 			f.close()
-		config.lcd.ledsuspendcolor = ConfigSelection(default="2", choices=[("0", _("off")), ("1", _("blue")), ("2", _("red")), ("3", _("violet"))])
+		if getBoxType() in ('dual',):
+			config.lcd.ledsuspendcolor = ConfigSelection(default="1", choices=[("0", _("off")), ("1", _("blue"))])
+		else:
+			config.lcd.ledsuspendcolor = ConfigSelection(default="2", choices=[("0", _("off")), ("1", _("blue")), ("2", _("red")), ("3", _("violet"))])
 		config.lcd.ledsuspendcolor.addNotifier(setLedSuspendColor)
 
 	if SystemInfo["Power24x7On"]:
@@ -360,12 +369,7 @@ def InitLcd():
 			config.lcd.contrast.addNotifier(setLCDcontrast)
 		else:
 			config.lcd.contrast = ConfigNothing()
-			if getBoxType() in ('dm900', 'dm920'):
-				standby_default = 4
-			elif getBoxType() in ('spycat4kmini', 'osmega'):
-				standby_default = 10
-			else:
-				standby_default = 1
+			standby_default = 1
 
 		config.lcd.standby = ConfigSlider(default=standby_default, limits=(0, 10))
 		config.lcd.standby.addNotifier(setLCDbright)

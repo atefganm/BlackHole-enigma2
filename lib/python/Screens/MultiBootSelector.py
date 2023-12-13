@@ -69,9 +69,9 @@ class MultiBootSelector(Screen, HelpableScreen):
 		mode = GetCurrentImageMode() or 0
 		print("[MultiBootSelector] reboot0 slot:", currentimageslot)
 		current = "  %s" % _("(Current)")
-		slotRecov = _("%s%s - Select to access recovery options")
-		slotSingle = _("Slot%s %s %s: %s%s")
-		slotMulti = _("Slot%s %s %s: %s - %s mode%s")
+		slotSingle = _("Slot %s %s%s: %s%s")
+		slotMulti = _("Slot %s %s%s: %s - %s mode%s")
+		slotRecov = _("%s: Boot to access Recovery Options%s")
 		if self.imagedict:
 			for x in sorted(self.imagedict.keys()):
 				if self.imagedict[x]["imagename"] == _("Deleted image"):
@@ -112,7 +112,7 @@ class MultiBootSelector(Screen, HelpableScreen):
 				open(path.join(self.tmp_dir, "STARTUP"), "w").write(f)
 		else:
 			copyfile(path.join(self.tmp_dir, SystemInfo["canMultiBoot"][slot]["startupfile"]), path.join(self.tmp_dir, "STARTUP"))
-		if SystemInfo["HasMultibootMTD"]:
+		if SystemInfo["HasMultibootMTD"] or SystemInfo["HasMultibootFlags"]:
 			with open('/dev/block/by-name/flag', 'wb') as f:
 				f.write(struct.pack("B", int(slot)))
 		self.cancel(QUIT_REBOOT)

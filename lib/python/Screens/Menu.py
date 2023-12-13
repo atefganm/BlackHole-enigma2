@@ -17,7 +17,7 @@ from Screens.ParentalControlSetup import ProtectedScreen
 from Screens.Screen import Screen, ScreenSummary
 
 from Tools.BoundFunction import boundFunction
-from Tools.Directories import resolveFilename, SCOPE_SKINS, SCOPE_CURRENT_SKIN
+from Tools.Directories import fileExists, resolveFilename, SCOPE_SKINS, SCOPE_CURRENT_SKIN
 from Tools.LoadPixmap import LoadPixmap
 
 from enigma import eTimer
@@ -37,7 +37,7 @@ def MenuEntryPixmap(key, png_cache):
 		return None
 	w, h = parameters.get("MenuIconSize", (50, 50))
 	png = png_cache.get(key)
-	if png is None: # no cached entry
+	if png is None:  # no cached entry
 		pngPath = menuicons.get(key, menuicons.get("default", ""))
 		if pngPath:
 			png = LoadPixmap(resolveFilename(SCOPE_CURRENT_SKIN, pngPath), cached=True, width=w, height=0 if pngPath.endswith(".svg") else h)
@@ -74,10 +74,10 @@ class Menu(Screen, HelpableScreen, ProtectedScreen):
 			exec("from %s import %s" % (arg[0], arg[1].split(",")[0]))
 			self.openDialog(*eval(arg[1]))
 
-	def nothing(self): #dummy
+	def nothing(self):  # dummy
 		pass
 
-	def openDialog(self, *dialog): # in every layer needed
+	def openDialog(self, *dialog):  # in every layer needed
 		self.session.openWithCallback(self.menuClosed, *dialog)
 
 	def openSetup(self, dialog):
@@ -277,7 +277,7 @@ class Menu(Screen, HelpableScreen, ProtectedScreen):
 
 		self.menuID = self.parentmenu.get("key")
 		self.list = []
-		for x in self.parentmenu: #walk through the actual nodelist
+		for x in self.parentmenu:  # walk through the actual nodelist
 			if not x.tag:
 				continue
 			if x.tag == 'item':
@@ -289,15 +289,28 @@ class Menu(Screen, HelpableScreen, ProtectedScreen):
 
 		if self.menuID is not None:
 			# plugins
+			bhorder = []
+			if fileExists(resolveFilename(SCOPE_SKINS, "menuorder.bh")):
+				file = open(resolveFilename(SCOPE_SKINS, "menuorder.bh"), "r")
+				for line in file.readlines():
+					parts = line.strip().split()
+					res = (parts[0], parts[1])
+					bhorder.append(res)
+					file.close()
+
 			for plugin, description in plugins.getPluginsForMenuWithDescription(self.menuID):
 				# check if a plugin overrides an existing menu
 				plugin_menuid = plugin[2]
 				for x in self.list:
-					if x[2] == plugin_menuid:
+					if x[2] == plugin[2]:
 						self.list.remove(x)
 						break
+					weight = plugin[3]
+					for y in bhorder:
+						if y[0] == plugin[2]:
+							weight = y[1]
 				menupng = MenuEntryPixmap(plugin[2], self.png_cache)
-				self.list.append((plugin[0], boundFunction(plugin[1], self.session, close=self.close), plugin[2], plugin[3] or 50, description, menupng))
+				self.list.append((plugin[0], boundFunction(plugin[1], self.session, close=self.close), plugin[2], weight or 50, description, menupng))
 
 		if "user" in config.usage.menu_sort_mode.value and self.menuID == "mainmenu":
 			plugin_list = []
@@ -333,7 +346,7 @@ class Menu(Screen, HelpableScreen, ProtectedScreen):
 		if config.usage.menu_show_numbers.value:
 			self.list = [(str(x[0] + 1) + " " + x[1][0], x[1][1], x[1][2]) for x in enumerate(self.list)]
 
-		if self.menulength != len(self.list): # updateList must only be used on a list of the same length. If length is different we call setList.
+		if self.menulength != len(self.list):  # updateList must only be used on a list of the same length. If length is different we call setList.
 			self.menulength = len(self.list)
 			self["menu"].setList(self.list)
 		self["menu"].updateList(self.list)

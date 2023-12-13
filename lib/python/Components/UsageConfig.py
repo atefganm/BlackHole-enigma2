@@ -62,9 +62,9 @@ def InitUsageConfig():
 	config.usage.hide_number_markers = ConfigYesNo(default=True)
 	config.usage.hide_number_markers.addNotifier(refreshServiceList)
 
-	config.usage.servicetype_icon_mode = ConfigSelection(default="0", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename"))])
+	config.usage.servicetype_icon_mode = ConfigSelection(default="1", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename"))])
 	config.usage.servicetype_icon_mode.addNotifier(refreshServiceList)
-	config.usage.crypto_icon_mode = ConfigSelection(default="0", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename"))])
+	config.usage.crypto_icon_mode = ConfigSelection(default="1", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename"))])
 	config.usage.crypto_icon_mode.addNotifier(refreshServiceList)
 	config.usage.record_indicator_mode = ConfigSelection(default="3", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename")), ("3", _("Red colored"))])
 	config.usage.record_indicator_mode.addNotifier(refreshServiceList)
@@ -75,7 +75,7 @@ def InitUsageConfig():
 	config.usage.servicelist_column = ConfigSelection(default="-1", choices=choicelist)
 	config.usage.servicelist_column.addNotifier(refreshServiceList)
 
-	config.usage.service_icon_enable = ConfigYesNo(default=False)
+	config.usage.service_icon_enable = ConfigYesNo(default=True)
 	config.usage.service_icon_enable.addNotifier(refreshServiceList)
 	config.usage.servicelist_cursor_behavior = ConfigSelection(default="keep", choices=[
 		("standard", _("Standard")),
@@ -276,7 +276,7 @@ def InitUsageConfig():
 
 	config.usage.check_timeshift = ConfigYesNo(default=True)
 
-	config.usage.bootlogo_identify = ConfigYesNo(default=True)
+	config.usage.bootlogo_identify = ConfigYesNo(default=False)
 
 	config.usage.alternatives_priority = ConfigSelection(default="0", choices=[
 		("0", "DVB-S/-C/-T"),
@@ -444,36 +444,36 @@ def InitUsageConfig():
 
 	# TRANSLATORS: full date representation dayname daynum monthname year in strftime() format! See 'man strftime'
 	config.usage.date.dayfull = ConfigSelection(default=_("%A %-d %B %Y"), choices=[
-		(_("%A %d %B %Y"), _("Dayname DD Month Year")),
-		(_("%A %d. %B %Y"), _("Dayname DD. Month Year")),
-		(_("%A %-d %B %Y"), _("Dayname D Month Year")),
-		(_("%A %-d. %B %Y"), _("Dayname D. Month Year")),
-		(_("%A %d-%B-%Y"), _("Dayname DD-Month-Year")),
-		(_("%A %-d-%B-%Y"), _("Dayname D-Month-Year")),
-		(_("%A %d/%m/%Y"), _("Dayname DD/MM/Year")),
-		(_("%A %d.%m.%Y"), _("Dayname DD.MM.Year")),
-		(_("%A %-d/%m/%Y"), _("Dayname D/MM/Year")),
-		(_("%A %-d.%m.%Y"), _("Dayname D.MM.Year")),
-		(_("%A %d/%-m/%Y"), _("Dayname DD/M/Year")),
-		(_("%A %d.%-m.%Y"), _("Dayname DD.M.Year")),
-		(_("%A %-d/%-m/%Y"), _("Dayname D/M/Year")),
-		(_("%A %-d.%-m.%Y"), _("Dayname D.M.Year")),
-		(_("%A %B %d %Y"), _("Dayname Month DD Year")),
-		(_("%A %B %-d %Y"), _("Dayname Month D Year")),
-		(_("%A %B-%d-%Y"), _("Dayname Month-DD-Year")),
-		(_("%A %B-%-d-%Y"), _("Dayname Month-D-Year")),
-		(_("%A %m/%d/%Y"), _("Dayname MM/DD/Year")),
-		(_("%A %-m/%d/%Y"), _("Dayname M/DD/Year")),
-		(_("%A %m/%-d/%Y"), _("Dayname MM/D/Year")),
-		(_("%A %-m/%-d/%Y"), _("Dayname M/D/Year")),
-		(_("%A %Y %B %d"), _("Dayname Year Month DD")),
-		(_("%A %Y %B %-d"), _("Dayname Year Month D")),
-		(_("%A %Y-%B-%d"), _("Dayname Year-Month-DD")),
-		(_("%A %Y-%B-%-d"), _("Dayname Year-Month-D")),
-		(_("%A %Y/%m/%d"), _("Dayname Year/MM/DD")),
-		(_("%A %Y/%m/%-d"), _("Dayname Year/MM/D")),
-		(_("%A %Y/%-m/%d"), _("Dayname Year/M/DD")),
-		(_("%A %Y/%-m/%-d"), _("Dayname Year/M/D"))
+		(_("%A %d %B %Y"), _("DD Month Year")),
+		(_("%A %d. %B %Y"), _("DD. Month Year")),
+		(_("%A %-d %B %Y"), _("D Month Year")),
+		(_("%A %-d. %B %Y"), _("D. Month Year")),
+		(_("%A %d-%B-%Y"), _("DD-Month-Year")),
+		(_("%A %-d-%B-%Y"), _("D-Month-Year")),
+		(_("%A %d/%m/%Y"), _("DD/MM/Year")),
+		(_("%A %d.%m.%Y"), _("DD.MM.Year")),
+		(_("%A %-d/%m/%Y"), _("D/MM/Year")),
+		(_("%A %-d.%m.%Y"), _("D.MM.Year")),
+		(_("%A %d/%-m/%Y"), _("DD/M/Year")),
+		(_("%A %d.%-m.%Y"), _("DD.M.Year")),
+		(_("%A %-d/%-m/%Y"), _("D/M/Year")),
+		(_("%A %-d.%-m.%Y"), _("D.M.Year")),
+		(_("%A %B %d %Y"), _("Month DD Year")),
+		(_("%A %B %-d %Y"), _("Month D Year")),
+		(_("%A %B-%d-%Y"), _("Month-DD-Year")),
+		(_("%A %B-%-d-%Y"), _("Month-D-Year")),
+		(_("%A %m/%d/%Y"), _("MM/DD/Year")),
+		(_("%A %-m/%d/%Y"), _("M/DD/Year")),
+		(_("%A %m/%-d/%Y"), _("MM/D/Year")),
+		(_("%A %-m/%-d/%Y"), _("M/D/Year")),
+		(_("%A %Y %B %d"), _("Year Month DD")),
+		(_("%A %Y %B %-d"), _("Year Month D")),
+		(_("%A %Y-%B-%d"), _("Year-Month-DD")),
+		(_("%A %Y-%B-%-d"), _("Year-Month-D")),
+		(_("%A %Y/%m/%d"), _("Year/MM/DD")),
+		(_("%A %Y/%m/%-d"), _("Year/MM/D")),
+		(_("%A %Y/%-m/%d"), _("Year/M/DD")),
+		(_("%A %Y/%-m/%-d"), _("Year/M/D"))
 	])
 
 	# TRANSLATORS: long date representation short dayname daynum monthname year in strftime() format! See 'man strftime'
@@ -819,30 +819,6 @@ def InitUsageConfig():
 	])
 	config.epg.correct_invalid_epgdata.addNotifier(correctInvalidEPGDataChange)
 
-# storm - previous code were placed in VideoHardware to where its belong
-
-	config.osd.dst_left = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=720, wraparound=False)
-	config.osd.dst_width = ConfigSelectionNumber(default=720, stepwidth=1, min=0, max=720, wraparound=False)
-	config.osd.dst_top = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=576, wraparound=False)
-	config.osd.dst_height = ConfigSelectionNumber(default=576, stepwidth=1, min=0, max=576, wraparound=False)
-
-	config.osd.alpha = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.osd.alpha_teletext = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.osd.alpha_webbrowser = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.av.osd_alpha = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.osd.threeDmode = ConfigSelection(default="auto", choices=[
-		("off", _("Off")),
-		("auto", _("Auto")),
-		("sidebyside", _("Side by Side")),
-		("topandbottom", _("Top and Bottom"))
-	])
-	config.osd.threeDznorm = ConfigSlider(default=50, increment=1, limits=(0, 100))
-	config.osd.show3dextensions = ConfigYesNo(default=False)
-	config.osd.threeDsetmode = ConfigSelection(default="mode1", choices=[
-		("mode1", _("Mode 1")),
-		("mode2", _("Mode 2"))
-	])
-
 	hddchoices = [("/etc/enigma2/", "Internal Flash")]
 	for p in harddiskmanager.getMountedPartitions():
 		if os.path.exists(p.mountpoint):
@@ -1002,7 +978,7 @@ def InitUsageConfig():
 	config.seek.speeds_backward.addNotifier(updateEnterBackward, immediate_feedback=False)
 
 	config.misc.zapkey_delay = ConfigSelectionNumber(default=5, stepwidth=1, min=0, max=20, wraparound=True)
-	config.misc.numzap_picon = ConfigYesNo(default=False)
+	config.misc.numzap_picon = ConfigYesNo(default=True)
 	if SystemInfo["ZapMode"]:
 		def setZapmode(el):
 			file = open(SystemInfo["ZapMode"], "w")
@@ -1011,13 +987,6 @@ def InitUsageConfig():
 		config.misc.zapmode = ConfigSelection(default="mute", choices=[
 			("mute", _("Black screen")), ("hold", _("Hold screen")), ("mutetilllock", _("Black screen till locked")), ("holdtilllock", _("Hold till locked"))])
 		config.misc.zapmode.addNotifier(setZapmode, immediate_feedback=False)
-
-	if not SystemInfo["ZapMode"] and os.path.exists("/proc/stb/info/model"):
-		def setZapmodeDM(el):
-			print('[UsageConfig] >>> zapmodeDM')
-		config.misc.zapmodeDM = ConfigSelection(default="black", choices=[("black", _("Black screen")), ("hold", _("Hold screen"))])
-		config.misc.zapmodeDM.addNotifier(setZapmodeDM, immediate_feedback = False)
-
 	config.usage.historymode = ConfigSelection(default="1", choices=[("0", _("Just zap")), ("1", _("Show menu"))])
 
 	config.subtitles = ConfigSubsection()
@@ -1075,7 +1044,7 @@ def InitUsageConfig():
 	config.subtitles.pango_autoturnon = ConfigYesNo(default=True)
 
 	config.autolanguage = ConfigSubsection()
-	default_autoselect = "eng Englisch" # for audio_autoselect1
+	default_autoselect = "eng Englisch"  # for audio_autoselect1
 	audio_language_choices = [
 		("", _("None")),
 		("und", _("Undetermined")),
@@ -1233,21 +1202,21 @@ def InitUsageConfig():
 	config.hdmicec.handle_tv_wakeup = ConfigYesNo(default=True)
 	config.hdmicec.tv_wakeup_detection = ConfigSelection(
 		choices={
-			"wakeup": _("Wakeup"),
-			"requestphysicaladdress": _("Request for physical address report"),
-			"tvreportphysicaladdress": _("TV physical address report"),
-			"routingrequest": _("Routing request"),
-			"sourcerequest": _("Source request"),
-			"streamrequest": _("Stream request"),
-			"requestvendor": _("Request for vendor report"),
-			"osdnamerequest": _("OSD name request"),
-			"activity": _("Any activity"),
+		"wakeup": _("Wakeup"),
+		"requestphysicaladdress": _("Request for physical address report"),
+		"tvreportphysicaladdress": _("TV physical address report"),
+		"routingrequest": _("Routing request"),
+		"sourcerequest": _("Source request"),
+		"streamrequest": _("Stream request"),
+		"requestvendor": _("Request for vendor report"),
+		"osdnamerequest": _("OSD name request"),
+		"activity": _("Any activity"),
 		},
 		default="streamrequest")
 	config.hdmicec.tv_wakeup_command = ConfigSelection(
 		choices={
-			"imageview": _("Image View On"),
-			"textview": _("Text View On"),
+		"imageview": _("Image View On"),
+		"textview": _("Text View On"),
 		},
 		default="imageview")
 	config.hdmicec.fixed_physical_address = ConfigText(default="0.0.0.0")
@@ -1267,7 +1236,7 @@ def InitUsageConfig():
 	config.hdmicec.debug = ConfigSelection(default="0", choices=[("0", _("Disabled")), ("1", _("Messages")), ("2", _("Key Events")), ("3", _("All"))])
 	config.hdmicec.bookmarks = ConfigLocations(default="/hdd/")
 	config.hdmicec.log_path = ConfigDirectory("/hdd/")
-	config.hdmicec.next_boxes_detect = ConfigYesNo(default=False)	# Before switching the TV to standby, receiver tests if any devices plugged to TV are in standby. If they are not, the 'sourceinactive' command will be sent to the TV instead of the 'standby' command.
+	config.hdmicec.next_boxes_detect = ConfigYesNo(default=False)  # Before switching the TV to standby, receiver tests if any devices plugged to TV are in standby. If they are not, the 'sourceinactive' command will be sent to the TV instead of the 'standby' command.
 	config.hdmicec.sourceactive_zaptimers = ConfigYesNo(default=False)				# Command the TV to switch to the correct HDMI input when zap timers activate.
 
 	upgradeConfig()

@@ -332,6 +332,7 @@ class ChannelContextMenu(Screen):
 				else:
 					_append_when_current_valid(current, menu, actions, (_("End alternatives edit"), self.bouquetMarkEnd), level=0, key="bullet")
 					_append_when_current_valid(current, menu, actions, (_("Abort alternatives edit"), self.bouquetMarkAbort), level=0, key="bullet")
+		menu.append(ChoiceEntryComponent(key="green", text=(_("Reload Services"), self.reloadServices)))
 		self["actions"] = ActionMap(["OkCancelActions", "ColorActions", "NumberActions", "MenuActions"], actions)
 
 	def set3DMode(self, value):

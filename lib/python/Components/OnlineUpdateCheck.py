@@ -37,7 +37,7 @@ class FeedsStatusCheck:
 		except ValueError:
 			return False
 
-	def adapterAvailable(self): # Box has an adapter configured and active
+	def adapterAvailable(self):  # Box has an adapter configured and active
 		for adapter in ("eth0", "eth1", "wlan0", "wlan1", "wlan2", "wlan3", "ra0"):
 			if "addr" in about.getIfConfig(adapter):
 				print("[OnlineUpdateCheck][adapterAvailable] PASSED")
@@ -45,7 +45,7 @@ class FeedsStatusCheck:
 		print("[OnlineUpdateCheck][adapterAvailable] FAILED")
 		return False
 
-	def NetworkUp(self, host="8.8.8.8", port=53, timeout=2): # Box can access outside the local network
+	def NetworkUp(self, host="8.8.8.8", port=53, timeout=2):  # Box can access outside the local network
 		# Avoids DNS resolution
 		# Avoids application layer (HTTP/FTP/IMAP)
 		# Avoids calls to external utilities
@@ -75,17 +75,17 @@ class FeedsStatusCheck:
 		return result
 
 	def getFeedStatus(self):
-		officialReleaseFeedsUri = "openvix.co.uk"
+		officialReleaseFeedsUri = "openbh.net"
 		status = 1
-		trafficLight = "unknown"
+		trafficLight = "stable"
 		if self.adapterAvailable():
 			if self.NetworkUp():
-				if getImageType() == "release" and officialReleaseFeedsUri in getFeedsUrl(): # we know the network is good now so only do this check on release images where the release domain applies
+				if getImageType() == "release" and officialReleaseFeedsUri in getFeedsUrl():  # we know the network is good now so only do this check on release images where the release domain applies
 					try:
 						print("[OnlineUpdateCheck][getFeedStatus] checking feeds state")
-						req = Request("http://openvix.co.uk/TrafficLightState.php")
-						d = urlopen(req)
-						trafficLight = d.read().decode()
+						#req = Request("http://openvix.co.uk/TrafficLightState.php")
+						#d = urlopen(req)
+						#trafficLight = d.read().decode()
 						if trafficLight == "stable":
 							status = 0
 						print("trafficLight", trafficLight)
@@ -98,19 +98,19 @@ class FeedsStatusCheck:
 					except:
 						print("[OnlineUpdateCheck][getFeedStatus] ERROR:", sys.exc_info()[0])
 						trafficLight = -2
-				if getImageType() == "developer" and "openvixdev" in getFeedsUrl():
+				if getImageType() == "developer" and "openbhdev" in getFeedsUrl():
 					print("[OnlineUpdateCheck][getFeedStatus] Official developer feeds")
 					trafficLight = "developer"
-				elif officialReleaseFeedsUri not in getFeedsUrl(): # if not using official feeds mark as alien. There is no status test for alien feeds (including official developer feeds).
+				elif officialReleaseFeedsUri not in getFeedsUrl():  # if not using official feeds mark as alien. There is no status test for alien feeds (including official developer feeds).
 					print("[OnlineUpdateCheck][getFeedStatus] Alien feeds url: %s" % getFeedsUrl())
 					status = 0
 					trafficLight = "alien"
 				config.softwareupdate.updateisunstable.value = status
 				return trafficLight
-			else: # network not up
+			else:  # network not up
 				print("[OnlineUpdateCheck][getFeedStatus] ERROR: -2")
 				return -2
-		else: # adapter not available
+		else:  # adapter not available
 			print("[OnlineUpdateCheck][getFeedStatus] ERROR: -3")
 			return -3
 
@@ -137,7 +137,7 @@ class FeedsStatusCheck:
 		self.feedstatus = self.getFeedStatus()
 		if self.feedstatus in (-2, -3, 403, 404):
 			print("[OnlineUpdateCheck][getFeedsBool] Error %s" % str(self.feedstatus))
-			return str(self.feedstatus) # must be str as used in string keys of feed_status_msgs
+			return str(self.feedstatus)  # must be str as used in string keys of feed_status_msgs
 		elif error:
 			print("[OnlineUpdateCheck][getFeedsBool] Check already in progress")
 			return "inprogress"
@@ -155,11 +155,11 @@ class FeedsStatusCheck:
 		elif self.feedstatus == -3:
 			return _("Your %s %s has no network access, please check your network settings and make sure you have network cable connected and try again.") % (getMachineBrand(), getMachineName())
 		elif self.feedstatus == 404:
-			return _("Your %s %s is not able to connect to the feeds, please try again later. If this persists please report on the OpenViX forum at world-of-satellite.com.") % (getMachineBrand(), getMachineName())
+			return _("Your %s %s is not able to connect to the feeds, please try again later. If this persists please report on the OpenBh forum at openbh.net") % (getMachineBrand(), getMachineName())
 		elif self.feedstatus in ("updating", 403):
-			return _("Sorry feeds are down for maintenance, please try again later. If this issue persists please check openvix.co.uk or world-of-satellite.com.")
+			return _("Sorry feeds are down for maintenance, please try again later. If this issue persists please check openbh.net")
 		elif error:
-			return _("There has been an error, please try again later. If this issue persists, please check openvix.co.uk or world-of-satellite.com")
+			return _("There has been an error, please try again later. If this issue persists, please check openbh.net")
 
 	def startCheck(self):
 		global error
@@ -193,7 +193,7 @@ class OnlineUpdateCheckPoller:
 		self.timer = eTimer()
 
 	# Class variables
-	MIN_INITIAL_DELAY = 40 * 60 # Wait at least 40 mins
+	MIN_INITIAL_DELAY = 40 * 60  # Wait at least 40 mins
 	checktimer_Notifier_Added = False
 
 	# Add optional args to start(), as it is now a callback from addNotifier
@@ -209,8 +209,8 @@ class OnlineUpdateCheckPoller:
 			config.softwareupdate.checktimer.addNotifier(self.start, initial_call=False, immediate_feedback=False)
 			self.checktimer_Notifier_Added = True
 			minimum_delay = self.MIN_INITIAL_DELAY
-		else: # we been here before, so this is *not* start-up
-			minimum_delay = 60 # 1 minute
+		else:  # we been here before, so this is *not* start-up
+			minimum_delay = 60  # 1 minute
 
 		last_run = config.softwareupdate.updatelastcheck.getValue()
 		gap = config.softwareupdate.checktimer.value * 3600

@@ -10,25 +10,26 @@ from sys import modules
 from datetime import datetime
 from json import loads
 # required methods: Request, urlopen, HTTPError, URLError
-from urllib.request import urlopen, Request # raises ImportError in Python 2
-from urllib.error import HTTPError, URLError # raises ImportError in Python 2
+from urllib.request import urlopen, Request  # raises ImportError in Python 2
+from urllib.error import HTTPError, URLError  # raises ImportError in Python 2
 
-if getImageType() == 'release':
+if getImageType() != 'developer':
 	ImageVer = "%03d" % int(getImageBuild())
 else:
 	ImageVer = "%s.%s" % (getImageBuild(), getImageDevBuild())
 	ImageVer = float(ImageVer)
 
 E2Branches = {
-	'developer': 'Developer',
-	'release': 'Release'
-}
+	'developer': 'Python3.11',
+	'release': 'Python3.11',
+	'community': 'Python3.11'
+	}
 
 project = 0
 projects = [
 	("https://api.github.com/repos/oe-alliance/oe-alliance-core/commits?sha=5.3", "OE-A Core"),
-	("https://api.github.com/repos/OpenViX/enigma2/commits?sha=%s" % getattr(E2Branches, getImageType(), "Release"), "Enigma2"),
-	("https://api.github.com/repos/OpenViX/skins/commits", "ViX Skins"),
+	("https://api.github.com/repos/BlackHole/enigma2/commits?sha=%s" % getattr(E2Branches, getImageType(), "Python3.11"), "Enigma2"),
+	("https://api.github.com/repos/BlackHole/skins/commits", "OpenBh Skins"),
 	("https://api.github.com/repos/oe-alliance/oe-alliance-plugins/commits", "OE-A Plugins"),
 	("https://api.github.com/repos/oe-alliance/AutoBouquetsMaker/commits", "AutoBouquetsMaker"),
 	("https://api.github.com/repos/oe-alliance/branding-module/commits", "Branding Module"),
@@ -49,19 +50,19 @@ def readGithubCommitLogsSoftwareUpdate():
 		except:
 			log = loads(urlopen(req, timeout=5).read())
 		for c in log:
-			if c['commit']['message'].startswith('openbh:') or (gitstart and not c['commit']['message'].startswith('openvix:') and getScreenTitle() in ("OE-A Core", "Enigma2", "ViX Core", "ViX Skins")):
-				continue
-			if c['commit']['message'].startswith('openvix:'):
+			if c['commit']['message'].startswith('openvix:') or (gitstart and not c['commit']['message'].startswith('openbh:') and getScreenTitle() in ("OE-A Core", "Enigma2", "OpenBh Skins")):
+					continue
+			if c['commit']['message'].startswith('openbh:'):
 				gitstart = False
-				if getImageType() == 'release' and c['commit']['message'].startswith('openvix: developer'):
+				if getImageType() != 'developer' and c['commit']['message'].startswith('openbh: developer'):
 					print('[GitCommitLog] Skipping developer line')
 					continue
-				elif getImageType() != 'release' and c['commit']['message'].startswith('openvix: release'):
-					print('[GitCommitLog] Skipping release line')
+				elif getImageType() == 'developer' and c['commit']['message'].startswith('openbh: release') or c['commit']['message'].startswith('openbh: community'):
+					print('[GitCommitLog] Skipping release/community line')
 					continue
 				tmp = c['commit']['message'].split(' ')[2].split('.')
 				if len(tmp) > 2:
-					if getImageType() == 'release':
+					if getImageType() != 'developer':
 						releasever = tmp[2]
 						releasever = "%03d" % int(releasever)
 					else:
@@ -107,20 +108,20 @@ def readGithubCommitLogs():
 		except:
 			log = loads(urlopen(req, timeout=5).read())
 		for c in log:
-			if c['commit']['message'].startswith('openbh:') or (gitstart and not c['commit']['message'].startswith('openvix:') and getScreenTitle() in ("OE-A Core", "Enigma2", "ViX Core", "ViX Skins")):
+			if c['commit']['message'].startswith('openvix:') or (gitstart and not c['commit']['message'].startswith('openbh:') and getScreenTitle() in ("OE-A Core", "Enigma2", "OpenBh Skins")):
 				continue
-			if c['commit']['message'].startswith('openvix:'):
+			if c['commit']['message'].startswith('openbh:'):
 				blockstart = False
 				gitstart = False
-				if getImageType() == 'release' and c['commit']['message'].startswith('openvix: developer'):
+				if getImageType() != 'developer' and c['commit']['message'].startswith('openbh: developer'):
 					print('[GitCommitLog] Skipping developer line')
 					continue
-				elif getImageType() == 'developer' and c['commit']['message'].startswith('openvix: release'):
-					print('[GitCommitLog] Skipping release line')
+				elif getImageType() == 'developer' and c['commit']['message'].startswith('openbh: release') or c['commit']['message'].startswith('openbh: community'):
+					print('[GitCommitLog] Skipping release/community line')
 					continue
 				tmp = c['commit']['message'].split(' ')[2].split('.')
 				if len(tmp) > 2:
-					if getImageType() == 'release':
+					if getImageType() != 'developer':
 						releasever = tmp[2]
 						releasever = "%03d" % int(releasever)
 					else:
@@ -129,7 +130,7 @@ def readGithubCommitLogs():
 				if releasever > ImageVer:
 					blockstart = True
 					continue
-			elif blockstart and getScreenTitle() in ("OE-A Core", "Enigma2", "ViX Core", "ViX Skins"):
+			elif blockstart and getScreenTitle() in ("OE-A Core", "Enigma2", "OpenBh Skins"):
 				blockstart = True
 				continue
 

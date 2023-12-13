@@ -58,7 +58,7 @@ class About(AboutBase):
 
 	def populate(self):
 		AboutText = ""
-		AboutText += _("Model:\t%s %s\n") % (getMachineBrand(), getMachineName())
+		AboutText += _("Model:\t%s %s\n") % (getMachineBrand().capitalize(), getMachineName())
 
 		if about.getChipSetString() != _("unavailable"):
 			if SystemInfo["HasHiSi"]:
@@ -105,7 +105,7 @@ class About(AboutBase):
 			AboutText += _("Processor temp:\t%s") % tempinfo.replace("\n", "").replace(" ", "") + "\xb0" + "C\n"
 
 		imageSubBuild = ""
-		if getImageType() != "release":
+		if getImageType() == "developer":
 			imageSubBuild = ".%s" % getImageDevBuild()
 		AboutText += _("Image:\t%s.%s%s (%s)\n") % (getImageVersion(), getImageBuild(), imageSubBuild, getImageType().title())
 
@@ -131,7 +131,7 @@ class About(AboutBase):
 				else:
 					image -= 1
 			slotType = {"eMMC": _("eMMC"), "SDCARD": _("SDCARD"), "USB": _("USB")}.get(SystemInfo["canMultiBoot"][slot]["slotType"].replace(" ", ""), SystemInfo["canMultiBoot"][slot]["slotType"].replace(" ", ""))
-			part = _("slot %s (%s)") % (slot, slotType)
+			part = _("%s Slot %s") % (slotType, slot)
 			bootmode = _("bootmode = %s") % GetCurrentImageMode() if SystemInfo["canMode12"] else ""
 			AboutText += (_("Image Slot:\tStartup %s - %s %s") % (str(slot), part, bootmode)) + "\n"
 
@@ -292,17 +292,16 @@ class Devices(Screen):
 			for count in range(len(self.hddlist)):
 				hdd = self.hddlist[count][1]
 				hddp = self.hddlist[count][0]
-				if "ATA" in hddp:
-					hddp = hddp.replace("ATA", "")
-					hddp = hddp.replace("Internal", "ATA Bus ")
+				if "ATA" or "USB" in hddp:
+					hddp = hddp.replace("ATA ", "").replace("Internal", "ATA Bus").replace("USB ", "")
 				free = hdd.Totalfree()
 				if free >= 1:
-					free *= 1000000  # convert MB to bytes
-					freeline = _("Free: ") + bytesToHumanReadable(free)
+					free *= 1000000 # convert MB to bytes
+					freeline = _("\n") + ("Free: ") + bytesToHumanReadable(free)
 				elif "Generic(STORAGE" in hddp:				# This is the SDA boot volume for SF8008 if "full" #
 					continue
 				else:
-					freeline = _("Free: ") + _("full")
+					freeline = _("\n") + ("Free: ") + _("Full")
 				line = "%s      %s" % (hddp, freeline)
 				self.list.append(line)
 		self.list = "\n".join(self.list)
@@ -330,7 +329,7 @@ class Devices(Screen):
 		if self.mountinfo:
 			self["mounts"].setText(self.mountinfo)
 		else:
-			self["mounts"].setText(_("none"))
+			self["mounts"].setText(_("None"))
 		self["actions"].setEnabled(True)
 
 	def createSummary(self):

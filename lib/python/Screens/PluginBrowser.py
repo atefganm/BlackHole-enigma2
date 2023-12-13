@@ -329,7 +329,7 @@ class PluginDownloadBrowser(Screen):
 	def selectionChanged(self):
 		item = self["list"].getCurrent()
 		try:
-			if isinstance(item[0], str): # category
+			if isinstance(item[0], str):  # category
 				name = item[0]
 				desc = ""
 			else:
@@ -381,7 +381,7 @@ class PluginDownloadBrowser(Screen):
 			return
 
 		sel = sel[0]
-		if isinstance(sel, str): # category
+		if isinstance(sel, str):  # category
 			if sel in self.expanded:
 				self.expanded.remove(sel)
 			else:
@@ -505,12 +505,12 @@ class PluginDownloadBrowser(Screen):
 		self.listHeight = listsize.height()
 		if self.type == self.DOWNLOAD:
 			self.type = self.UPDATE
-			if (getImageType() != "release" and feedsstatuscheck.getFeedsBool() not in ("unknown", "alien", "developer")) or (getImageType() == "release" and feedsstatuscheck.getFeedsBool() not in ("stable", "unstable", "alien", "developer")):
+			if (getImageType() != "release" and feedsstatuscheck.getFeedsBool() not in ("unknown", "alien")) or (getImageType() == "release" and feedsstatuscheck.getFeedsBool() not in ("stable", "unstable", "alien")):
 				self["text"].setText(feedsstatuscheck.getFeedsErrorMessage())
-			elif getImageType() != 'release' or (config.softwareupdate.updateisunstable.value == 1 and config.softwareupdate.updatebeta.value):
+			elif getImageType() != 'release' or (config.softwareupdate.updateisunstable.value == '1' and config.softwareupdate.updatebeta.value):
 				self["text"].setText(_("WARNING: feeds may be unstable.") + '\n' + _("Downloading plugin information. Please wait..."))
 				self.container.execute(self.ipkg + " update")
-			elif config.softwareupdate.updateisunstable.value == 1 and not config.softwareupdate.updatebeta.value:
+			elif config.softwareupdate.updateisunstable.value == '1' and not config.softwareupdate.updatebeta.value:
 				self["text"].setText(_("Sorry feeds seem be in an unstable state, if you wish to use them please enable 'Allow unstable (experimental) updates' in \"Software update settings\"."))
 			else:
 				self.container.execute(self.ipkg + " update")

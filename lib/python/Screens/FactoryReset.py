@@ -13,7 +13,7 @@ from Screens.TaskView import JobView
 from Tools.Directories import SCOPE_CONFIG, SCOPE_SKIN, resolveFilename
 
 try:
-	from Plugins.SystemPlugins.ViX.BackupManager import BackupFiles, getMountChoices
+	from Plugins.SystemPlugins.OBH.BackupManager import BackupFiles, getMountChoices
 except ImportError:
 	BackupFiles, getMountChoices = None
 

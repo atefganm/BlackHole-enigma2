@@ -13,17 +13,15 @@ from Tools.BoundFunction import boundFunction
 from ServiceReference import ServiceReference
 from enigma import eServiceReference, eActionMap
 from Components.Label import Label
+import os
 
 from time import time
 
-ButtonSetupKeys = [(_("Red"), "red", "Infobar/openSingleServiceEPG/1"),
-	(_("Red long"), "red_long", "Infobar/activateRedButton"),
-	(_("Green"), "green", ""),
-	(_("Green long"), "green_long", "Infobar/showAutoTimerList"),
-	(_("Yellow"), "yellow", "Plugins/Extensions/EPGSearch/1"),
-	(_("Yellow long"), "yellow_long", "Plugins/Extensions/IMDb/1"),
-	(_("Blue"), "blue", ""),
-	(_("Blue long"), "blue_long", ""),
+ButtonSetupKeys = [(_("Red"), "red", "Infobar/activateRedButton"),
+	(_("Red long"), "red_long", ""),
+	(_("Green long"), "green_long", ""),
+	(_("Yellow "), "yellow", "Infobar/AudioSelection"),
+	(_("Yellow long"), "yellow_long", "Infobar/subtitleSelection"),
 	(_("Info (EPG)"), "info", "Infobar/InfoPressed/1"),
 	(_("Info (EPG) Long"), "info_long", "Infobar/showEventInfoPlugins/1"),
 	(_("Epg/Guide"), "epg", "Infobar/EPGPressed/1"),
@@ -32,12 +30,18 @@ ButtonSetupKeys = [(_("Red"), "red", "Infobar/openSingleServiceEPG/1"),
 	(_("Right"), "cross_right", ""),
 	(_("Left long"), "cross_left_long", ""),
 	(_("Right long"), "cross_right_long", "Infobar/seekFwdVod"),
+	(_("PageUp"), "pageup", ""),
+	(_("PageUp long"), "pageup_long", ""),
+	(_("PageDown"), "pagedown", ""),
+	(_("PageDown long"), "pagedown_long", ""),
 	(_("Up"), "cross_up", ""),
 	(_("Down"), "cross_down", ""),
 	(_("Channel up"), "channelup", ""),
 	(_("Channel down"), "channeldown", ""),
 	(_("TV"), "showTv", ""),
+	(_("TV long"), "tv_long", ""),
 	(_("Radio"), "radio", ""),
+	(_("Radio long"), "radio_long", ""),
 	(_("Rec"), "rec", ""),
 	(_("Teletext"), "text", ""),
 	(_("Help"), "displayHelp", ""),
@@ -86,8 +90,18 @@ ButtonSetupKeys = [(_("Red"), "red", "Infobar/openSingleServiceEPG/1"),
 	(_("F3 long"), "f3_long", ""),
 	(_("F4"), "f4", ""),
 	(_("F4 long"), "f4_long", ""),
+	(_("Aspect"), "mode", ""),
+	(_("Aspect long"), "mode_long", ""),
+	(_("Magic"), "f10", ""),
+	(_("Magic long"), "f10_long", ""),
+	(_("VOD"), "vod", ""),
+	(_("VOD long"), "vod_long", ""),
+	(_("Kodi"), "kodi", ""),
+	(_("Kodi long"), "kodi_long", ""),
 	(_("WWW"), "www", ""),
-	(_("WWW long"), "www_long", "")]
+	(_("WWW long"), "www_long", ""),
+	(_("YouTube"), "youtube", ""),
+	(_("YouTube long"), "youtube_long", "")]
 
 config.misc.ButtonSetup = ConfigSubsection()
 config.misc.ButtonSetup.additional_keys = ConfigYesNo(default=True)
@@ -109,7 +123,7 @@ def getButtonSetupFunctions():
 				twinPaths[plugin.path[plugin.path.rfind("Plugins"):]] = 1
 			ButtonSetupFunctions.append((plugin.name, plugin.path[plugin.path.rfind("Plugins"):] + "/" + str(twinPaths[plugin.path[plugin.path.rfind("Plugins"):]]), "EPG"))
 			twinPlugins.append(plugin.name)
-	pluginlist = plugins.getPlugins([PluginDescriptor.WHERE_PLUGINMENU, PluginDescriptor.WHERE_EXTENSIONSMENU, PluginDescriptor.WHERE_VIXMENU, PluginDescriptor.WHERE_EVENTINFO, PluginDescriptor.WHERE_BUTTONSETUP])
+	pluginlist = plugins.getPlugins([PluginDescriptor.WHERE_PLUGINMENU, PluginDescriptor.WHERE_EXTENSIONSMENU, PluginDescriptor.WHERE_EVENTINFO, PluginDescriptor.WHERE_BUTTONSETUP])
 	pluginlist.sort(key=lambda p: p.name)
 	for plugin in pluginlist:
 		if plugin.name not in twinPlugins and plugin.path:
@@ -163,6 +177,10 @@ def getButtonSetupFunctions():
 	if SystemInfo["LcdLiveTV"]:
 		ButtonSetupFunctions.append((_("Toggle LCD LiveTV"), "Infobar/ToggleLCDLiveTV", "InfoBar"))
 	ButtonSetupFunctions.append((_("Do nothing"), "Void", "InfoBar"))
+	if os.path.isdir("/usr/script"):
+		for x in [x for x in os.listdir("/usr/script") if x.endswith(".sh")]:
+			x = x[:-3]
+			ButtonSetupFunctions.append((_("Script") + " " + x, "Script/" + x, "Scripts"))
 	ButtonSetupFunctions.append((_("Button setup"), "Module/Screens.ButtonSetup/ButtonSetup", "Setup"))
 	ButtonSetupFunctions.append((_("Software update"), "Module/Screens.SoftwareUpdate/UpdatePlugin", "Setup"))
 	ButtonSetupFunctions.append((_("CI (Common Interface) Setup"), "Module/Screens.Ci/CiSelection", "Setup"))
@@ -514,7 +532,7 @@ class InfoBarButtonSetup():
 							self.runPlugin(plugin)
 							return
 						twinPlugins.append(plugin.name)
-				pluginlist = plugins.getPlugins([PluginDescriptor.WHERE_PLUGINMENU, PluginDescriptor.WHERE_VIXMENU, PluginDescriptor.WHERE_EXTENSIONSMENU, PluginDescriptor.WHERE_BUTTONSETUP])
+				pluginlist = plugins.getPlugins([PluginDescriptor.WHERE_PLUGINMENU, PluginDescriptor.WHERE_EXTENSIONSMENU, PluginDescriptor.WHERE_BUTTONSETUP])
 				pluginlist.sort(key=lambda p: p.name)
 				for plugin in pluginlist:
 					if plugin.name not in twinPlugins and plugin.path:
@@ -562,6 +580,10 @@ class InfoBarButtonSetup():
 				moviepath = defaultMoviePath()
 				if moviepath:
 					config.movielist.last_videodir.value = moviepath
+			elif selected[0] == "Script":
+				command = "/usr/script/" + selected[1] + ".sh"
+				from Screens.Console import Console
+				exec("self.session.open(Console,_(selected[1]),[command])")
 			elif selected[0] == "Menu":
 				from Screens.Menu import MainMenu, mdom
 				root = mdom.getroot()

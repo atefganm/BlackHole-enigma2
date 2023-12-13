@@ -26,12 +26,9 @@ class AboutBase(TextBox):
 	def __init__(self, session, labels=None):
 		TextBox.__init__(self, session, label="AboutScrollLabel")
 		if labels:
-			self["lab1"] = StaticText(_("OpenBh"))
-			self["lab2"] = StaticText(_("From the OpenBh Team"))
-			if getImageType() == "release":
-				self["lab3"] = StaticText(_("Support at") + " www.openbh.net")
-			elif getImageType() == "community":
-				self["lab3"] = StaticText(_("Support at") + " blackhole-community.com")
+			self["lab1"] = StaticText(_("Virtuosso Image Xtreme"))
+			self["lab2"] = StaticText(_("By Team ViX"))
+			self["lab3"] = StaticText(_("Support at") + " www.world-of-satellite.com")
 
 	def createSummary(self):
 		return AboutSummary
@@ -58,7 +55,7 @@ class About(AboutBase):
 
 	def populate(self):
 		AboutText = ""
-		AboutText += _("Model:\t%s %s\n") % (getMachineBrand().capitalize(), getMachineName())
+		AboutText += _("Model:\t%s %s\n") % (getMachineBrand(), getMachineName())
 
 		if about.getChipSetString() != _("unavailable"):
 			if SystemInfo["HasHiSi"]:
@@ -105,7 +102,7 @@ class About(AboutBase):
 			AboutText += _("Processor temp:\t%s") % tempinfo.replace("\n", "").replace(" ", "") + "\xb0" + "C\n"
 
 		imageSubBuild = ""
-		if getImageType() == "developer":
+		if getImageType() != "release":
 			imageSubBuild = ".%s" % getImageDevBuild()
 		AboutText += _("Image:\t%s.%s%s (%s)\n") % (getImageVersion(), getImageBuild(), imageSubBuild, getImageType().title())
 
@@ -131,7 +128,7 @@ class About(AboutBase):
 				else:
 					image -= 1
 			slotType = {"eMMC": _("eMMC"), "SDCARD": _("SDCARD"), "USB": _("USB")}.get(SystemInfo["canMultiBoot"][slot]["slotType"].replace(" ", ""), SystemInfo["canMultiBoot"][slot]["slotType"].replace(" ", ""))
-			part = _("%s Slot %s") % (slotType, slot)
+			part = _("slot %s (%s)") % (slot, slotType)
 			bootmode = _("bootmode = %s") % GetCurrentImageMode() if SystemInfo["canMode12"] else ""
 			AboutText += (_("Image Slot:\tStartup %s - %s %s") % (str(slot), part, bootmode)) + "\n"
 
@@ -292,16 +289,17 @@ class Devices(Screen):
 			for count in range(len(self.hddlist)):
 				hdd = self.hddlist[count][1]
 				hddp = self.hddlist[count][0]
-				if "ATA" or "USB" in hddp:
-					hddp = hddp.replace("ATA ", "").replace("Internal", "ATA Bus").replace("USB ", "")
+				if "ATA" in hddp:
+					hddp = hddp.replace("ATA", "")
+					hddp = hddp.replace("Internal", "ATA Bus ")
 				free = hdd.Totalfree()
 				if free >= 1:
-					free *= 1000000 # convert MB to bytes
-					freeline = _("\n") + ("Free: ") + bytesToHumanReadable(free)
+					free *= 1000000  # convert MB to bytes
+					freeline = _("Free: ") + bytesToHumanReadable(free)
 				elif "Generic(STORAGE" in hddp:				# This is the SDA boot volume for SF8008 if "full" #
 					continue
 				else:
-					freeline = _("\n") + ("Free: ") + _("Full")
+					freeline = _("Free: ") + _("full")
 				line = "%s      %s" % (hddp, freeline)
 				self.list.append(line)
 		self.list = "\n".join(self.list)
@@ -329,7 +327,7 @@ class Devices(Screen):
 		if self.mountinfo:
 			self["mounts"].setText(self.mountinfo)
 		else:
-			self["mounts"].setText(_("None"))
+			self["mounts"].setText(_("none"))
 		self["actions"].setEnabled(True)
 
 	def createSummary(self):
@@ -624,7 +622,7 @@ class AboutSummary(ScreenSummary):
 		self.skinName = "AboutSummary"
 		self.aboutText = []
 		self["AboutText"] = StaticText()
-		self.aboutText.append(_("OpenBh: %s") % getImageVersion() + "." + getImageBuild() + "\n")
+		self.aboutText.append(_("OpenViX: %s") % getImageVersion() + "." + getImageBuild() + "\n")
 		self.aboutText.append(_("Model: %s %s\n") % (getMachineBrand(), getMachineName()))
 		self.aboutText.append(_("Updated: %s") % about.getLastUpdate() + "\n")
 		tempinfo = ""

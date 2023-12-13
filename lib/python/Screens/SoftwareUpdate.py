@@ -216,6 +216,8 @@ class UpdatePlugin(Screen, ProtectedScreen):
 		if event == IpkgComponent.EVENT_DOWNLOAD:
 			self.status.setText(_("Downloading"))
 		elif event == IpkgComponent.EVENT_UPGRADE:
+			if self.sliderPackages.has_key(param):
+				self.slider.setValue(self.sliderPackages[param])
 			if param in self.sliderPackages:
 				self.slider.setValue(self.sliderPackages[param])
 			self.package.setText(param)
@@ -267,7 +269,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 				if self.total_packages:
 					if self.total_packages > 150:
 						message += " " + _("Reflash recommended!")
-					if isPluginInstalled("OBH") and not config.softwareupdate.autosettingsbackup.value and config.backupmanager.backuplocation.value:
+					if isPluginInstalled("ViX") and not config.softwareupdate.autosettingsbackup.value and config.backupmanager.backuplocation.value:
 						message += "\n" + _("Making a settings backup before updating is highly recommended.")
 					global ocram
 					ocram = ''
@@ -279,7 +281,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 					config.softwareupdate.updatefound.setValue(True)
 					choices = [(_("View the changes"), "changes"),
 						(_("Upgrade and reboot system"), "cold")]
-					if isPluginInstalled("OBH"):
+					if isPluginInstalled("ViX"):
 						if not config.softwareupdate.autosettingsbackup.value and config.backupmanager.backuplocation.value:
 							choices.append((_("Perform a settings backup"), "backup"))
 						if not config.softwareupdate.autoimagebackup.value and config.imagemanager.backuplocation.value:
@@ -383,7 +385,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 		self.ipkg.write(res and "N" or "Y")
 
 	def doSettingsBackup(self):
-		from Plugins.SystemPlugins.OBH.BackupManager import BackupFiles
+		from Plugins.SystemPlugins.ViX.BackupManager import BackupFiles
 		self.BackupFiles = BackupFiles(self.session, backuptype=BackupFiles.TYPE_SOFTWAREUPDATE)
 		Components.Task.job_manager.AddJob(self.BackupFiles.createBackupJob())
 		Components.Task.job_manager.in_background = False
@@ -394,7 +396,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 
 	def doImageBackup(self):
 		backup = None  # noqa: F841
-		from Plugins.SystemPlugins.OBH.ImageManager import ImageBackup
+		from Plugins.SystemPlugins.ViX.ImageManager import ImageBackup
 		self.ImageBackup = ImageBackup(self.session, True)
 		Components.Task.job_manager.AddJob(self.ImageBackup.createBackupJob())
 		Components.Task.job_manager.in_background = False

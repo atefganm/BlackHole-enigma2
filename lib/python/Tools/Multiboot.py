@@ -4,7 +4,6 @@ import subprocess
 import tempfile
 from os import path, rmdir, rename, sep, stat
 
-import struct
 from boxbranding import getMachineMtdRoot
 from Components.Console import Console
 from Components.SystemInfo import SystemInfo, BoxInfo as BoxInfoRunningInstance, BoxInformation
@@ -87,7 +86,6 @@ def getMultibootslots():
 								slot["startupfile"] = path.basename(file)
 								slot["slotname"] = slotname
 								SystemInfo["HasMultibootMTD"] = slot.get("mtd")
-								SystemInfo["HasMultibootFlags"] = path.exists("/dev/block/by-name/flag")
 								if not fileHas("/proc/cmdline", "kexec=1") and "sda" in slot["root"]:		# Not Kexec Vu+ receiver -- sf8008 type receiver with sd card, reset value as SD card slot has no rootsubdir
 									slot["rootsubdir"] = None
 									slot["slotType"] = "SDCARD"
@@ -119,13 +117,6 @@ def getMultibootslots():
 			SystemInfo["VuUUIDSlot"] = (UUID, UUIDnum) if UUIDnum != 0 else ""
 			print("[Multiboot][MultiBootSlot]0 current slot used:", SystemInfo["MultiBootSlot"])
 			# print("[Multiboot][MultiBootSlot]0 UID, UUIDnum:", SystemInfo["VuUUIDSlot"], "   ", SystemInfo["VuUUIDSlot"][0], "   ", SystemInfo["VuUUIDSlot"][1])
-		elif SystemInfo["HasMultibootFlags"]:  # Qviart Dual 4K
-			with open('/dev/block/by-name/flag', 'rb') as f:
-				struct_fmt = "B"
-				flag = f.read(struct.calcsize(struct_fmt))
-				slot = struct.unpack(struct_fmt, flag)
-				SystemInfo["MultiBootSlot"] = int(slot[0])
-				print("[Multiboot][MultiBootSlot]1 current slot used:", SystemInfo["MultiBootSlot"])
 		elif SystemInfo["HasRootSubdir"] and "root=/dev/sda" not in bootArgs:							# RootSubdir receiver or sf8008 receiver with root in eMMC slot
 			slot = [x[-1] for x in bootArgs.split() if x.startswith("rootsubdir")]
 			SystemInfo["MultiBootSlot"] = int(slot[0])
@@ -173,11 +164,8 @@ def GetImagelist(Recovery=None):
 				continue
 		print("[multiboot] [GetImagelist] slot = ", slot)
 		BuildVersion = "  "
-		Build = " "  # OpenBh Build No.
-		Dev = " "  # OpenBh Dev No.
-		Creator = " "  # OpenBh Openpli Openvix Openatv etc
-		Date = " "
-		BuildType = " "  # release etc
+		Build = " "  # ViX Build No.
+		Creator = " "  # Openpli Openvix Openatv etc
 		Imagelist[slot] = {"imagename": _("Empty slot")}
 		imagedir = "/"
 		if SystemInfo["MultiBootSlot"] != slot or SystemInfo["HasHiSi"]:
@@ -231,7 +219,7 @@ def createInfo(slot, imagedir="/"):
 	BuildType = BoxInfo.getItem("imagetype", " ")[0:3]
 	BuildVer = BoxInfo.getItem("imagebuild")
 	BuildDate = VerDate(imagedir)
-	BuildDev = str(BoxInfo.getItem("imagedevbuild")).zfill(3) if BuildType == "developer" else ""
+	BuildDev = str(BoxInfo.getItem("imagedevbuild")).zfill(3) if BuildType != "rel" else ""
 	return "%s %s %s %s %s (%s)" % (Creator, BuildImgVersion, BuildType, BuildVer, BuildDev, BuildDate)
 
 
@@ -272,7 +260,7 @@ def bootmviSlot(imagedir="/", text=" ", slot=0):
 	inmviPath = path.join(imagedir, "usr/share/bootlogo.mvi")
 	outmviPath = path.join(imagedir, "usr/share/enigma2/bootlogo.mvi")
 	txtPath = path.join(imagedir, "usr/share/enigma2/bootlogo.txt")
-	text = "Booting Slot %s %s" % (slot, text)
+	text = "booting slot %s %s" % (slot, text)
 	print("[multiboot][bootmviSlot] inPath, outpath ", inmviPath, "   ", outmviPath)
 	if path.exists(inmviPath):
 		if path.exists(outmviPath) and path.exists(txtPath) and open(txtPath).read() == text:
@@ -290,7 +278,7 @@ def bootmviSlot(imagedir="/", text=" ", slot=0):
 		I1 = ImageDraw.Draw(img)									# Call draw Method to add 2D graphics in an image
 		myFont = ImageFont.truetype("/usr/share/fonts/OpenSans-Regular.ttf", 65)		# Custom font style and font size
 		print("[multiboot][bootmviSlot] Write text to png")
-		I1.text((50, 10), text, font=myFont, fill=(255, 255, 255))		# Add Text to an image
+		I1.text((52, 12), text, font=myFont, fill=(255, 0, 0))		# Add Text to an image
 		I1.text((50, 10), text, font=myFont, fill=(255, 255, 255))
 		img.save("/tmp/out1.png")									# Save the edited image
 		print("[multiboot][bootmviSlot] Repack bootlogo")

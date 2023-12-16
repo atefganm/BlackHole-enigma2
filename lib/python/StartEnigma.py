@@ -290,26 +290,29 @@ class PowerKey:
 
 class AutoScartControl:
 	def __init__(self, session):
-		self.force = False
-		self.current_vcr_sb = enigma.eAVSwitch.getInstance().getVCRSlowBlanking()
-		if self.current_vcr_sb and config.av.vcrswitch.value:
-			self.scartDialog = session.instantiateDialog(Scart, True)
-		else:
-			self.scartDialog = session.instantiateDialog(Scart, False)
-		config.av.vcrswitch.addNotifier(self.recheckVCRSb)
-		enigma.eAVSwitch.getInstance().vcr_sb_notifier.get().append(self.VCRSbChanged)
+		self.hasScart = BoxInfo.getItem("scart")
+		if self.hasScart:
+			self.force = False
+			self.current_vcr_sb = enigma.eAVControl.getInstance().getVCRSlowBlanking()
+			if self.current_vcr_sb and config.av.vcrswitch.value:
+				self.scartDialog = session.instantiateDialog(Scart, True)
+			else:
+				self.scartDialog = session.instantiateDialog(Scart, False)
+			config.av.vcrswitch.addNotifier(self.recheckVCRSb)
+			enigma.eAVControl.getInstance().vcr_sb_notifier.get().append(self.VCRSbChanged)
 
 	def recheckVCRSb(self, configElement):
 		self.VCRSbChanged(self.current_vcr_sb)
 
 	def VCRSbChanged(self, value):
-		# print("vcr sb changed to", value)
-		self.current_vcr_sb = value
-		if config.av.vcrswitch.value or value > 2:
-			if value:
-				self.scartDialog.showMessageBox()
-			else:
-				self.scartDialog.switchToTV()
+		if self.hasScart:
+			# print("[StartEnigma] VCR SB changed to '%s'." % value)
+			self.current_vcr_sb = value
+			if config.av.vcrswitch.value or value > 2:
+				if value:
+					self.scartDialog.showMessageBox()
+				else:
+					self.scartDialog.switchToTV()
 
 
 def runScreenTest():
@@ -622,7 +625,6 @@ config.misc.RCSource.addNotifier(RCSelectionChanged, immediate_feedback=False)
 
 profile("Standby")
 import Screens.Standby  # noqa: E402
-
 from Screens.Menu import MainMenu, mdom  # noqa: E402
 from GlobalActions import globalActionMap  # noqa: E402
 
@@ -718,6 +720,19 @@ else:
 	print("[StartEnigma]  Initialising LCD / FrontPanel.")
 	from Components.Lcd import InitLcd  # noqa: E402
 	InitLcd()
+
+from Tools.HardwareInfo import HardwareInfo
+if HardwareInfo().get_device_model() in ('dm7080', 'dm820', 'dm900', 'dm920', 'dreamone', 'dreamtwo'):
+	print("[StartEnigma] Read /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
+	check = open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "r").read()
+	if check.startswith("on"):
+		print("[StartEnigma] Write to /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
+		open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "w").write("off")
+	print("[StartEnigma] Read /proc/stb/audio/hdmi_rx_monitor")
+	checkaudio = open("/proc/stb/audio/hdmi_rx_monitor", "r").read()
+	if checkaudio.startswith("on"):
+		print("[StartEnigma] Write to /proc/stb/audio/hdmi_rx_monitor")
+		open("/proc/stb/audio/hdmi_rx_monitor", "w").write("off")
 
 	profile("UserInterface")
 	print("[StartEnigma]  Initialising UserInterface.")

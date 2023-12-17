@@ -3144,7 +3144,7 @@ class NetworkPassword(Setup):
 		self["config"].invalidateCurrent()
 
 	def createSetup(self):
-		instructions = _("Setting a network password is mandatory in OpenViX %s if you wish to use network services. \nTo set a password using the virtual keyboard press the 'text' button on your remote control.") % getImageVersion()
+		instructions = _("Setting a network password is mandatory in OpenBh %s if you wish to use network services. \nTo set a password using the virtual keyboard press the 'text' button on your remote control.") % getImageVersion()
 		self.list.append(getConfigListEntry(_('New password'), self.password, instructions))
 		self['config'].list = self.list
 

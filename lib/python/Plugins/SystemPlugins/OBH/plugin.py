@@ -8,6 +8,7 @@ from .BackupManager import BackupManagerautostart
 from .ImageManager import ImageManagerautostart
 from .IPKInstaller import IpkgInstaller
 from .ScriptRunner import ScriptRunnerAutostart
+from .SoftcamManager import SoftcamAutostart
 from .SwapManager import SwapAutostart
 
 
@@ -85,6 +86,21 @@ def RestoreWizard(*args, **kwargs):
 def LanguageWizard(*args, **kwargs):
 	from Screens.LanguageSelection import LanguageWizard
 	return LanguageWizard(*args, **kwargs)
+
+def SoftcamManager(session):
+	from .SoftcamManager import VIXSoftcamManager
+	return VIXSoftcamManager(session)
+
+
+def SoftcamMenu(session, **kwargs):
+	session.open(SoftcamManager)
+
+
+def SoftcamSetup(menuid):
+	if menuid == "cam":
+		return [(_("Softcam Manager"), SoftcamMenu, "softcamsetup", 1005)]
+	return []
+
 
 def BackupManager(session):
 	from .BackupManager import OpenBhBackupManager
@@ -171,9 +187,15 @@ def Plugins(**kwargs):
 			plist.append(PluginDescriptor(name=_("Vu+ ImageManager wizard"), where=PluginDescriptor.WHERE_WIZARD, needsRestart=False, fnc=(30, ImageManager)))
 		return plist
 
-	plist = [PluginDescriptor(needsRestart=False, fnc=startSetup)]
+	plist = [
+		PluginDescriptor(where=PluginDescriptor.WHERE_MENU, needsRestart=False, fnc=startSetup),
+		PluginDescriptor(name=_("openbh Image Management"), where=PluginDescriptor.WHERE_EXTENSIONSMENU, fnc=UpgradeMain),
+		PluginDescriptor(where=PluginDescriptor.WHERE_MENU, fnc=SoftcamSetup)]
+	if config.softcammanager.showinextensions.value:
+		plist.append(PluginDescriptor(name=_("Softcam manager"), where=PluginDescriptor.WHERE_EXTENSIONSMENU, fnc=SoftcamMenu))
 	if config.scriptrunner.showinextensions.value:
 		plist.append(PluginDescriptor(name=_("Script runner"), where=PluginDescriptor.WHERE_EXTENSIONSMENU, fnc=ScriptRunnerMenu))
+	plist.append(PluginDescriptor(where=PluginDescriptor.WHERE_AUTOSTART, fnc=SoftcamAutostart))
 	plist.append(PluginDescriptor(where=PluginDescriptor.WHERE_AUTOSTART, fnc=SwapAutostart))
 	plist.append(PluginDescriptor(where=PluginDescriptor.WHERE_SESSIONSTART, fnc=ImageManagerautostart))
 	plist.append(PluginDescriptor(where=PluginDescriptor.WHERE_SESSIONSTART, fnc=BackupManagerautostart))
@@ -184,4 +206,9 @@ def Plugins(**kwargs):
 		else:
 			plist.append(PluginDescriptor(name=_("Language Wizard"), where=PluginDescriptor.WHERE_WIZARD, needsRestart=False, fnc=(1, LanguageWizard)))
 	plist.append(PluginDescriptor(name=_("Ipkg"), where=PluginDescriptor.WHERE_FILESCAN, needsRestart=False, fnc=filescan))
+	plist.append(PluginDescriptor(name=_("openbh Backup manager"), where=PluginDescriptor.WHERE_OBHMENU, fnc=BackupManagerMenu))
+	plist.append(PluginDescriptor(name=_("openbh Image manager"), where=PluginDescriptor.WHERE_OBHMENU, fnc=ImageManagerMenu))
+	plist.append(PluginDescriptor(name=_("openbh Mount manager"), where=PluginDescriptor.WHERE_OBHMENU, fnc=MountManagerMenu))
+	plist.append(PluginDescriptor(name=_("openbh Script runner"), where=PluginDescriptor.WHERE_OBHMENU, fnc=ScriptRunnerMenu))
+	plist.append(PluginDescriptor(name=_("openbh SWAP manager"), where=PluginDescriptor.WHERE_OBHMENU, fnc=SwapManagerMenu))
 	return plist

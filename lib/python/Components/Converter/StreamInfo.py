@@ -22,9 +22,11 @@ class StreamInfo(Converter):
 		if playref:
 			refstr = playref.toString()
 			strtype = refstr.replace('%3a', ':')
-			if strtype.startswith('1:0:'):
-				if '0.0.0.0' in refstr or '127.0.0.1' in refstr or 'localhost' in refstr:
-					return ''
+			if refstr in streamrelay.data:
+				return 'iCAM'
+			elif strtype.startswith('1:0:'):
+				if bool([1 for x in ('0.0.0.0:', '127.0.0.1:', 'localhost:') if x in strtype]):
+					return 'Stream Relay'
 				elif '%3a' in refstr:
 					return 'GStreamer'
 			elif '%3a' in refstr and strtype.startswith('4097:0:'):
@@ -39,9 +41,9 @@ class StreamInfo(Converter):
 		playref = NavigationInstance.instance.getCurrentlyPlayingServiceReference()
 		if playref:
 			refstr = playref.toString()
-			if '0.0.0.0' in refstr or '127.0.0.1' in refstr or 'localhost' in refstr:
-				return ''
-			elif '%3a' in refstr:
+			if refstr in streamrelay.data:
+				return 'Stream Relay'
+			if '%3a' in refstr:
 				strurl = refstr.split(':')
 				streamurl = strurl[10].replace('%3a', ':').replace('http://', '').replace('https://', '').split('/1:0:')[0].split('//')[0].split('/')[0].split('@')[-1]
 				return streamurl

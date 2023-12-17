@@ -642,11 +642,7 @@ class PliExtraInfo(Poll, Converter, object):
 		return "%sx%s%s%s" % (xres, yres, mode, fps)
 
 	def createVideoCodec(self, info):
-		refstr = info.getInfoString(iServiceInformation.sServiceref)
-		if refstr.lower().split(":")[0] in codec_data_patch.keys() and info.getInfo(iServiceInformation.sVideoType) == -1:
-			return codec_data_patch.get(refstr.lower().split(":")[0], _("N/A"))
-		else:
-			return codec_data.get(info.getInfo(iServiceInformation.sVideoType), _("N/A"))
+		return codec_data.get(info.getInfo(iServiceInformation.sVideoType), _("N/A"))
 
 	def createServiceRef(self, info):
 		return info.getInfoString(iServiceInformation.sServiceref)
@@ -694,7 +690,7 @@ class PliExtraInfo(Poll, Converter, object):
 			elif field == "StreamURLInfo":
 				val = self.createStreamURLInfo(info)
 			elif field == "TransponderModulationFEC":
-				val = self.createModulation(fedata) + ' ' + self.createFEC(fedata, feraw)
+				val = self.createModulation(fedata) + '-' + self.createFEC(fedata, feraw)
 			elif field == "TransponderName":
 				val = self.createTransponderName(feraw)
 			elif field == "ProviderName":
@@ -896,11 +892,7 @@ class PliExtraInfo(Poll, Converter, object):
 			return self.formatOrbPos(orbpos)
 
 	def createProviderName(self, info):
-		refstr = info.getInfoString(iServiceInformation.sServiceref)
-		if "%3a//" in refstr.lower() and "127.0.0.1" not in refstr and "0.0.0.0" not in refstr and "localhost" not in refstr:
-			return ""
-		else:
-			return info.getInfoString(iServiceInformation.sProvider)
+		return info.getInfoString(iServiceInformation.sProvider)
 
 	def createMisPls(self, fedata):
 		tmp = ""

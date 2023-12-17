@@ -54,17 +54,19 @@ def InitUsageConfig():
 		refreshServiceList()
 	config.usage.alternative_number_mode.addNotifier(alternativeNumberModeChange)
 
-	config.usage.servicelist_twolines = ConfigSelection(default="0", choices=[("0", _("None")), ("1", _("two lines")), ("2", _("two lines+next event"))])
+	config.usage.servicelist_twolines = ConfigSelection(default="0", choices=[("0", _("None")), ("1", _("two lines"))])
+	if config.usage.servicelist_twolines.value not in ("0", "1"):
+		config.usage.servicelist_twolines.value = "1"
 	config.usage.servicelist_twolines.addNotifier(refreshServiceList)
 
 	config.usage.hide_number_markers = ConfigYesNo(default=True)
 	config.usage.hide_number_markers.addNotifier(refreshServiceList)
 
-	config.usage.servicetype_icon_mode = ConfigSelection(default="0", choices=[("1", _("None")), ("1", _("Left from servicename (only available in single line mode)")), ("2", _("Right from servicename"))])
+	config.usage.servicetype_icon_mode = ConfigSelection(default="0", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename"))])
 	config.usage.servicetype_icon_mode.addNotifier(refreshServiceList)
-	config.usage.crypto_icon_mode = ConfigSelection(default="0", choices=[("1", _("None")), ("1", _("Left from servicename (only available in single line mode)")), ("2", _("Right from servicename"))])
+	config.usage.crypto_icon_mode = ConfigSelection(default="0", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename"))])
 	config.usage.crypto_icon_mode.addNotifier(refreshServiceList)
-	config.usage.record_indicator_mode = ConfigSelection(default="3", choices=[("0", _("None")), ("1", _("Left from servicename (only available in single line mode)")), ("2", _("Right from servicename")), ("3", _("Red colored"))])
+	config.usage.record_indicator_mode = ConfigSelection(default="3", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename")), ("3", _("Red colored"))])
 	config.usage.record_indicator_mode.addNotifier(refreshServiceList)
 
 	choicelist = [("-1", _("Disable"))]
@@ -73,7 +75,7 @@ def InitUsageConfig():
 	config.usage.servicelist_column = ConfigSelection(default="-1", choices=choicelist)
 	config.usage.servicelist_column.addNotifier(refreshServiceList)
 
-	config.usage.service_icon_enable = ConfigYesNo(default=True)
+	config.usage.service_icon_enable = ConfigYesNo(default=False)
 	config.usage.service_icon_enable.addNotifier(refreshServiceList)
 	config.usage.servicelist_cursor_behavior = ConfigSelection(default="keep", choices=[
 		("standard", _("Standard")),
@@ -336,9 +338,9 @@ def InitUsageConfig():
 		('no', _("No"))])
 	config.usage.show_channel_numbers_in_servicelist = ConfigYesNo(default=True)
 	config.usage.show_channel_jump_in_servicelist = ConfigSelection(default="alpha", choices=[
-					("quick", _("Quick Actions")),
-					("alpha", _("Alpha")),
-					("number", _("Number"))])
+		("quick", _("Quick Actions")),
+		("alpha", _("Alpha")),
+		("number", _("Number"))])
 
 	config.usage.show_event_progress_in_servicelist.addNotifier(refreshServiceList)
 	config.usage.show_channel_numbers_in_servicelist.addNotifier(refreshServiceList)
@@ -355,30 +357,30 @@ def InitUsageConfig():
 	# standby
 	if getDisplayType() in ("textlcd7segment"):
 		config.usage.blinking_display_clock_during_recording = ConfigSelection(default="Rec", choices=[
-						("Rec", _("REC")),
-						("RecBlink", _("Blinking REC")),
-						("Nothing", _("Nothing"))])
+			("Rec", _("REC")),
+			("RecBlink", _("Blinking REC")),
+			("Nothing", _("Nothing"))])
 	else:
 		config.usage.blinking_display_clock_during_recording = ConfigYesNo(default=False)
 
 	# in use
 	if getDisplayType() in ("textlcd"):
 		config.usage.blinking_rec_symbol_during_recording = ConfigSelection(default="Channel", choices=[
-						("Rec", _("REC Symbol")),
-						("RecBlink", _("Blinking REC Symbol")),
-						("Channel", _("Channelname"))])
+			("Rec", _("REC Symbol")),
+			("RecBlink", _("Blinking REC Symbol")),
+			("Channel", _("Channelname"))])
 	if getDisplayType() in ("textlcd7segment"):
 		config.usage.blinking_rec_symbol_during_recording = ConfigSelection(default="Rec", choices=[
-						("Rec", _("REC")),
-						("RecBlink", _("Blinking REC")),
-						("Time", _("Time"))])
+			("Rec", _("REC")),
+			("RecBlink", _("Blinking REC")),
+			("Time", _("Time"))])
 	else:
 		config.usage.blinking_rec_symbol_during_recording = ConfigYesNo(default=True)
 
 	if getDisplayType() in ("textlcd7segment"):
 		config.usage.show_in_standby = ConfigSelection(default="time", choices=[
-						("time", _("Time")),
-						("nothing", _("Nothing"))])
+			("time", _("Time")),
+			("nothing", _("Nothing"))])
 
 	config.usage.show_message_when_recording_starts = ConfigYesNo(default=True)
 
@@ -1000,7 +1002,7 @@ def InitUsageConfig():
 	config.seek.speeds_backward.addNotifier(updateEnterBackward, immediate_feedback=False)
 
 	config.misc.zapkey_delay = ConfigSelectionNumber(default=5, stepwidth=1, min=0, max=20, wraparound=True)
-	config.misc.numzap_picon = ConfigYesNo(default=True)
+	config.misc.numzap_picon = ConfigYesNo(default=False)
 	if SystemInfo["ZapMode"]:
 		def setZapmode(el):
 			file = open(SystemInfo["ZapMode"], "w")
@@ -1073,7 +1075,7 @@ def InitUsageConfig():
 	config.subtitles.pango_autoturnon = ConfigYesNo(default=True)
 
 	config.autolanguage = ConfigSubsection()
-	default_autoselect = "eng Englisch"  # for audio_autoselect1
+	default_autoselect = "eng Englisch" # for audio_autoselect1
 	audio_language_choices = [
 		("", _("None")),
 		("und", _("Undetermined")),
@@ -1231,21 +1233,21 @@ def InitUsageConfig():
 	config.hdmicec.handle_tv_wakeup = ConfigYesNo(default=True)
 	config.hdmicec.tv_wakeup_detection = ConfigSelection(
 		choices={
-		"wakeup": _("Wakeup"),
-		"requestphysicaladdress": _("Request for physical address report"),
-		"tvreportphysicaladdress": _("TV physical address report"),
-		"routingrequest": _("Routing request"),
-		"sourcerequest": _("Source request"),
-		"streamrequest": _("Stream request"),
-		"requestvendor": _("Request for vendor report"),
-		"osdnamerequest": _("OSD name request"),
-		"activity": _("Any activity"),
+			"wakeup": _("Wakeup"),
+			"requestphysicaladdress": _("Request for physical address report"),
+			"tvreportphysicaladdress": _("TV physical address report"),
+			"routingrequest": _("Routing request"),
+			"sourcerequest": _("Source request"),
+			"streamrequest": _("Stream request"),
+			"requestvendor": _("Request for vendor report"),
+			"osdnamerequest": _("OSD name request"),
+			"activity": _("Any activity"),
 		},
 		default="streamrequest")
 	config.hdmicec.tv_wakeup_command = ConfigSelection(
 		choices={
-		"imageview": _("Image View On"),
-		"textview": _("Text View On"),
+			"imageview": _("Image View On"),
+			"textview": _("Text View On"),
 		},
 		default="imageview")
 	config.hdmicec.fixed_physical_address = ConfigText(default="0.0.0.0")
@@ -1265,7 +1267,7 @@ def InitUsageConfig():
 	config.hdmicec.debug = ConfigSelection(default="0", choices=[("0", _("Disabled")), ("1", _("Messages")), ("2", _("Key Events")), ("3", _("All"))])
 	config.hdmicec.bookmarks = ConfigLocations(default="/hdd/")
 	config.hdmicec.log_path = ConfigDirectory("/hdd/")
-	config.hdmicec.next_boxes_detect = ConfigYesNo(default=False)  # Before switching the TV to standby, receiver tests if any devices plugged to TV are in standby. If they are not, the 'sourceinactive' command will be sent to the TV instead of the 'standby' command.
+	config.hdmicec.next_boxes_detect = ConfigYesNo(default=False)	# Before switching the TV to standby, receiver tests if any devices plugged to TV are in standby. If they are not, the 'sourceinactive' command will be sent to the TV instead of the 'standby' command.
 	config.hdmicec.sourceactive_zaptimers = ConfigYesNo(default=False)				# Command the TV to switch to the correct HDMI input when zap timers activate.
 
 	upgradeConfig()

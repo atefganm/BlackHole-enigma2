@@ -4067,30 +4067,31 @@ class InfoBarResolutionSelection:
 		pass
 
 	def resolutionSelection(self):
-		xRes = int(fileReadLine("/proc/stb/vmpeg/0/xres", 0), 16)
-		yRes = int(fileReadLine("/proc/stb/vmpeg/0/yres", 0), 16)
-		fps = float(fileReadLine("/proc/stb/vmpeg/0/framerate", 50000)) // 1000.0
+		avControl = eAVControl.getInstance()
+		fps = float(avControl.getFrameRate(50000)) / 1000.0
+		yRes = avControl.getResolutionY(0)
+		xRes = avControl.getResolutionX(0)
 		resList = []
 		resList.append((_("Exit"), "exit"))
+		resList.append((_("Auto(not available)"), "auto"))
 		resList.append((_("Video: ") + "%dx%d@%gHz" % (xRes, yRes, fps), ""))
 		resList.append(("--", ""))
 		# Do we need a new sorting with this way here or should we disable some choices?
-		if fileExists("/proc/stb/video/videomode_choices"):
-			videoModes = fileReadLine("/proc/stb/video/videomode_choices", "")
-			videoModes = videoModes.replace("pal ", "").replace("ntsc ", "").split(" ")
-			for videoMode in videoModes:
-				video = videoMode
-				if videoMode.endswith("23"):
-					video = "%s.976" % videoMode
-				if videoMode[-1].isdigit():
-					video = "%sHz" % videoMode
-				resList.append((video, videoMode))
-		videoMode = fileReadLine("/proc/stb/video/videomode", "Unknown")
-		keys = ["green", "yellow", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+		videoModes = iAVSwitch.readPreferredModes(readOnly=True)
+		videoModes = [x.replace("pal ", "").replace("ntsc ", "") for x in videoModes]  # Do we need this?
+		for videoMode in videoModes:
+			video = videoMode
+			if videoMode.endswith("23"):
+				video = "%s.976" % videoMode
+			if videoMode[-1].isdigit():
+				video = "%sHz" % videoMode
+			resList.append((video, videoMode))
+		videoMode = avControl.getVideoMode("Unknown")
+		keys = ["green", "yellow", "blue", "", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 		selection = 0
-		for item in range(len(resList)):
-			if resList[item][1] == videoMode:
-				selection = item
+		for index, item in enumerate(resList):
+			if item[1] == videoMode:
+				selection = index
 				break
 		print("[InfoBarGenerics] Current video mode is %s." % videoMode)
 		self.session.openWithCallback(self.resolutionSelected, ChoiceBox, text=_("Please select a resolution..."), list=resList, keys=keys, selection=selection)
@@ -4098,19 +4099,13 @@ class InfoBarResolutionSelection:
 	def resolutionSelected(self, videoMode):
 		if videoMode is not None:
 			if isinstance(videoMode[1], str):
-				if videoMode[1] == "exit" or videoMode[1] == "":
+				if videoMode[1] == "exit" or videoMode[1] == "" or videoMode[1] == "auto":
 					self.ExGreen_toggleGreen()
 				if videoMode[1] != "auto":
-					if fileWriteLine("/proc/stb/video/videomode", videoMode[1]) and fileWriteLine("/proc/stb/video/videomode_24hz", videoMode[1]) and fileWriteLine("/proc/stb/video/videomode_50hz", videoMode[1]) and fileWriteLine("/proc/stb/video/videomode_60hz", videoMode[1]):
-						print("[InfoBarGenerics] New video mode is %s." % videoMode[1])
-					else:
-						print("[InfoBarGenerics] Error: Unable to set new video mode of %s!" % videoMode[1])
-					# from enigma import gMainDC
-					# gMainDC.getInstance().setResolution(-1, -1)
+					iAVSwitch.setVideoModeDirect(videoMode[1])
 					self.ExGreen_doHide()
 		else:
 			self.ExGreen_doHide()
-		return
 
 
 class InfoBarVmodeButton:
@@ -4122,24 +4117,6 @@ class InfoBarVmodeButton:
 
 	def vmodeSelection(self):
 		self.session.open(VideoMode)
-
-
-def ToggleVideo():
-	mode = open("/proc/stb/video/policy").read()[:-1]
-	print("[InfoBarGenerics] toggle videomode:", mode)
-	if mode == "letterbox":
-		f = open("/proc/stb/video/policy", "w")
-		f.write("panscan")
-		f.close()
-	elif mode == "panscan":
-		f = open("/proc/stb/video/policy", "w")
-		f.write("letterbox")
-		f.close()
-	else:
-		# if current policy is not panscan or letterbox, set to panscan
-		f = open("/proc/stb/video/policy", "w")
-		f.write("panscan")
-		f.close()
 
 
 class VideoMode(Screen):

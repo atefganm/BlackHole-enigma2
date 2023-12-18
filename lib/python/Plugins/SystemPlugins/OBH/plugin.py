@@ -87,6 +87,7 @@ def LanguageWizard(*args, **kwargs):
 	from Screens.LanguageSelection import LanguageWizard
 	return LanguageWizard(*args, **kwargs)
 
+
 def SoftcamManager(session):
 	from .SoftcamManager import VIXSoftcamManager
 	return VIXSoftcamManager(session)
@@ -206,9 +207,4 @@ def Plugins(**kwargs):
 		else:
 			plist.append(PluginDescriptor(name=_("Language Wizard"), where=PluginDescriptor.WHERE_WIZARD, needsRestart=False, fnc=(1, LanguageWizard)))
 	plist.append(PluginDescriptor(name=_("Ipkg"), where=PluginDescriptor.WHERE_FILESCAN, needsRestart=False, fnc=filescan))
-	plist.append(PluginDescriptor(name=_("openbh Backup manager"), where=PluginDescriptor.WHERE_OBHMENU, fnc=BackupManagerMenu))
-	plist.append(PluginDescriptor(name=_("openbh Image manager"), where=PluginDescriptor.WHERE_OBHMENU, fnc=ImageManagerMenu))
-	plist.append(PluginDescriptor(name=_("openbh Mount manager"), where=PluginDescriptor.WHERE_OBHMENU, fnc=MountManagerMenu))
-	plist.append(PluginDescriptor(name=_("openbh Script runner"), where=PluginDescriptor.WHERE_OBHMENU, fnc=ScriptRunnerMenu))
-	plist.append(PluginDescriptor(name=_("openbh SWAP manager"), where=PluginDescriptor.WHERE_OBHMENU, fnc=SwapManagerMenu))
 	return plist

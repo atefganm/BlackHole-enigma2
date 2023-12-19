@@ -39,42 +39,42 @@ char* eDVBCISlot::readInputCI(int tuner_no)
 	f = fopen("/proc/bus/nim_sockets", "rt");
 	if (f)
 	{
-	while (fgets(buf, sizeof(buf), f))
-	{
-		char *p = strcasestr(buf, id1);
-		if (!p)
-			continue;
-
-		p += strlen(id1);
-		p += strcspn(p, keys1);
-		if (*p && strtol(p, 0, 0) == tuner_no)
-			break;
-	}
-
-	while (fgets(buf, sizeof(buf), f))
-	{
-		if (strcasestr(buf, id1))
-			break;
-
-		char *p = strcasestr(buf, id2);
-		if (!p)
-			continue;
-
-		p = strchr(p + strlen(id2), ':');
-		if (!p)
-			continue;
-
-		p++;
-		p += strcspn(p, keys2);
-		size_t len = strspn(p, keys2);
-		if (len > 0)
+		while (fgets(buf, sizeof(buf), f))
 		{
-			inputName = strndup(p, len);
-			break;
-		}
-	}
+			char *p = strcasestr(buf, id1);
+			if (!p)
+				continue;
 
-	fclose(f);
+			p += strlen(id1);
+			p += strcspn(p, keys1);
+			if (*p && strtol(p, 0, 0) == tuner_no)
+				break;
+		}
+
+		while (fgets(buf, sizeof(buf), f))
+		{
+			if (strcasestr(buf, id1))
+				break;
+
+			char *p = strcasestr(buf, id2);
+			if (!p)
+				continue;
+
+			p = strchr(p + strlen(id2), ':');
+			if (!p)
+				continue;
+
+			p++;
+			p += strcspn(p, keys2);
+			size_t len = strspn(p, keys2);
+			if (len > 0)
+			{
+				inputName = strndup(p, len);
+				break;
+			}
+		}
+
+		fclose(f);
 	}
 
 	return inputName;
@@ -377,7 +377,11 @@ void eDVBCIInterfaces::ciRemoved(eDVBCISlot *slot)
 		if (slot->linked_next)
 			slot->linked_next->setSource(slot->current_source);
 		else // last CI in chain
+#ifdef DREAMBOX_DUAL_TUNER
+			setInputSource(slot->current_tuner, eDVBCISlot::getTunerLetterDM(slot->current_tuner));
+#else
 			setInputSource(slot->current_tuner, eDVBCISlot::getTunerLetter(slot->current_tuner));
+#endif
 		slot->linked_next = 0;
 		slot->use_count=0;
 		slot->plugged=true;

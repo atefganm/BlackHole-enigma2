@@ -139,6 +139,9 @@ class BHMenu(Screen, ProtectedScreen):
 				elif currentEntry == "swap-manager":
 					from .SwapManager import OpenBhSwap
 					self.session.open(OpenBhSwap)
+				elif currentEntry == "package-manager":
+					from .PackageManager import PackageManager
+					self.session.open(PackageManager)
 
 	def closeRecursive(self):
 		self.close(True)

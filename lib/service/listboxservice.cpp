@@ -715,10 +715,18 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 		style.setStyle(painter, selected ? eWindowStyle::styleListboxSelected : eWindowStyle::styleListboxNormal);
 
 	eListboxStyle *local_style = 0;
+	eRect itemRect = eRect(offset, m_itemsize);
+	int radius = 0;
+	int edges = 0;
 
 		/* get local listbox style, if present */
 	if (m_listbox)
 		local_style = m_listbox->getLocalStyle();
+
+	if (local_style) {
+		radius = local_style->cornerRadius(selected ? 1:0);
+		edges = local_style->cornerRadiusEdges(selected ? 1:0);
+	}
 
 	if (marked == 1)  // marked
 	{
@@ -764,13 +772,19 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 		/* blit background picture, if available (otherwise, clear only) */
 		if (local_style && local_style->m_background)
 			painter.blit(local_style->m_background, offset, eRect(), 0);
+		else if (local_style && !local_style->m_background && radius)
+		{
+			if(radius)
+				painter.setRadius(radius, edges);
+			painter.drawRectangle(itemRect);
+		}
 		else
 			painter.clear();
 	} else
 	{
 		if (local_style->m_background)
 			painter.blit(local_style->m_background, offset, eRect(), gPainter::BT_ALPHABLEND);
-		else if (selected && !local_style->m_selection && !local_style->m_selection_large)
+		else if (selected && !local_style->m_selection && !local_style->m_selection_large && !radius)
 			painter.clear();
 	}
 
@@ -784,8 +798,8 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 		}
 
 		// Draw the frame for selected item here so to be under the content
-		if (selected && (!local_style || (!local_style->m_selection && !local_style->m_selection_large)))
-			style.drawFrame(painter, eRect(offset, m_itemsize), eWindowStyle::frameListboxEntry);
+		if (selected && (!local_style || (!local_style->m_selection && !local_style->m_selection_large)) && !radius)
+			style.drawFrame(painter, itemRect, eWindowStyle::frameListboxEntry);
 
 		eServiceReference ref = *m_cursor;
 		std::string orig_ref_str = ref.toString();
@@ -1076,11 +1090,14 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 
 				if (!event_name.empty())
 				{
+					int pb_xpos = xoffs;
 					//--------------------------------------------------- Event Progressbar -----------------------------------------------------------------
 					if (progressBarRect.width() > 0) {
 						int pb_yoffs_corr = m_itemheight/2;
 						if (m_has_next_event) pb_yoffs_corr = 5;
-						int pb_xpos = m_has_next_event ? (m_itemsize.width() - 15 - progressBarRect.width()) : xoffs;
+						if (m_has_next_event) {
+							pb_xpos = m_itemsize.width() - 15 - progressBarRect.width();
+						}
 						int pb_ypos = offset.y() + pb_yoffs_corr + (m_itemheight/2 - m_progressbar_height - 2 * m_progressbar_border_width) / 2;
 						int pb_width = progressBarRect.width() - 2 * m_progressbar_border_width;
 						gRGB ProgressbarBorderColor = 0xdfdfdf;
@@ -1139,12 +1156,10 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 						if (!selected && m_color_set[eventForeground])
 						{
 							painter.setForegroundColor(m_color[eventForeground]);
-							EventProgressbarColor = m_color[eventForeground];
 						}
 						else if (selected && m_color_set[eventForegroundSelected])
 						{
 							painter.setForegroundColor(m_color[eventForegroundSelected]);
-							EventProgressbarColor = m_color[eventForegroundSelected];
 						}
 						else
 							painter.setForegroundColor(gRGB(0xe7b53f));
@@ -1152,27 +1167,11 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 						if (serviceFallback && !selected && m_color_set[eventForegroundFallback]) // fallback receiver
 						{
 							painter.setForegroundColor(m_color[eventForegroundFallback]);
-							EventProgressbarColor = m_color[eventForegroundFallback];
 						}
 						else if (serviceFallback && selected && m_color_set[eventForegroundSelectedFallback])
 						{
 							painter.setForegroundColor(m_color[eventForegroundSelectedFallback]);
-							EventProgressbarColor = m_color[eventForegroundSelectedFallback];
 						}
-					}
-
-					eRect bboxtLeft = eRect();
-					if (!m_has_next_event) {
-						//------------------------------------------------ Event remaining ------------------------------------------------------------------------
-						std::string timeLeft_str = "";
-						char buffer[15];
-						snprintf(buffer, sizeof(buffer), ("%s" + m_text_time).c_str(), timeLeft == 0 ? "" : "+", timeLeft/60);
-						timeLeft_str = buffer;
-						ePtr<eTextPara> paraLeft = new eTextPara(eRect(0, 0, m_itemsize.width(), m_itemheight/2));
-						paraLeft->setFont(m_element_font[celServiceInfo]);
-						paraLeft->renderString(timeLeft_str.c_str());
-						bboxtLeft = paraLeft->getBoundBox();
-						painter.renderPara(paraLeft, ePoint(m_itemsize.width() - bboxtLeft.width() - 15, offset.y() - 2 + m_itemheight/2 + ((m_itemheight/2 - bboxtLeft.height())/2)));
 					}
 
 					std::string percent = "";
@@ -1184,7 +1183,7 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 
 					//------------------------------------------------- Event name ------------------------------------------------------------------------------
 					if (m_has_next_event) {
-						ePtr<eTextPara> para = new eTextPara(eRect(0, 0, m_itemsize.width() - service_name_end - m_items_distances - progressBarRect.width() - 15, m_itemheight/2));
+						ePtr<eTextPara> para = new eTextPara(eRect(0, 0, pb_xpos - service_name_end - m_items_distances - 15, m_itemheight/2));
 						para->setFont(m_element_font[celServiceInfo]);
 						para->renderString(text.c_str());
 						eRect bbox = para->getBoundBox();
@@ -1204,12 +1203,10 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 								if (!selected && m_color_set[eventNextForeground])
 								{
 									painter.setForegroundColor(m_color[eventNextForeground]);
-									EventProgressbarColor = m_color[eventNextForeground];
 								}
 								else if (selected && m_color_set[eventNextForegroundSelected])
 								{
 									painter.setForegroundColor(m_color[eventNextForegroundSelected]);
-									EventProgressbarColor = m_color[eventNextForegroundSelected];
 								}
 								else
 									painter.setForegroundColor(gRGB(0x787878));
@@ -1217,12 +1214,10 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 								if (serviceFallback && !selected && m_color_set[eventNextForegroundFallback]) // fallback receiver
 								{
 									painter.setForegroundColor(m_color[eventNextForegroundFallback]);
-									EventProgressbarColor = m_color[eventNextForegroundFallback];
 								}
 								else if (serviceFallback && selected && m_color_set[eventNextForegroundSelectedFallback])
 								{
 									painter.setForegroundColor(m_color[eventNextForegroundSelectedFallback]);
-									EventProgressbarColor = m_color[eventNextForegroundSelectedFallback];
 								}
 							}
 							ePtr<eTextPara> paraNext = new eTextPara(eRect(0, 0, xlpos - xoffs - m_items_distances, m_itemheight/2));
@@ -1232,11 +1227,46 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 							painter.renderPara(paraNext, ePoint(xoffs, offset.y() - 2 + m_itemheight/2 + ((m_itemheight/2 - bboxNext.height())/2)));
 						}
 					} else {
+						//------------------------------------------------ Event remaining ------------------------------------------------------------------------
+						std::string timeLeft_str = "";
+						char buffer[15];
+						snprintf(buffer, sizeof(buffer), ("%s" + m_text_time).c_str(), timeLeft == 0 ? "" : "+", timeLeft/60);
+						timeLeft_str = buffer;
+						ePtr<eTextPara> paraLeft = new eTextPara(eRect(0, 0, m_itemsize.width(), m_itemheight/2));
+						paraLeft->setFont(m_element_font[celServiceInfoRemainingTime]);
+						paraLeft->renderString(timeLeft_str.c_str());
+						eRect bboxtLeft = paraLeft->getBoundBox();
+
 						ePtr<eTextPara> para = new eTextPara(eRect(0, 0, m_itemsize.width() - xoffs - bboxtLeft.width() - 25 - m_items_distances, m_itemheight/2));
 						para->setFont(m_element_font[celServiceInfo]);
 						para->renderString(((!percent.empty() ? (percent + m_separator) : "") + text).c_str());
 						eRect bbox = para->getBoundBox();
 						painter.renderPara(para, ePoint(xoffs, offset.y() - 2 + m_itemheight/2 + ((m_itemheight/2 - bbox.height())/2)));
+
+						if (serviceAvail)
+						{
+							if (!selected && m_color_set[eventRemainingForeground])
+							{
+								painter.setForegroundColor(m_color[eventRemainingForeground]);
+							}
+							else if (selected && m_color_set[eventRemainingForegroundSelected])
+							{
+								painter.setForegroundColor(m_color[eventRemainingForegroundSelected]);
+							}
+							else
+								painter.setForegroundColor(gRGB(0x787878));
+
+							if (serviceFallback && !selected && m_color_set[eventRemainingForegroundFallback]) // fallback receiver
+							{
+								painter.setForegroundColor(m_color[eventRemainingForegroundFallback]);
+							}
+							else if (serviceFallback && selected && m_color_set[eventRemainingForegroundSelectedFallback])
+							{
+								painter.setForegroundColor(m_color[eventRemainingForegroundSelectedFallback]);
+							}
+						}
+
+						painter.renderPara(paraLeft, ePoint(m_itemsize.width() - bboxtLeft.width() - 15, offset.y() - 2 + m_itemheight/2 + ((m_itemheight/2 - bboxtLeft.height())/2)));
 					}
 				}
 			}
@@ -1280,14 +1310,16 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 			bool hasPicons = PyCallable_Check(m_GetPiconNameFunc);
 			bool isAlternativeNumberingMode = m_alternative_numbering;
 			std::string eventProgressConfig = m_progress_mode;
-			int serviceNameWidth = m_column_width > 0 && !isDirectory && !isMarker ? m_column_width : m_itemsize.width();
+			int serviceNameWidth = m_column_width > -1 && !isDirectory && !isMarker ? m_column_width : m_itemsize.width();
 			bool shouldCorrect = serviceNameWidth >= m_column_width - pixmap_system_size.width()*3;
 
-			if (m_servicetype_icon_mode == 2 && m_column_width > 0 && shouldCorrect) serviceNameWidth -= pixmap_system_size.width() + m_items_distances;
-			if (m_crypto_icon_mode == 2 && m_column_width > 0 && shouldCorrect) serviceNameWidth -= pixmap_crypto_size.width() + m_items_distances;
-			if (isRecorded && m_record_indicator_mode == 2 && m_column_width > 0 && shouldCorrect) serviceNameWidth -= pixmap_rec_size.width() + m_items_distances;
-			if ((m_servicetype_icon_mode == 2 || m_crypto_icon_mode == 2 || (isRecorded && m_record_indicator_mode == 2)) && m_column_width > 0)
+			if (m_servicetype_icon_mode == 2 && m_column_width > -1 && shouldCorrect) serviceNameWidth -= pixmap_system_size.width() + m_items_distances;
+			if (m_crypto_icon_mode == 2 && m_column_width > -1 && shouldCorrect) serviceNameWidth -= pixmap_crypto_size.width() + m_items_distances;
+			if (isRecorded && m_record_indicator_mode == 2 && m_column_width > -1 && shouldCorrect) serviceNameWidth -= pixmap_rec_size.width() + m_items_distances;
+			if ((m_servicetype_icon_mode == 2 || m_crypto_icon_mode == 2 || (isRecorded && m_record_indicator_mode == 2)) && m_column_width > -1)
 				serviceNameWidth -= m_items_distances;
+
+			if (serviceNameWidth < 0) serviceNameWidth = 0;
 
 			ePtr<eTextPara> paraServiceName = new eTextPara(eRect(0, 0, serviceNameWidth, m_itemheight));
 			paraServiceName->setFont(m_element_font[celServiceName]);

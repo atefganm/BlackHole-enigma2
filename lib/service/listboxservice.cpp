@@ -1014,7 +1014,9 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 			// channel number + name
 			if (service_info)
 				service_info->getName(ref, text);
-
+#ifdef USE_LIBVUGLES2
+					painter.setFlush(text == "<n/a>");
+#endif
 			ePtr<eTextPara> paraName = new eTextPara(eRect(0, 0, m_itemsize.width(), m_itemheight/2));
 			paraName->setFont(m_element_font[celServiceName]);
 			paraName->renderString(text.c_str());

@@ -8,7 +8,6 @@ from .BackupManager import BackupManagerautostart
 from .ImageManager import ImageManagerautostart
 from .IPKInstaller import IpkgInstaller
 from .ScriptRunner import ScriptRunnerAutostart
-from .SoftcamManager import SoftcamAutostart
 from .SwapManager import SwapAutostart
 
 
@@ -47,7 +46,7 @@ def checkConfigBackup():
 	backups = []
 	for dir in ["/media/%s/backup" % media for media in listdir("/media/") if path.isdir(path.join("/media/", media))]:
 		try:
-			backups += [{"name": f, "mtime": stat(f).st_mtime} for x in listdir(dir) if (f := path.join(dir, x)) and path.isfile(f) and f.endswith(".tar.gz") and "vix" in f.lower()]
+			backups += [{"name": f, "mtime": stat(f).st_mtime} for x in listdir(dir) if (f := path.join(dir, x)) and path.isfile(f) and f.endswith(".tar.gz") and "obh" in f.lower()]
 		except FileNotFoundError:  # e.g. /media/autofs/xxx will crash listdir if "xxx" is inactive
 			pass
 	if backups:
@@ -88,18 +87,14 @@ def LanguageWizard(*args, **kwargs):
 	return LanguageWizard(*args, **kwargs)
 
 
-def SoftcamManager(session):
-	from .SoftcamManager import VIXSoftcamManager
-	return VIXSoftcamManager(session)
+def PackageManagerMenu(session, **kwargs):
+	from .PackageManager import PackageManager
+	session.open(PackageManager)
 
 
-def SoftcamMenu(session, **kwargs):
-	session.open(SoftcamManager)
-
-
-def SoftcamSetup(menuid):
-	if menuid == "cam":
-		return [(_("Softcam Manager"), SoftcamMenu, "softcamsetup", 1005)]
+def PackageManagerSetup(menuid):
+	if config.usage.setup_level.index > 1 and menuid == "softwareupdatemenu":
+		return [(_("Package Manager"), PackageManagerMenu, "packagemanager", 2)]
 	return []
 
 
@@ -188,15 +183,10 @@ def Plugins(**kwargs):
 			plist.append(PluginDescriptor(name=_("Vu+ ImageManager wizard"), where=PluginDescriptor.WHERE_WIZARD, needsRestart=False, fnc=(30, ImageManager)))
 		return plist
 
-	plist = [
-		PluginDescriptor(where=PluginDescriptor.WHERE_MENU, needsRestart=False, fnc=startSetup),
-		PluginDescriptor(name=_("openbh Image Management"), where=PluginDescriptor.WHERE_EXTENSIONSMENU, fnc=UpgradeMain),
-		PluginDescriptor(where=PluginDescriptor.WHERE_MENU, fnc=SoftcamSetup)]
-	if config.softcammanager.showinextensions.value:
-		plist.append(PluginDescriptor(name=_("Softcam manager"), where=PluginDescriptor.WHERE_EXTENSIONSMENU, fnc=SoftcamMenu))
+	plist = [PluginDescriptor(needsRestart=False, fnc=startSetup),
+		PluginDescriptor(where=PluginDescriptor.WHERE_MENU, fnc=PackageManagerSetup)]
 	if config.scriptrunner.showinextensions.value:
 		plist.append(PluginDescriptor(name=_("Script runner"), where=PluginDescriptor.WHERE_EXTENSIONSMENU, fnc=ScriptRunnerMenu))
-	plist.append(PluginDescriptor(where=PluginDescriptor.WHERE_AUTOSTART, fnc=SoftcamAutostart))
 	plist.append(PluginDescriptor(where=PluginDescriptor.WHERE_AUTOSTART, fnc=SwapAutostart))
 	plist.append(PluginDescriptor(where=PluginDescriptor.WHERE_SESSIONSTART, fnc=ImageManagerautostart))
 	plist.append(PluginDescriptor(where=PluginDescriptor.WHERE_SESSIONSTART, fnc=BackupManagerautostart))

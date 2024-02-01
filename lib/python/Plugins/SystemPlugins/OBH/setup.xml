@@ -1,5 +1,10 @@
 <!--suppress XmlUnboundNsPrefix -->
 <setupxml>
+    <setup key="vixsoftcammanager" title="Softcam manager settings" titleshort="Settings" showOpenWebIF="1">
+        <item level="2" text="Show in extensions" description="Allows the softcam manager to be launched from extensions.">config.softcammanager.showinextensions</item>
+        <item level="2" text="Enable frozen check" description="Allows the softcam to be checked if it stopped working, and restarted automatically if needed.">config.softcammanager.softcamtimerenabled</item>
+        <item level="2" text="Frozen check interval" requires="config.softcammanager.softcamtimerenabled" description="Set the interval to be checked in mins.">config.softcammanager.softcamtimer</item>
+    </setup>
     <setup key="openbhbackupmanager" title="Backup manager settings" titleshort="Settings">
         <item level="2" text="Backup location" description="Location of where backup should be saved.">config.backupmanager.backuplocation</item>
         <item level="2" text="Backup prefix" description="Allows you to tag your backups to a box.">config.backupmanager.folderprefix</item>

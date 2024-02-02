@@ -1,8 +1,8 @@
-from os import path
+from os.path import exists
 
 from enigma import eAVControl, iPlayableService, iServiceInformation, eTimer, eServiceCenter, eServiceReference, eDVBDB
 
-from Components.ActionMap import ActionMap
+from Components.ActionMap import HelpableActionMap
 from Components.AVSwitch import iAVSwitch
 from Components.ConfigList import ConfigListScreen
 from Components.config import config, configfile, getConfigListEntry, ConfigNothing
@@ -79,8 +79,11 @@ class VideoSetup(Screen, ConfigListScreen):
 		self.list = []
 		ConfigListScreen.__init__(self, self.list, session=session, on_change=self.changedEntry)
 
-		self["actions"] = ActionMap(["SetupActions", "MenuActions", "ColorActions"],
-			{"save": self.apply, }, -2)
+		self["actions"] = HelpableActionMap(self, ["SetupActions", "MenuActions", "ColorActions"],
+			{
+				"cancel": self.keyCancel,
+				"save": self.apply,
+			}, -2)
 
 		self["key_red"] = StaticText(_("Cancel"))
 		self["key_green"] = StaticText(_("Save"))
@@ -213,7 +216,7 @@ class VideoSetup(Screen, ConfigListScreen):
 				self.list.append(getConfigListEntry(_("Aspect switch"), config.av.aspectswitch.enabled, _("This option allows you to set offset values for different Letterbox resolutions.")))
 				if config.av.aspectswitch.enabled.value:
 					for aspect in range(5):
-						self.list.append(getConfigListEntry(" -> %s" % iAVSwitch.ASPECT_SWITCH_MSG[aspect], config.av.aspectswitch.offsets[str(aspect)]))
+						self.list.append(getConfigListEntry(f" -> {iAVSwitch.ASPECT_SWITCH_MSG[aspect]}", config.av.aspectswitch.offsets[str(aspect)]))
 
 			self.list.append(getConfigListEntry(_("Allow unsupported modes"), config.av.edid_override, _("This option allows you to use all HDMI Modes")))
 
@@ -417,7 +420,7 @@ class VideoSetup(Screen, ConfigListScreen):
 			or (port, mode_uhd, rate_uhd) != self.last_good_autores_uhd or (autores_24p, autores_1080i) != self.last_good_autores_extra or self.last_good_autores != config.av.autores.value or self.reset_mode == 1
 			or (self.last_good_autores_unknownres != config.av.autores_unknownres.value and config.av.autores.value == "native")):
 			self.reset_mode = 2
-			if self.current_mode == None:
+			if self.current_mode is None:
 				self.current_mode = self.getCurrent_mode()
 			AutoVideoMode(None).VideoChangeDetect()
 		else:
@@ -447,7 +450,7 @@ class VideoSetup(Screen, ConfigListScreen):
 			cur = self["config"].getCurrent()
 			cur = cur and len(cur) > 3 and cur[3]
 			if cur in ("check", "check_sd", "check_hd", "check_fhd", "check_uhd"):
-				if self.current_mode == None:
+				if self.current_mode is None:
 					self.current_mode = self.getCurrent_mode()
 				if cur in ("check", "check_sd"):
 					self.getVerify_videomode(config.av.autores_mode_sd, config.av.autores_rate_sd)
@@ -502,7 +505,7 @@ def applySettings(mode=config.osd.threeDmode.value, znorm=int(config.osd.threeDz
 		try:
 			previous = (mode, znorm)
 			if BoxInfo.getItem("CanUse3DModeChoices"):
-				f = open("/proc/stb/fb/3dmode_choices", "r")
+				f = open("/proc/stb/fb/3dmode_choices")
 				choices = f.readlines()[0].split()
 				f.close()
 				if mode not in choices:
@@ -522,7 +525,7 @@ class AutoVideoMode(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
 
-		if session != None:
+		if session is not None:
 			self.__event_tracker = ServiceEventTracker(screen=self, eventmap={
 				iPlayableService.evStart: self.__evStart,
 				iPlayableService.evVideoSizeChanged: self.VideoChanged,
@@ -543,12 +546,12 @@ class AutoVideoMode(Screen):
 		service = self.session.nav.getCurrentlyPlayingServiceReference()
 		servicepath = service and service.getPath()
 		if servicepath and servicepath.startswith("/"):
-			if service.toString().startswith("1:"):
-				info = eServiceCenter.getInstance().info(service)
-				service = info and info.getInfoString(service, iServiceInformation.sServiceref)
-				return service and eDVBDB.getInstance().getFlag(eServiceReference(service)) & FLAG_IS_DEDICATED_3D == FLAG_IS_DEDICATED_3D and "sidebyside"
-			else:
-				return ".3d." in servicepath.lower() and "sidebyside" or ".tab." in servicepath.lower() and "topandbottom"
+				if service.toString().startswith("1:"):
+					info = eServiceCenter.getInstance().info(service)
+					service = info and info.getInfoString(service, iServiceInformation.sServiceref)
+					return service and eDVBDB.getInstance().getFlag(eServiceReference(service)) & FLAG_IS_DEDICATED_3D == FLAG_IS_DEDICATED_3D and "sidebyside"
+				else:
+					return ".3d." in servicepath.lower() and "sidebyside" or ".tab." in servicepath.lower() and "topandbottom"
 		service = self.session.nav.getCurrentService()
 		info = service and service.info()
 		return info and info.getInfo(iServiceInformation.sIsDedicated3D) == 1 and "sidebyside"
@@ -601,6 +604,14 @@ class AutoVideoMode(Screen):
 		if current_mode.upper() in ("PAL", "NTSC"):
 			current_mode = current_mode.upper()
 
+		current_pol = ""
+		if "i" in current_mode:
+			current_pol = "i"
+		elif "p" in current_mode:
+			current_pol = "p"
+		current_res = current_pol and current_mode.split(current_pol)[0].replace("\n", "") or ""
+		current_rate = current_pol and current_mode.split(current_pol)[0].replace("\n", "") and current_mode.split(current_pol)[1].replace("\n", "") or ""
+
 		write_mode = None
 		new_mode = None
 
@@ -622,7 +633,7 @@ class AutoVideoMode(Screen):
 				video_pol = ("i", "p")[info.getInfo(iServiceInformation.sProgressive)]
 				video_rate = int(info.getInfo(iServiceInformation.sFrameRate))
 
-		print("[VideoMode] detect video height: %s, width: %s, pol: %s, rate: %s (current video mode: %s)" % (video_height, video_width, video_pol, video_rate, current_mode))
+		print(f"[VideoMode] detect video height: {video_height}, width: {video_width}, pol: {video_pol}, rate: {video_rate} (current video mode: {current_mode})")
 		if video_height and video_width and video_pol and video_rate:
 			label_rate = (video_rate + 500) // 1000
 			if video_pol == "i":
@@ -780,9 +791,7 @@ class AutoVideoMode(Screen):
 							write_mode = config_mode + new_rate
 						else:
 							write_mode = config_mode
-			write_mode = new_mode = None
-			if config_mode in ("PAL", "NTSC"):
-				write_mode = config_mode
+
 			elif config.av.autores.value == "all" or (config.av.autores.value == "hd" and int(new_res) >= 720):
 				autorestyp = "all or hd"
 				if config.av.autores_deinterlace.value:
@@ -842,10 +851,10 @@ class AutoVideoMode(Screen):
 				write_mode = new_mode
 			else:
 				autorestyp = "no match"
-				if path.exists("/sys/class/display/mode") and config_rate in ("auto", "multi"):
-					f = open("/sys/class/display/mode", "r")
-				elif path.exists("/proc/stb/video/videomode_%shz" % new_rate) and config_rate in ("auto", "multi"):
-					f = open("/proc/stb/video/videomode_%shz" % new_rate, "r")
+				if exists("/sys/class/display/mode") and config_rate in ("auto", "multi"):
+					f = open("/sys/class/display/mode")
+				elif exists(f"/proc/stb/video/videomode_{new_rate}hz") and config_rate in ("auto", "multi"):
+					f = open(f"/proc/stb/video/videomode_{new_rate}hz")
 				if f:
 					multi_videomode = f.read().replace("\n", "")
 					f.close()
@@ -921,10 +930,10 @@ class AutoVideoMode(Screen):
 						write_mode += "hz"
 				if write_mode in values:
 					iAVSwitch.setVideoModeDirect(write_mode)
-					print("[VideoMode] setMode - port: %s, mode: %s (autoresTyp: '%s')" % (config_port, write_mode, autorestyp))
+					print(f"[VideoMode] setMode - port: {config_port}, mode: {write_mode} (autoresTyp: '{autorestyp}')")
 					resolutionlabel["restxt"].setText(_("Video mode: %s") % write_mode)
 				else:
-					print("[VideoMode] setMode - port: %s, mode: %s is not available" % (config_port, write_mode))
+					print(f"[VideoMode] setMode - port: {config_port}, mode: {write_mode} is not available")
 					resolutionlabel["restxt"].setText(_("Video mode: %s not available") % write_mode)
 
 				if config.av.autores_label_timeout.value:
@@ -932,7 +941,7 @@ class AutoVideoMode(Screen):
 
 			elif write_mode and current_mode != write_mode:
 				# the resolution remained stuck at a wrong setting after streaming when self.bufferfull was False (should be fixed now after adding BufferInfoStop)
-				print("[VideoMode] not changing from %s to %s as self.bufferfull is %s" % (current_mode, write_mode, self.bufferfull))
+				print(f"[VideoMode] not changing from {current_mode} to {write_mode} as self.bufferfull is {self.bufferfull}")
 
 		if write_mode and write_mode != current_mode or self.firstrun:
 			iAVSwitch.setAspect(config.av.aspect)

@@ -15,6 +15,12 @@ if HAVE_OSDANIMATION
 SUBDIRS += AnimationSetup
 endif
 
+if DREAMNEXTGEN
+SUBDIRS += AmlFRQ VideoEnhancementAML
+else
+SUBDIRS += VideoEnhancement
+endif
+
 if HAVE_FCC
 SUBDIRS += FastChannelChange
 endif

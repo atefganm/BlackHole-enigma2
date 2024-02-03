@@ -115,10 +115,7 @@ class Standby2(Screen):
 		if self.session.pipshown:
 			self.infoBarInstance and hasattr(self.infoBarInstance, "showPiP") and self.infoBarInstance.showPiP()
 
-		if SystemInfo["ScartSwitch"]:
-			self.avswitch.setInput("SCART")
-		else:
-			self.avswitch.setInput("AUX")
+		self.avswitch.setInput("off")
 		if getBrandOEM() in ('dinobot') or SystemInfo["HasHiSi"] or getBoxType() in ("sfx6008", "sfx6018"):
 			try:
 				open("/proc/stb/hdmi/output", "w").write("off")
@@ -143,7 +140,7 @@ class Standby2(Screen):
 				self.session.nav.playService(self.prev_running_service)
 		self.session.screen["Standby"].boolean = False
 		globalActionMap.setEnabled(True)
-		self.avswitch.setInput("ENCODER")
+		self.avswitch.setInput("encoder")
 		self.leaveMute()
 		if path.exists("/usr/scripts/standby_leave.sh"):
 			Console().ePopen("/usr/scripts/standby_leave.sh")

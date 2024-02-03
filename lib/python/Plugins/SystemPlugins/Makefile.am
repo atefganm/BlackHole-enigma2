@@ -21,6 +21,14 @@ else
 SUBDIRS += VideoEnhancement
 endif
 
+if DM900
+SUBDIRS += FSBLUpdater
+endif
+
+if DM920
+SUBDIRS += FSBLUpdater
+endif
+
 if HAVE_FCC
 SUBDIRS += FastChannelChange
 endif

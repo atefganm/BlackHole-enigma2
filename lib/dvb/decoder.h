@@ -133,7 +133,7 @@ private:
 	ePtr<eTimer> m_showSinglePicTimer;
 #ifdef DREAMNEXTGEN
 	void parseVideoInfo(); // called by timer
-#endi
+#endif
 	int m_fcc_fd;
 	bool m_fcc_enable;
 	int m_fcc_state;

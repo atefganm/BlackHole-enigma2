@@ -54,6 +54,11 @@ class Session:
 		self.summary = None
 		self.in_exec = False
 		self.screen = SessionGlobals(self)
+
+		self.shutdown = False
+		from Components.FrontPanelLed import frontPanelLed
+		frontPanelLed.init(self)
+
 		for p in plugins.getPlugins(PluginDescriptor.WHERE_SESSIONSTART):
 			try:
 				p(reason=0, session=self)
@@ -377,7 +382,10 @@ def runScreenTest():
 
 	profile("RunReactor")
 	profile_final()
+	from Components.FrontPanelLed import FrontPanelLed
 	runReactor()
+	session.shutdown = True
+	FrontPanelLed.shutdown()
 
 	if not VuRecovery:
 		profile("wakeup")

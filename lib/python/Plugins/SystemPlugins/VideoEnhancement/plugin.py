@@ -45,6 +45,8 @@ class VideoEnhancementSetup(ConfigListScreen, Screen):
 		self["key_yellow"] = StaticText(_("Last config"))
 		self["key_blue"] = StaticText(_("Default"))
 
+		if self.SelectionChanged not in self["config"].onSelectionChanged:
+			self["config"].onSelectionChanged.append(self.SelectionChanged)
 		self.rememberOldSettings()
 		self.onLayoutFinish.append(self.layoutFinished)
 

@@ -83,8 +83,8 @@ def getChipSetString():
 		return "7252S"
 	elif getMachineBuild() in ('hd51', 'vs1500', 'h7'):
 		return "7251S"
-	elif getMachineBuild() in ('alien5',):
-		return "S905D"
+	elif getMachineBuild() in ('dreamone', 'dreamonetwo', 'dreamseven'):
+		return "S922X"
 	else:
 		chipset = fileReadLine("/proc/stb/info/chipset", source=MODULE_NAME)
 		if chipset is None:

@@ -13,6 +13,27 @@ from Tools.Directories import resolveFilename, SCOPE_SKIN, SCOPE_CURRENT_SKIN
 config.misc.showtestcard = ConfigBoolean(default=False)
 
 
+def sortkey(name):
+	if name[0] == "2160p":
+		return 1
+	elif name[0] == "2160p30":
+		return 2
+	elif name[0] == "1080p":
+		return 3
+	elif name[0] == "720p":
+		return 4
+	elif name[0] == "1080i":
+		return 5
+	elif name[0] == "smpte":
+		return 20
+	elif name[0] == "multi":
+		return 1
+	elif name[0] == "auto":
+		return 2
+	else:
+		return 6
+
+
 class VideoWizardSummary(WizardSummary):
 	def __init__(self, session, parent):
 		WizardSummary.__init__(self, session, parent)
@@ -83,18 +104,18 @@ class VideoWizard(WizardLanguage, Rc):
 				if port != "DVI-PC":
 					list.append((descr, port))
 		list.sort(key=lambda x: x[0])
-		print("[VideoWizard] listInputChannels:", list)
+		#print("listInputChannels:", list)
 		return list
 
 	def inputSelectionMade(self, index):
-		print("[VideoWizard] inputSelectionMade:", index)
+		#print("inputSelectionMade:", index)
 		self.port = index
 		self.inputSelect(index)
 
 	def inputSelectionMoved(self):
 		# hw_type = HardwareInfo().get_device_name()
 		# has_hdmi = HardwareInfo().has_hdmi()
-		print("[VideoWizard] input selection moved:", self.selection)
+		#print("input selection moved:", self.selection)
 		self.inputSelect(self.selection)
 		if self["portpic"].instance is not None:
 			picname = self.selection
@@ -105,9 +126,9 @@ class VideoWizard(WizardLanguage, Rc):
 			self["portpic"].instance.setPixmapFromFile(resolveFilename(SCOPE_CURRENT_SKIN, "icons/%s.png" % picname))
 
 	def inputSelect(self, port):
-		print("[VideoWizard] inputSelect:", port)
+		#print("[VideoWizard] inputSelect:", port)
 		modeList = iAV.getModeList(self.selection)
-		print("[VideoWizard] modeList:", modeList)
+		#print("[VideoWizard] modeList:", modeList)
 		self.port = port
 		if len(modeList) > 0:
 			ratesList = self.listRates(modeList[0][0])
@@ -115,26 +136,26 @@ class VideoWizard(WizardLanguage, Rc):
 
 	def listModes(self):
 		list = []
-		print("[VideoWizard] modes for port", self.port)
+		#print("[VideoWizard] modes for port", self.port)
 		for mode in iAV.getModeList(self.port):
 			# if mode[0] != "PC":
 			list.append((mode[0], mode[0]))
-		print("[VideoWizard] modeslist:", list)
-		return list
+		#print("[VideoWizard] modeslist:", list)
+		return sorted(list, key=sortkey)
 
 	def modeSelectionMade(self, index):
-		print("[VideoWizard] modeSelectionMade:", index)
+		#print("[VideoWizard] modeSelectionMade:", index)
 		self.mode = index
 		self.modeSelect(index)
 
 	def modeSelectionMoved(self):
-		print("[VideoWizard] mode selection moved:", self.selection)
+		#print("[VideoWizard] mode selection moved:", self.selection)
 		self.modeSelect(self.selection)
 
 	def modeSelect(self, mode):
 		ratesList = self.listRates(mode)
-		print("[VideoWizard] ratesList:", ratesList)
-		if self.port == "HDMI" and mode in ("720p", "1080i", "1080p", "2160p"):
+		#print("[VideoWizard] ratesList:", ratesList)
+		if self.port == "HDMI" and mode in ("720p", "1080i", "1080p") and not BoxInfo.getItem("AmlogicFamily"):
 			self.rate = "multi"
 			iAV.setMode(port=self.port, mode=mode, rate="multi")
 		else:
@@ -144,26 +165,26 @@ class VideoWizard(WizardLanguage, Rc):
 		if querymode is None:
 			querymode = self.mode
 		list = []
-		print("[VideoWizard] modes for port", self.port, "and mode", querymode)
+		#print("[VideoWizard] modes for port", self.port, "and mode", querymode)
 		for mode in iAV.getModeList(self.port):
 			print("[VideoWizard] mode:", mode)
 			if mode[0] == querymode:
 				for rate in mode[1]:
 					if self.port == "DVI-PC":
-						print("[VideoWizard] rate:", rate)
+						#print("[VideoWizard] rate:", rate)
 						if rate == "640x480":
 							list.insert(0, (rate, rate))
 							continue
 					list.append((rate, rate))
-		return list
+		return sorted(list, key=sortkey)
 
 	def rateSelectionMade(self, index):
-		print("[VideoWizard] rateSelectionMade:", index)
+		#print("[VideoWizard] rateSelectionMade:", index)
 		self.rate = index
 		self.rateSelect(index)
 
 	def rateSelectionMoved(self):
-		print("[VideoWizard] rate selection moved:", self.selection)
+		#print("[VideoWizard] rate selection moved:", self.selection)
 		self.rateSelect(self.selection)
 
 	def rateSelect(self, rate):
@@ -172,7 +193,7 @@ class VideoWizard(WizardLanguage, Rc):
 	def showTestCard(self, selection=None):
 		if selection is None:
 			selection = self.selection
-		print("[VideoWizard] set config.misc.showtestcard to", {"yes": True, "no": False}[selection])
+		#print("[VideoWizard] set config.misc.showtestcard to", {"yes": True, "no": False}[selection])
 		if selection == "yes":
 			config.misc.showtestcard.value = True
 		else:

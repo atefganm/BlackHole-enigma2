@@ -707,7 +707,6 @@ int eDVBServicePMTHandler::getProgramInfo(program &program)
 				++cnt;
 			}
 		}
-
 		if ( cached_pcrpid != -1 )
 		{
 			++cnt;

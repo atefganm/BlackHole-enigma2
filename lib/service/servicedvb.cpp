@@ -2175,7 +2175,7 @@ RESULT eDVBServicePlay::getTrackInfo(struct iAudioTrackInfo &info, unsigned int 
 		{ eDVBServicePMTHandler::audioStream::atAC4,   "AC4",    },
 		{ eDVBServicePMTHandler::audioStream::atAAC,   "AAC",    },
 		{ eDVBServicePMTHandler::audioStream::atDRA,   "DRA",    },
-		{ eDVBServicePMTHandler::audioStream::atHEAAC, "HE-AAC", },
+		{ eDVBServicePMTHandler::audioStream::atAACHE, "AAC-HE", },
 		{ eDVBServicePMTHandler::audioStream::atDTS,   "DTS",    },
 		{ eDVBServicePMTHandler::audioStream::atDTSHD, "DTS-HD", },
 		{ eDVBServicePMTHandler::audioStream::atLPCM,  "LPCM",   },
@@ -2302,7 +2302,7 @@ int eDVBServicePlay::selectAudioStream(int i)
 			{ eDVBAudio::aDTS,   eDVBService::cDTSPID,    },
 			{ eDVBAudio::aLPCM,  eDVBService::cLPCMPID,   },
 			{ eDVBAudio::aDTSHD, eDVBService::cDTSHDPID,  },
-			{ eDVBAudio::aHEAAC, eDVBService::cHEAACAPID, },
+			{ eDVBAudio::aAACHE, eDVBService::cAACHEAPID, },
 			{ eDVBAudio::aDRA,   eDVBService::cDRAAPID,   },
 		};
 		static const int nAudioMap = sizeof audioMap / sizeof audioMap[0];

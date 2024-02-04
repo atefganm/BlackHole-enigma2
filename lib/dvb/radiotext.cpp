@@ -183,7 +183,7 @@ void eDVBRdsDecoder::processPESPacket(uint8_t *data, int len)
 {
 	int pos=9+data[8];// skip pes header
 
-	if (m_audio_type == eDVBAudio::aAAC  || m_audio_type == eDVBAudio::aHEAAC)
+	if (m_audio_type == eDVBAudio::aAAC  || m_audio_type == eDVBAudio::aAACHE)
 		processPESAACPacket(data, pos, len);
 	else
 		processPESMPEGPacket(data, pos, len);

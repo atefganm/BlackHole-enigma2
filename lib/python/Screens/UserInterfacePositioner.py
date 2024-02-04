@@ -4,7 +4,7 @@ from enigma import getDesktop
 
 from Components.ActionMap import ActionMap
 from Components.AVSwitch import iAVSwitch
-from Components.config import config, configfile, getConfigListEntry
+from Components.config import config, configfile, getConfigListEntry, ConfigSelectionNumber, ConfigSelection, ConfigSlider, ConfigYesNo, NoSave, ConfigNumber
 from Components.ConfigList import ConfigListScreen
 from Components.Label import Label
 from Components.SystemInfo import BoxInfo
@@ -12,19 +12,82 @@ from Components.Sources.StaticText import StaticText
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Screens.Setup import SetupSummary
-from Tools.Directories import fileWriteLine
+from Tools.Directories import fileWriteLine, fileCheck, fileExists
 
 MODULE_NAME = __name__.split(".")[-1]
 
 BRAND = BoxInfo.getItem("brand")
 
+from boxbranding import getBoxType
+
+
+def getFilePath(setting):
+	return "/proc/stb/fb/dst_%s" % (setting)
+
+
+def setPositionParameter(parameter, configElement):
+	f = open(getFilePath(parameter), "w")
+	f.write('%08X\n' % configElement.value)
+	f.close()
+	if fileExists(getFilePath("apply")):
+		f = open(getFilePath("apply"), "w")
+		f.write('1')
+		f.close()
+	# This is a horrible hack to work around a problem with Vu+ not updating the background properly
+	# when changing height. Previously the background only updated after changing the width fields.
+	elif parameter != "width" and fileExists(getFilePath("width")):
+		f = open(getFilePath("width"), "w")
+		f.write('%08X\n' % config.osd.dst_width.value)
+		f.close()
+
 
 def InitOsd():
+	BoxInfo.setItem("CanChange3DOsd", access("/proc/stb/fb/3dmode", R_OK))
 
+	config.osd.dst_left = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=720, wraparound=False)
+	config.osd.dst_width = ConfigSelectionNumber(default=720, stepwidth=1, min=0, max=720, wraparound=False)
+	config.osd.dst_top = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=576, wraparound=False)
+	config.osd.dst_height = ConfigSelectionNumber(default=576, stepwidth=1, min=0, max=576, wraparound=False)
+	config.osd.alpha = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
+	config.av.osd_alpha = NoSave(ConfigNumber(default=255))
+	config.osd.threeDmode = ConfigSelection([("off", _("Off")), ("auto", _("Auto")), ("sidebyside", _("Side by Side")), ("topandbottom", _("Top and Bottom"))], "auto")
+	config.osd.threeDznorm = ConfigSlider(default=50, increment=1, limits=(0, 100))
+	config.osd.show3dextensions = ConfigYesNo(default=False)
+
+	def set3DMode(configElement):
+		if BoxInfo.getItem("CanChange3DOsd"):
+			value = configElement.value
+			print("[UserInterfacePositioner] Setting 3D mode: %s" % str(value))
+			try:
+				if BoxInfo.getItem("CanUse3DModeChoices"):
+					f = open("/proc/stb/fb/3dmode_choices", "r")
+					choices = f.readlines()[0].split()
+					f.close()
+					if value not in choices:
+						if value == "sidebyside":
+							value = "sbs"
+						elif value == "topandbottom":
+							value = "tab"
+						elif value == "auto":
+							value = "off"
+				fileWriteLine("/proc/stb/fb/3dmode", value, source=MODULE_NAME)
+			except OSError:
+				pass
+	config.osd.threeDmode.addNotifier(set3DMode)
+
+	def set3DZnorm(configElement):
+		if BoxInfo.getItem("CanChange3DOsd"):
+			print("[UserInterfacePositioner] Setting 3D depth: %s" % str(configElement.value))
+			fileWriteLine("/proc/stb/fb/znorm", "%d" % int(configElement.value), source=MODULE_NAME)
+	config.osd.threeDznorm.addNotifier(set3DZnorm)
+
+
+def InitOsdPosition():
 	BoxInfo.setItem("CanChange3DOsd", BRAND != "fulan" and access("/proc/stb/fb/3dmode", R_OK))
 	BoxInfo.setItem("CanChangeOsdPosition", BRAND != "fulan" and access("/proc/stb/fb/dst_left", R_OK))
 	BoxInfo.setItem("CanChangeOsdAlpha", access("/proc/stb/video/alpha", R_OK))
 	BoxInfo.setItem("CanChangeOsdPlaneAlpha", access("/sys/class/graphics/fb0/osd_plane_alpha", R_OK))
+	BoxInfo.setItem("CanChangeOsdPosition", access("/proc/stb/fb/dst_left", R_OK))
 	BoxInfo.setItem("CanChangeOsdPositionAML", access("/sys/class/graphics/fb0/free_scale", R_OK))
 	BoxInfo.setItem("OsdSetup", BoxInfo.getItem("CanChangeOsdPosition"))
 	if BoxInfo.getItem("CanChangeOsdAlpha") is True or BoxInfo.getItem("CanChangeOsdPosition") is True or BoxInfo.getItem("CanChangeOsdPositionAML") is True or BoxInfo.getItem("CanChangeOsdPlaneAlpha") is True:

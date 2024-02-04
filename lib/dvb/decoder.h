@@ -19,7 +19,7 @@ private:
 	eTsParser *m_TsPaser;
 #endif
 public:
-	enum { aMPEG, aAC3, aDTS, aAAC, aHEAAC, aLPCM, aDTSHD, aDDP, aDRA, aAC4 };
+	enum { aMPEG, aAC3, aDTS, aAAC, aAACHE, aLPCM, aDTSHD, aDDP, aDRA, aAC4 };
 	eDVBAudio(eDVBDemux *demux, int dev);
 	enum { aMonoLeft, aStereo, aMonoRight };
 	void setChannel(int channel);

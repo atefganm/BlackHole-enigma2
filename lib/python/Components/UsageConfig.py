@@ -12,7 +12,7 @@ from Tools.camcontrol import CamControl
 from Tools.Directories import resolveFilename, SCOPE_HDD, SCOPE_TIMESHIFT, defaultRecordingLocation
 from Components.NimManager import nimmanager
 from Components.ServiceList import refreshServiceList
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import SystemInfo, BoxInfo
 from Tools.HardwareInfo import HardwareInfo
 from Components.AVSwitch import iAVSwitch
 

@@ -177,7 +177,7 @@ public:
 	int closeFrontend(bool force=false, bool no_delayed=false);
 	const char *getDescription() const { return m_description; }
 	const dvb_frontend_info getFrontendInfo() const { return fe_info; }
-	const dvb_frontend_info getFrontendInfo(fe_delivery_system_t delsys)  { return m_fe_info[delsys]; }
+	const dvb_frontend_info getFrontendInfo(fe_delivery_system_t delsys)  { return fe_info[delsys]; }
 	bool is_simulate() const { return m_simulate; }
 	bool is_FBCTuner() { return m_fbc; }
 	void set_FBCTuner(bool yesno) { m_fbc = yesno; }

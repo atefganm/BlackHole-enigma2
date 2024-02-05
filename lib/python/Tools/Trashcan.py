@@ -1,5 +1,6 @@
 from os import access, mkdir, path as ospath, rmdir, stat, statvfs, walk, W_OK
 import enigma
+from enigma import pNavigation
 import time
 
 from Components.config import config
@@ -65,6 +66,7 @@ class Trashcan:
 		self.gotRecordEvent(None, None)
 
 	def gotRecordEvent(self, service, event):
+		self.recordings = len(self.session.nav.getRecordings(False,pNavigation.isRealRecording))
 		if event == enigma.iRecordableService.evEnd:
 			self.cleanIfIdle()
 

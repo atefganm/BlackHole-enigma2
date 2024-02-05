@@ -163,6 +163,10 @@ class ServiceList(GUIComponent):
 
 		def colorServiceRecorded(value):
 			self.l.setColor(eListboxServiceContent.serviceRecorded, parseColor(value))
+				elif attrib == "colorServicePseudoRecorded":
+					self.l.setColor(eListboxServiceContent.servicePseudoRecorded, parseColor(value))
+				elif attrib == "colorServiceStreamed":
+					self.l.setColor(eListboxServiceContent.serviceStreamed, parseColor(value))
 
 		def colorFallbackItem(value):
 			self.l.setColor(eListboxServiceContent.serviceItemFallback, parseColor(value))

@@ -618,7 +618,7 @@ def getExtension(file):
 	return extension
 
 
-def mediafilesInUse(session):
+def mediaFilesInUse(session):
 	from Components.MovieList import KNOWN_EXTENSIONS
 	files = [pathBasename(x[2]) for x in lsof() if getExtension(x[2]) in KNOWN_EXTENSIONS]
 	service = session.nav.getCurrentlyPlayingServiceOrGroup()

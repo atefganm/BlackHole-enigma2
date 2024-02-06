@@ -127,13 +127,15 @@ public:
 	void setContent(iListboxContent *content);
 
 	void allowNativeKeys(bool allow);
+	void enableAutoNavigation(bool allow) { allowNativeKeys(allow); }
 
 /*	enum Movement {
 		moveUp,
 		moveDown,
 		moveTop,
 		moveEnd,
-		justCheck
+		justCheck,
+		refresh
 	}; */
 
 	int getCurrentIndex();

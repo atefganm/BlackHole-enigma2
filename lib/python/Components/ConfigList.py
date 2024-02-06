@@ -147,6 +147,10 @@ class ConfigList(GUIComponent):
 			self.instance.moveSelection(self.instance.moveEnd)
 
 
+	def refresh(self):
+		if self.instance is not None:
+			self.instance.moveSelection(self.instance.refresh)
+
 class ConfigListScreen:
 	def __init__(self, list, session=None, on_change=None, fullUI=False):
 		self.entryChanged = on_change if on_change is not None else lambda: None
@@ -351,9 +355,11 @@ class ConfigListScreen:
 
 	def keyLeft(self):
 		self["config"].handleKey(ACTIONKEY_LEFT, self.entryChanged)
+		self["config"].refresh()
 
 	def keyRight(self):
 		self["config"].handleKey(ACTIONKEY_RIGHT, self.entryChanged)
+		self["config"].refresh()
 
 	def keyLast(self):
 		self["config"].handleKey(ACTIONKEY_LAST, self.entryChanged)

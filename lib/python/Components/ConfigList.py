@@ -113,6 +113,10 @@ class ConfigList(GUIComponent):
 			for x in configList:
 				assert len(x) < 2 or isinstance(x[1], ConfigElement), "[ConfigList] Error: Entry in ConfigList '%s' must be a ConfigElement!" % str(x[1])
 
+	def enableAutoNavigation(self, enabled):
+		if self.instance:
+			self.instance.enableAutoNavigation(enabled)
+
 	def getList(self):
 		return self.__list
 
@@ -248,7 +252,7 @@ class ConfigListScreen:
 			x()
 
 	def noNativeKeys(self):
-		self["config"].instance.allowNativeKeys(False)
+		self["config"].enableAutoNavigation(False)
 
 	def handleInputHelpers(self):
 		currConfig = self["config"].getCurrent()

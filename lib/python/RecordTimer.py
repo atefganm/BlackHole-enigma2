@@ -564,11 +564,11 @@ class RecordTimerEntry(TimerEntry):
 							if self.ts_dialog is None:
 								self.openChoiceActionBeforeZap()
 						else:
-						self.messageString += _("The TV was switched to the recording service!\n")
-						self.messageStringShow = True
-							self.setRecordingPreferredTuner()
-							self.failureCB(True)
-							self.log(5, "zap to recording service")
+								self.messageString += _("The TV was switched to the recording service!\n")
+								self.messageStringShow = True
+								self.setRecordingPreferredTuner()
+								self.failureCB(True)
+								self.log(5, "zap to recording service")
 
 			if self.tryPrepare():
 				self.log(6, "prepare ok, waiting for begin")

@@ -134,8 +134,7 @@ public:
 		moveDown,
 		moveTop,
 		moveEnd,
-		justCheck,
-		refresh
+		justCheck
 	}; */
 
 	int getCurrentIndex();
@@ -154,6 +153,7 @@ public:
 		pageUp,
 		pageDown,
 		justCheck,
+		refresh,
 		moveStartTop,
 		moveStart,
 		prevItemPage,

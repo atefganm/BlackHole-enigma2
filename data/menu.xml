@@ -117,7 +117,9 @@ self.session.openWithCallback(msgClosed, EpgDeleteMsg)
 
 		<!-- Menu / Setup / Recording, Playback & Timeshift -->
 		<menu key="rec" level="1" text="Recording, Playback &amp; Timeshift" weight="11">
-			<item key="recording_setup" level="0" text="Recording" weight="10"><screen module="Recordings" screen="RecordingSettings" /></item>
+			<item key="recording_setup" level="0" text="Recording Settings" weight="15"><screen module="Recording" screen="RecordingSettings" /></item>
+			<item key="hdmirecord_setup" level="0" text="HDMI-In Recording Settings" weight="20" requires="HDMIin"><setup setupKey="HDMIRecord" /></item>
+			<item key="timshift_setup" level="0" text="Time Shift Settings" weight="25"><screen module="Timeshift" screen="TimeshiftSettings" /></item>
 			<item key="playback_setup" level="0" text="Playback" weight="12"><setup id="playback" /></item>
 			<item key="timshift_setup" level="0" text="Timeshift" weight="15"><screen module="Timeshift" screen="TimeshiftSettings" /></item>
 		</menu>

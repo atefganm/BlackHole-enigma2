@@ -527,7 +527,7 @@ eListboxPythonServiceContent::eListboxPythonServiceContent()
 {
 	cursorHome();
 	eServiceCenter::getInstance(m_service_center);
-	m_servicelist = true;
+	servicelist = true;
 }
 
 bool eListboxPythonServiceContent::checkServiceIsRecorded(eServiceReference ref,pNavigation::RecordType type)
@@ -583,7 +583,7 @@ void eListboxPythonServiceContent::setBuildArgs(int selected)
 
     int status = (isSelected << 0) + (marked << 1) + (isMarker << 2) + (isPlayable << 3) + (isRecorded << 4) + (isStreamed << 5) + (isPseudoRecorded << 6) + (isFolder << 7);
 
-	m_pArgs = PyTuple_New(2);
+	pArgs = PyTuple_New(2);
 	PyTuple_SET_ITEM(m_pArgs, 0, NEW_eServiceReference(ref));
 	PyTuple_SET_ITEM(m_pArgs, 1, PyLong_FromLong(status));
 }

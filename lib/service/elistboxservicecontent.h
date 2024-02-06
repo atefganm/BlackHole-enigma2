@@ -49,8 +49,6 @@ public:
 	int setCurrentMarked(bool);
 	bool isCurrentMarked();
 
-	void refresh();
-
 protected:
 	bool getIsMarked(int selected);
 	void setBuildArgs(int selected);

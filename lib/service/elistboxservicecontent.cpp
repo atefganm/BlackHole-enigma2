@@ -587,9 +587,3 @@ void eListboxPythonServiceContent::setBuildArgs(int selected)
 	PyTuple_SET_ITEM(m_pArgs, 0, NEW_eServiceReference(ref));
 	PyTuple_SET_ITEM(m_pArgs, 1, PyInt_FromLong(status));
 }
-
-void eListboxPythonServiceContent::refresh()
-{
-	if (m_listbox)
-		m_listbox->moveSelection(m_listbox->refresh);
-}

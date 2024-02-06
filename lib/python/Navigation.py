@@ -247,7 +247,7 @@ class Navigation:
 	def getCurrentlyPlayingServiceOrGroup(self):
 		return self.currentlyPlayingServiceOrGroup
 
-	def recordService(self, ref, simulate=False, type=pNavigation.isUnknownRecording)
+	def recordService(self, ref, simulate=False, type=pNavigation.isUnknownRecording):
 		service = None
 		if not simulate:
 			print("[Navigation] recording service:", (ref and ref.toString()))

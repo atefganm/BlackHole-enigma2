@@ -61,9 +61,12 @@ class BoxInformation:
 		self.boxInfo[item] = value
 		return True
 
+	def setMutableItem(self, item, value):
+		self.boxInfo[item] = value
+
 	def deleteItem(self, item):
 		if item in self.immutableList:
-			print("[BoxInfo] Error: Item '%s' is immutable and can not be deleted!" % item)
+			print(f"[BoxInfo] Error: Item '{item}' is immutable and can not be deleted!")
 		elif item in self.boxInfo:
 			del self.boxInfo[item]
 			return True
@@ -346,6 +349,12 @@ SystemInfo["VideoModes"] = getChipSetString() in (  # 2160p and 1080p capable ha
 	["720p", "1080i", "576p", "576i", "480p", "480i"],  # Normal modes.
 	{"720p", "1080i"}  # Widescreen modes.
 )
+
+BoxInfo.setMutableItem("SeekStatePlay", False)
+BoxInfo.setMutableItem("StatePlayPause", False)
+BoxInfo.setMutableItem("StandbyState", False)
+BoxInfo.setMutableItem("FastChannelChange", False)
+BoxInfo.setMutableItem("FCCactive", False)
 
 SystemInfo["FbcTunerPowerAlwaysOn"] = SystemInfo["boxtype"] in ("vusolo4k", "vuduo4k", "vuduo4kse", "vuultimo4k", "vuuno4k", "vuuno4kse")
 SystemInfo["HasPhysicalLoopthrough"] = ["Vuplus DVB-S NIM(AVL2108)", "GIGA DVB-S2 NIM (Internal)"]

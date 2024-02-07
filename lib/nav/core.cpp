@@ -83,7 +83,7 @@ RESULT eNavigation::stopService(void)
 	return 0;
 }
 
-RESULT eNavigation::recordService(const eServiceReference &ref, ePtr<iRecordableService> &service, bool simulate, pNavigation::RecordType type)
+RESULT eNavigation::recordService(const eServiceReference &ref, ePtr<iRecordableService> &service, bool simulate)
 {
 	ASSERT(m_servicehandler);
 	RESULT res = m_servicehandler->record(ref, service);
@@ -102,12 +102,6 @@ RESULT eNavigation::recordService(const eServiceReference &ref, ePtr<iRecordable
 			service->connectEvent(sigc::mem_fun(*this, &eNavigation::recordEvent), conn);
 			m_recordings[service]=conn;
 			m_recordings_services[service]=ref;
-			m_recordings_types[service]=type;
-
-			//for (std::map<ePtr<iRecordableService>, eServiceReference >::iterator it2(m_recordings_services.begin()); it2 != m_recordings_services.end(); ++it2)
-			//	eDebug("[core.cpp] recordService: ref %s", (it2->second).toString().c_str());
-			//for (std::map<ePtr<iRecordableService>, pNavigation::RecordType >::iterator it3(m_recordings_types.begin()); it3 != m_recordings_types.end(); ++it3)
-			//	eDebug("[core.cpp] recordService: type %d", it3->second);
 		}
 	}
 	return res;
@@ -132,22 +126,12 @@ RESULT eNavigation::stopRecordService(ePtr<iRecordableService> &service)
 			m_recordings.erase(it);
 			/* send stop event */
 			m_record_event(service, iRecordableService::evEnd);
-			std::map<ePtr<iRecordableService>, eServiceReference >::iterator it_services =
+			std::map<ePtr<iRecordableService>, eServiceReference >::iterator it =
 				m_recordings_services.find(service);
-			if (it_services != m_recordings_services.end())
+			if (it != m_recordings_services.end())
 			{
-				m_recordings_services.erase(it_services);
+				m_recordings_services.erase(it);
 			}
-			std::map<ePtr<iRecordableService>, pNavigation::RecordType >::iterator it_types =
-				m_recordings_types.find(service);
-			if (it_types != m_recordings_types.end())
-			{
-				m_recordings_types.erase(it_types);
-			}
-			//for (std::map<ePtr<iRecordableService>, eServiceReference >::iterator it2(m_recordings_services.begin()); it2 != m_recordings_services.end(); ++it2)
-			//	eDebug("[core.cpp] after stopRecordService: ref %s", (it2->second).toString().c_str());
-			//for (std::map<ePtr<iRecordableService>, pNavigation::RecordType >::iterator it3(m_recordings_types.begin()); it3 != m_recordings_types.end(); ++it3)
-			//	eDebug("[core.cpp] after stopRecordService: type %d", it3->second);
 			return 0;
 		}
 	}
@@ -156,80 +140,14 @@ RESULT eNavigation::stopRecordService(ePtr<iRecordableService> &service)
 	return -1;
 }
 
-void eNavigation::getRecordings(std::vector<ePtr<iRecordableService> > &recordings, bool simulate, pNavigation::RecordType type)
+void eNavigation::getRecordings(std::vector<ePtr<iRecordableService> > &recordings, bool simulate)
 {
 	if (simulate)
 		for (std::set<ePtr<iRecordableService> >::iterator it(m_simulate_recordings.begin()); it != m_simulate_recordings.end(); ++it)
 			recordings.push_back(*it);
 	else
 		for (std::map<ePtr<iRecordableService>, ePtr<eConnection> >::iterator it(m_recordings.begin()); it != m_recordings.end(); ++it)
-		{
-			if (m_recordings_types[it->first] & type)
-			{
-				recordings.push_back(it->first);
-			//	eDebug("[core.cpp] getRecordings: returning type %d (asked for type %d)", m_recordings_types[it->first], type);
-			}
-			//else
-			//	eDebug("[core.cpp] getRecordings: not returning type %d (asked for type %d)", m_recordings_types[it->first], type);
-		}
-}
-
-void eNavigation::getRecordingsServicesOnly(std::vector<eServiceReference> &services, pNavigation::RecordType type)
-{
-	for (std::map<ePtr<iRecordableService>, eServiceReference >::iterator it(m_recordings_services.begin()); it != m_recordings_services.end(); ++it)
-	{
-		if (m_recordings_types[it->first] & type)
-		{
-			services.push_back(it->second);
-		//	eDebug("[core.cpp] getRecordingsServicesOnly: returning type %d (asked for type %d)", m_recordings_types[it->first], type);
-		}
-		//else
-		//	eDebug("[core.cpp] getRecordingsServicesOnly: not returning type %d (asked for type %d)", m_recordings_types[it->first], type);
-	}
-}
-
-void eNavigation::getRecordingsTypesOnly(std::vector<pNavigation::RecordType> &returnedTypes, pNavigation::RecordType type)
-{
-	for (std::map<ePtr<iRecordableService>, pNavigation::RecordType >::iterator it(m_recordings_types.begin()); it != m_recordings_types.end(); ++it)
-	{
-		if (m_recordings_types[it->first] & type)
-		{
-			returnedTypes.push_back(it->second);
-		}
-	}
-}
-
-void eNavigation::getRecordingsSlotIDsOnly(std::vector<int> &slotids, pNavigation::RecordType type)
-{
-	for (std::map<ePtr<iRecordableService>, eServiceReference>::iterator it(m_recordings_services.begin()); it != m_recordings_services.end(); ++it)
-	{
-		if (m_recordings_types[it->first] & type)
-		{
-			ePtr<iFrontendInformation> fe_info;
-			it->first->frontendInfo(fe_info);
-			if (fe_info)
-				slotids.push_back(fe_info->getFrontendInfo(iFrontendInformation_ENUMS::frontendNumber));
-			else
-				slotids.push_back(-1);
-		}
-	}
-}
-
-std::map<ePtr<iRecordableService>, eServiceReference, std::less<iRecordableService*> > eNavigation::getRecordingsServices(pNavigation::RecordType type)
-{
-    std::map<ePtr<iRecordableService>, eServiceReference, std::less<iRecordableService*> > m_recordings_services_filtered;
-
-	for (std::map<ePtr<iRecordableService>, eServiceReference >::iterator it(m_recordings_services.begin()); it != m_recordings_services.end(); ++it)
-	{
-		if (m_recordings_types[it->first] & type)
-		{
-			m_recordings_services_filtered[it->first]=m_recordings_services[it->first];
-		//	eDebug("[core.cpp] getRecordingsServices: returning type %d (asked for type %d)", m_recordings_types[it->first], type);
-		}
-		//else
-		//	eDebug("[core.cpp] getRecordingsServices: not returning type %d (asked for type %d)", m_recordings_types[it->first], type);
-	}
-    return m_recordings_services_filtered;
+			recordings.push_back(it->first);
 }
 
 RESULT eNavigation::pause(int dop)

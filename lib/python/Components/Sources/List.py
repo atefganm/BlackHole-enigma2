@@ -25,13 +25,6 @@ to generate HTML."""
 		self.enableWrapAround = enableWrapAround
 		self.__style = "default"  # Style might be an optional string which can be used to define different visualisations in the skin.
 
-	def enableAutoNavigation(self, enabled):
-		try:
-			instance = self.master.master.instance
-			instance.enableAutoNavigation(enabled)
-		except AttributeError:
-			return
-
 	def setList(self, list):
 		self.__list = list
 		self.changed((self.CHANGED_ALL,))

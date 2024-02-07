@@ -48,6 +48,12 @@ SCOPE_USERETC = SCOPE_HOME
 PATH_CREATE = 0
 PATH_DONTCREATE = 1
 
+#
+# ${libdir} = /usr/lib
+# ${sysconfdir} = /etc/enigma2
+# ${datadir} = /usr/share
+#
+
 defaultPaths = {
 	SCOPE_HOME: ("", PATH_DONTCREATE),  # User home directory
 	SCOPE_LANGUAGE: (eEnv.resolve("${datadir}/enigma2/po/"), PATH_DONTCREATE),
@@ -250,7 +256,7 @@ def resolveFilename(scope, base="", path_prefix=None):
 
 
 def getPrimarySkinResolution():
-	from Components.config import config # deferred import
+	from Components.config import config  # deferred import
 	resolutions = ["480", "576", "720", "1080", "2160", "4320", "8640"]
 	resolution = None
 	skin = resolveFilename(SCOPE_SKIN, config.skin.primary_skin.value)
@@ -618,7 +624,7 @@ def getExtension(file):
 	return extension
 
 
-def mediaFilesInUse(session):
+def mediafilesInUse(session):
 	from Components.MovieList import KNOWN_EXTENSIONS
 	files = [pathBasename(x[2]) for x in lsof() if getExtension(x[2]) in KNOWN_EXTENSIONS]
 	service = session.nav.getCurrentlyPlayingServiceOrGroup()

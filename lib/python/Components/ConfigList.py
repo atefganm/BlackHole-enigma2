@@ -113,10 +113,6 @@ class ConfigList(GUIComponent):
 			for x in configList:
 				assert len(x) < 2 or isinstance(x[1], ConfigElement), "[ConfigList] Error: Entry in ConfigList '%s' must be a ConfigElement!" % str(x[1])
 
-	def enableAutoNavigation(self, enabled):
-		if self.instance:
-			self.instance.enableAutoNavigation(enabled)
-
 	def getList(self):
 		return self.__list
 
@@ -146,10 +142,6 @@ class ConfigList(GUIComponent):
 		if self.instance is not None:
 			self.instance.moveSelection(self.instance.moveEnd)
 
-
-	def refresh(self):
-		if self.instance is not None:
-			self.instance.moveSelection(self.instance.refresh)
 
 class ConfigListScreen:
 	def __init__(self, list, session=None, on_change=None, fullUI=False):
@@ -256,7 +248,7 @@ class ConfigListScreen:
 			x()
 
 	def noNativeKeys(self):
-		self["config"].enableAutoNavigation(False)
+		self["config"].instance.allowNativeKeys(False)
 
 	def handleInputHelpers(self):
 		currConfig = self["config"].getCurrent()
@@ -355,11 +347,9 @@ class ConfigListScreen:
 
 	def keyLeft(self):
 		self["config"].handleKey(ACTIONKEY_LEFT, self.entryChanged)
-		self["config"].refresh()
 
 	def keyRight(self):
 		self["config"].handleKey(ACTIONKEY_RIGHT, self.entryChanged)
-		self["config"].refresh()
 
 	def keyLast(self):
 		self["config"].handleKey(ACTIONKEY_LAST, self.entryChanged)

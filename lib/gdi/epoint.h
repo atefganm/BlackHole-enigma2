@@ -10,9 +10,6 @@ class ePoint
 public:
 	ePoint();
 	ePoint( int xpos, int ypos );
-	ePoint( float xpos, float ypos );
-	ePoint( float xpos, int ypos );
-	ePoint( int xpos, float ypos );
 
 	bool   isNull()	const;
 
@@ -66,15 +63,6 @@ inline ePoint::ePoint()
 { xp=0; yp=0; }
 
 inline ePoint::ePoint( int xpos, int ypos )
-{ xp=(int)xpos; yp=(int)ypos; }
-
-inline ePoint::ePoint( float xpos, float ypos )
-{ xp=(int)xpos; yp=(int)ypos; }
-
-inline ePoint::ePoint( float xpos, int ypos )
-{ xp=(int)xpos; yp=(int)ypos; }
-
-inline ePoint::ePoint( int xpos, float ypos )
 { xp=(int)xpos; yp=(int)ypos; }
 
 inline bool ePoint::isNull() const

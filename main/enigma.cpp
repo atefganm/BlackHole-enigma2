@@ -167,7 +167,7 @@ static const std::string getConfigCurrentSpinner(const char* key)
 	}
 
 	return "spinner"; // fallback on default system spinner
-}
+} 
 
 int exit_code;
 
@@ -404,19 +404,9 @@ const char *getEnigmaVersionString()
 	return enigma2_date;
 }
 
-const char *getE2Rev()
-{
-	return E2REV;
-}
-
 const char *getGStreamerVersionString()
 {
 	return gst_version_string();
-}
-
-const char *getBoxType()
-{
-	return BOXTYPE;
 }
 
 #include <malloc.h>
@@ -439,15 +429,9 @@ void setAnimation_speed(int speed)
 {
 	gles_set_animation_speed(speed);
 }
-
-void setAnimation_current_listbox(int a)
-{
-	gles_set_animation_listbox_func(a);
-}
 #else
 #ifndef HAVE_OSDANIMATION
 void setAnimation_current(int a) {}
 void setAnimation_speed(int speed) {}
-void setAnimation_current_listbox(int a) {}
 #endif
 #endif

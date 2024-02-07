@@ -299,7 +299,7 @@ class EventViewEPGSelect(Screen, EventViewBase):
 				"timerAdd": self.timerAdd,
 				"openSimilarList": self.openSimilarList,
 			})  # noqa: E123
-		self["key_green"] = Button("")
+		self["key_green"] = Button("Add Timer")
 
 		if singleEPGCB:
 			self["key_yellow"] = Button(_("Single EPG"))

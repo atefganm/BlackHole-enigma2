@@ -274,7 +274,7 @@ void eFbLCD::disableManualBlit()
 
 int eFbLCD::setLCDBrightness(int brightness)
 {
-	//eDebug("[eFbLCD] setLCDBrightness %d", brightness);
+	eDebug("[eFbLCD] setLCDBrightness %d", brightness);
 	FILE *f = fopen("/proc/stb/lcd/oled_brightness", "w");
 	if (f)
 	{
@@ -287,6 +287,7 @@ int eFbLCD::setLCDBrightness(int brightness)
 
 void eFbLCD::dumpLCD(bool png=true)
 {
+	eDebug("[eFbLCD] dumpLCD");
 	unsigned char *buffer, *output;
 	int mallocsize = m_xRes * m_yRes;
 	output = (unsigned char *)malloc(mallocsize*4);

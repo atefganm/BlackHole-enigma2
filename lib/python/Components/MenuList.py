@@ -10,10 +10,6 @@ class MenuList(GUIComponent):
 		self.setList(list)
 		self.enableWrapAround = enableWrapAround
 
-	def enableAutoNavigation(self, enabled):
-		if self.instance:
-			self.instance.enableAutoNavigation(enabled)
-
 	def getCurrent(self):
 		return self.l.getCurrentSelection()
 

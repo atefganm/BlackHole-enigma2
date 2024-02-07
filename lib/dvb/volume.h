@@ -1,12 +1,6 @@
 #ifndef __volume_h
 #define __volume_h
 
-#ifdef DREAMNEXTGEN
-#ifdef HAVE_ALSA
-#undef HAVE_ALSA
-#endif
-#endif
-
 #ifdef HAVE_ALSA
 #include <alsa/asoundlib.h>
 #endif
@@ -30,16 +24,14 @@ private:
 
 	bool muted;
 	int leftVol, rightVol;
-	int m_volsteps;
 
 	int checkVolume(int vol);
 
 public:
 	static eDVBVolumecontrol* getInstance();
 
-	void setVolumeSteps(int steps);
-	void volumeUp(int left = 0, int right = 0);
-	void volumeDown(int left = 0, int right = 0);
+	void volumeUp(int left = 5, int right = 5);
+	void volumeDown(int left = 5, int right = 5);
 
 	void setVolume(int left, int right);
 

@@ -247,7 +247,7 @@ class Navigation:
 	def getCurrentlyPlayingServiceOrGroup(self):
 		return self.currentlyPlayingServiceOrGroup
 
-	def recordService(self, ref, simulate=False, type=pNavigation.isUnknownRecording):
+	def recordService(self, ref, simulate=False):
 		service = None
 		if not simulate:
 			print("[Navigation] recording service:", (ref and ref.toString()))
@@ -255,7 +255,7 @@ class Navigation:
 			if ref.flags & eServiceReference.isGroup:
 				ref = getBestPlayableServiceReference(ref, eServiceReference(), simulate)
 			ref = streamrelay.streamrelayChecker(ref)
-			service = ref and self.pnav and self.pnav.recordService(ref, simulate, type)
+			service = ref and self.pnav and self.pnav.recordService(ref, simulate)
 			if service is None:
 				print("[Navigation] record returned non-zero")
 		return service
@@ -266,26 +266,13 @@ class Navigation:
 			ret = self.pnav and self.pnav.stopRecordService(service)
 		return ret
 
-	def getRecordings(self, simulate=False, type=pNavigation.isAnyRecording):
-		return self.pnav and self.pnav.getRecordings(simulate, type)
-
-	def getRecordingsServices(self, type=pNavigation.isAnyRecording):
-		return self.pnav and self.pnav.getRecordingsServices(type)
-
-	def getRecordingsServicesOnly(self, type=pNavigation.isAnyRecording):
-		return self.pnav and self.pnav.getRecordingsServicesOnly(type)
-
-	def getRecordingsTypesOnly(self, type=pNavigation.isAnyRecording):
-		return self.pnav and self.pnav.getRecordingsTypesOnly(type)
-
-	def getRecordingsSlotIDsOnly(self, type=pNavigation.isAnyRecording):
-		return self.pnav and self.pnav.getRecordingsSlotIDsOnly(type)
-
-	def getRecordingsServicesAndTypes(self, type=pNavigation.isAnyRecording):
-		return self.pnav and self.pnav.getRecordingsServicesAndTypes(type)
-
-	def getRecordingsServicesAndTypesAndSlotIDs(self, type=pNavigation.isAnyRecording):
-		return self.pnav and self.pnav.getRecordingsServicesAndTypesAndSlotIDs(type)
+	def getRecordings(self, simulate=False):
+		recs = self.pnav and self.pnav.getRecordings(simulate)
+		if not simulate and StreamServiceList:
+			for rec in recs[:]:
+				if rec.__deref__() in StreamServiceList:
+					recs.remove(rec)
+		return recs
 
 	def getCurrentService(self):
 		if not self.currentlyPlayingService:

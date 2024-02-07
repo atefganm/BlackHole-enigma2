@@ -15,8 +15,8 @@ from Screens.MessageBox import MessageBox
 from Screens.ParentalControlSetup import ProtectedScreen
 from Screens.InputBox import PinInput  # noqa: F401
 from ServiceReference import ServiceReference
+from Screens.Recordings import RecordingSettings
 from Screens.TimerEntry import TimerEntry, TimerLog
-from Screens.Setup import Setup
 from Tools.BoundFunction import boundFunction
 from Tools.FuzzyDate import FuzzyTime
 from time import time
@@ -60,7 +60,7 @@ class TimerEditList(Screen, ProtectedScreen):
 				"ok": self.openEdit,
 				"cancel": self.leave,
 				"green": self.addCurrentTimer,
-				"log": self.showLog, # KEY_INFO
+				"log": self.showLog,  # KEY_INFO
 				"left": self.left,
 				"right": self.right,
 				"up": self.up,
@@ -92,9 +92,8 @@ class TimerEditList(Screen, ProtectedScreen):
 	def createSetup(self):
 		def onSetupClose(test=None):
 			self.refill()
-			pass
 
-		self.session.openWithCallback(onSetupClose, Setup, 'recording')
+		self.session.openWithCallback(onSetupClose, RecordingSettings)
 
 	def isProtected(self):
 		return config.ParentalControl.setuppinactive.value and (not config.ParentalControl.config_sections.main_menu.value or hasattr(self.session, 'infobar') and self.session.infobar is None) and config.ParentalControl.config_sections.timer_menu.value and config.ParentalControl.servicepin[0].value
@@ -287,7 +286,7 @@ class TimerEditList(Screen, ProtectedScreen):
 			xlist.extend([(timer, True) for timer in self.session.nav.RecordTimer.processed_timers if timer.disabled and timer.end > now])
 		else:
 			xlist.extend([(timer, True) for timer in self.session.nav.RecordTimer.processed_timers])
-		if config.usage.timerlist_finished_timer_position.index: #end of list
+		if config.usage.timerlist_finished_timer_position.index:  # end of list
 			xlist.sort(key=cmp_to_key(eol_compare))
 		else:
 			xlist.sort(key=lambda x: x[0].begin)
@@ -474,7 +473,7 @@ class TimerSanityConflict(Screen):
 		self.session.openWithCallback(self.finishedEdit, TimerEntry, self["timer2"].getCurrent())
 
 	def toggleTimer(self):
-		x = self["list"].getSelectedIndex() + 1 # the first is the new timer so we do +1 here
+		x = self["list"].getSelectedIndex() + 1  # the first is the new timer so we do +1 here
 		if self.timer[x].disabled:
 			self.timer[x].disabled = False
 			self.session.nav.RecordTimer.timeChanged(self.timer[x])
@@ -514,7 +513,7 @@ class TimerSanityConflict(Screen):
 
 	def updateState(self):
 		if len(self.timer) > 1:
-			x = self["list"].getSelectedIndex() + 1 # the first is the new timer so we do +1 here
+			x = self["list"].getSelectedIndex() + 1  # the first is the new timer so we do +1 here
 			if self.timer[x] is not None:
 				if self.key_yellow_choice == self.EMPTY:
 					self["actions"].actions.update({"yellow": self.editTimer2})

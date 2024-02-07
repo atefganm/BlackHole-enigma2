@@ -164,7 +164,7 @@ void TSAudioInfoWeb::addAudio(int pid, std::string lang, std::string desc, int t
 /* eServiceWebTS                                                       */
 /********************************************************************/
 
-eServiceWebTS::eServiceWebTS(const eServiceReference &url): m_reference(url), m_pump(eApp, 1, "eServiceWebTS")
+eServiceWebTS::eServiceWebTS(const eServiceReference &url): m_reference(url), m_pump(eApp, 1, "ServiceWebTS")
 {
 	eDebug("ServiceWebTS construct!");
 	m_filename = url.path.c_str();
@@ -565,7 +565,7 @@ int eServiceWebTS::getCurrentTrack() {
 
 DEFINE_REF(eStreamThreadWeb)
 
-eStreamThreadWeb::eStreamThreadWeb(): m_messagepump(eApp, 0, "eStreamThreadWeb") {
+eStreamThreadWeb::eStreamThreadWeb(): m_messagepump(eApp, 0, "servicewebts - eStreamThreadWeb") {
 	CONNECT(m_messagepump.recv_msg, eStreamThreadWeb::recvEvent);
 	m_running = false;
 }
@@ -721,7 +721,7 @@ bool eStreamThreadWeb::scanAudioInfo(unsigned char buf[], int len)
 			if (APID == 0)
 				APID =pid;
 			lang = getDescriptor(pmt+b+5, pmt[b+4], LANGUAGE_DESCRIPTOR);
-			ainfo->addAudio(pid, lang, "AACHE", eDVBAudio::aAACHE);
+			ainfo->addAudio(pid, lang, "HEAAC", eDVBAudio::aHEAAC);
 			break;
 		}
 		b += 4 + pmt[b+4];

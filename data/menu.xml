@@ -117,9 +117,7 @@ self.session.openWithCallback(msgClosed, EpgDeleteMsg)
 
 		<!-- Menu / Setup / Recording, Playback & Timeshift -->
 		<menu key="rec" level="1" text="Recording, Playback &amp; Timeshift" weight="11">
-			<item key="recording_setup" level="0" text="Recording Settings" weight="15"><screen module="Recording" screen="RecordingSettings" /></item>
-			<item key="hdmirecord_setup" level="0" text="HDMI-In Recording Settings" weight="20" requires="HDMIin"><setup setupKey="HDMIRecord" /></item>
-			<item key="timshift_setup" level="0" text="Time Shift Settings" weight="25"><screen module="Timeshift" screen="TimeshiftSettings" /></item>
+			<item key="recording_setup" level="0" text="Recording" weight="10"><screen module="Recordings" screen="RecordingSettings" /></item>
 			<item key="playback_setup" level="0" text="Playback" weight="12"><setup id="playback" /></item>
 			<item key="timshift_setup" level="0" text="Timeshift" weight="15"><screen module="Timeshift" screen="TimeshiftSettings" /></item>
 		</menu>
@@ -182,7 +180,7 @@ self.session.open(SABnzbdSetupScreen)
 			<!-- Menu / Software Update -->
 			<menu weight="3" level="0" text="Software Update" key="softwareupdatemenu">
 				<item key="onlineupdate_setup" level="0" text="Settings" weight="1"><setup id="softwareupdate"/></item>
-				<item key="software_update" level="0" text="Software Update" weight="2"><screen module="SoftwareUpdate" screen="UpdatePlugin"/></item>
+				<item key="software_update" level="0" text="Software Update" weight="3"><screen module="SoftwareUpdate" screen="UpdatePlugin"/></item>
 			</menu>
 			<item key="input_device_setup" level="1" text="Input Devices" weight="4"><screen module="InputDeviceSetup" screen="InputDeviceSelection" /></item>
 			<item key="keyboard_setup" level="0" text="Keyboard" weight="5"><setup id="keyboard" /></item>
@@ -251,6 +249,5 @@ self.session.scart.VCRSbChanged(3)
 		<item key="H9SDswap" level="0" text="H9SDroot" requires="HasH9SD"><screen module="H9SDswap">1</screen></item>
 		<item key="restart" level="0" text="Reboot"><screen module="Standby" screen="TryQuitMainloop">2</screen></item>
 		<item key="restart_enigma" level="0" text="Restart Enigma2"><screen module="Standby" screen="TryQuitMainloop">3</screen></item>
-		<item key="maintenance_mode" level="0" text="Recovery Mode" requires="RecoveryMode"><screen module="Standby" screen="TryQuitMainloop">16</screen></item>
 	</menu>
 </menu>

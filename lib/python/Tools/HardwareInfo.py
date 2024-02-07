@@ -1,4 +1,3 @@
-from boxbranding import getBoxType, getBrandOEM, getMachineName
 from Components.About import about
 
 
@@ -15,8 +14,6 @@ class HardwareInfo:
 		try:
 			file = open("/proc/stb/info/model", "r")
 			HardwareInfo.device_name = file.readline().strip()
-			if getBrandOEM() == "dags":
-				HardwareInfo.device_name = "dm800se"
 			file.close()
 			try:
 				file = open("/proc/stb/info/version", "r")
@@ -37,9 +34,6 @@ class HardwareInfo:
 				elif "Brcm7401 V0.0" in rd:
 					HardwareInfo.device_name = "dm800"
 					print("dm800 detected!")
-				elif "MIPS 4KEc V4.8" in rd:
-					HardwareInfo.device_name = "dm7025"
-					print("dm7025 detected!")
 			except:
 				pass
 
@@ -49,28 +43,15 @@ class HardwareInfo:
 	def get_device_version(self):
 		return HardwareInfo.device_version
 
-	def get_device_model(self):
-		return getBoxType()
-
-	def get_vu_device_name(self):
-		return getBoxType()
-
-	def get_friendly_name(self):
-		return getMachineName()
-
 	def has_hdmi(self):
-		return not (HardwareInfo.device_name == 'dm800' or (HardwareInfo.device_name == 'dm8000' and HardwareInfo.device_version == None))
-
-	def linux_kernel(self):
-		try:
-			return open("/proc/version", "r").read().split(' ', 4)[2].split('-', 2)[0]
-		except:
-			return "unknown"
+		from Components.SystemInfo import SystemInfo
+		return SystemInfo["brand"] in ('xtrend', 'gigablue', 'dags', 'ixuss', 'odin', 'vuplus', 'ini', 'ebox', 'ceryon') or (SystemInfo["boxtype"] in ('dm7020hd', 'dm800se', 'dm500hd', 'dm8000') and HardwareInfo.device_version is not None)
 
 	def has_deepstandby(self):
-		return getBoxType() != 'dm800'
+		# from Components.SystemInfo import SystemInfo
+		return True  # SystemInfo["boxtype"] != 'dm800'
 
 	def is_nextgen(self):
-		if about.getCPUString() in ('BCM7346B2', 'BCM7425B2', 'BCM7429B0'):
-			return True
-		return False
+		if about.getCpuCoresInt() < 2 or about.getCPUSpeedMHzInt() < 750:
+			return False
+		return True

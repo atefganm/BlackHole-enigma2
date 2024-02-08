@@ -10,18 +10,6 @@
 #include <lib/base/ebase.h>
 #include <lib/driver/avswitch.h>
 
-const char *__MODULE__ = "eAVSwitch";
-const char *proc_hdmi_rx_monitor = "/proc/stb/hdmi-rx/0/hdmi_rx_monitor";
-const char *proc_hdmi_rx_monitor_audio = "/proc/stb/audio/hdmi_rx_monitor";
-const char *proc_policy169 = "/proc/stb/video/policy2";
-const char *proc_policy43 = "/proc/stb/video/policy";
-const char *proc_videoaspect_r = "/proc/stb/vmpeg/0/aspect";
-const char *proc_videoaspect_w = "/proc/stb/video/aspect";
-const char *proc_videomode = "/proc/stb/video/videomode";
-const char *proc_videomode_50 = "/proc/stb/video/videomode_50hz";
-const char *proc_videomode_60 = "/proc/stb/video/videomode_60hz";
-const char *proc_videomode_24 = "/proc/stb/video/videomode_24hz";
-
 eAVSwitch *eAVSwitch::instance = 0;
 
 eAVSwitch::eAVSwitch()
@@ -30,6 +18,8 @@ eAVSwitch::eAVSwitch()
 	instance = this;
 	m_video_mode = 0;
 	m_active = false;
+}
+
 
 eAVSwitch::~eAVSwitch()
 {
@@ -42,7 +32,7 @@ eAVSwitch *eAVSwitch::getInstance()
 
 bool eAVSwitch::haveScartSwitch()
 {
-	char tmp[255] = {};
+	char tmp[255];
 	int fd = open("/proc/stb/avs/0/input_choices", O_RDONLY);
 	if(fd < 0) {
 		eDebug("[eAVSwitch] cannot open /proc/stb/avs/0/input_choices: %m");
@@ -51,162 +41,9 @@ bool eAVSwitch::haveScartSwitch()
 	if (read(fd, tmp, 255) < 1)
 	{
 		eDebug("[eAVSwitch] failed to read data from /proc/stb/avs/0/input_choices: %m");
-		return false;
 	}
 	close(fd);
 	return !!strstr(tmp, "scart");
-}
-
-bool eAVSwitch::isActive()
-{
-	return m_active;
-}
-
-// Get video aspect
-int eAVSwitch::getAspect(int defaultVal, int flags) const
-{
-	int value = 0;
-	CFile::parseIntHex(&value, proc_videoaspect_r, __MODULE__, flags);
-	if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: %d", __MODULE__, "getAspect", value);
-	return defaultVal;
-}
-
-// read the preferred video modes
-// parameters flags bit ( 1 = DEBUG , 2 = SUPPRESS_NOT_EXISTS , 4 = SUPPRESS_READWRITE_ERROR)
-std::string eAVSwitch::getPreferredModes(int flags) const
-{
-
-	const char *fileName = "/proc/stb/video/videomode_edid";
-	const char *fileName2 = "/proc/stb/video/videomode_preferred";
-
-	std::string result = "";
-
-	if (access(fileName, R_OK) == 0)
-	{
-		result = CFile::read(fileName, __MODULE__, flags);
-		if (!result.empty() && result[result.length() - 1] == '\n')
-		{
-			result.erase(result.length() - 1);
-		}
-	}
-
-	if (result.empty() && access(fileName2, R_OK) == 0)
-	{
-		result = CFile::read(fileName2, __MODULE__, flags);
-		if (!result.empty() && result[result.length() - 1] == '\n')
-		{
-			result.erase(result.length() - 1);
-		}
-	}
-
-	return result;
-}
-
-// readAvailableModes
-// parameters flags bit ( 1 = DEBUG , 2 = SUPPRESS_NOT_EXISTS , 4 = SUPPRESS_READWRITE_ERROR)
-std::string eAVSwitch::readAvailableModes(int flags) const
-{
-
-	const char *fileName = "/proc/stb/video/videomode_choices";
-	std::string result = "";
-	if (access(fileName, R_OK) == 0)
-	{
-		result = CFile::read(fileName, __MODULE__, flags);
-	}
-
-	if (!result.empty() && result[result.length() - 1] == '\n')
-	{
-		result.erase(result.length() - 1);
-	}
-	if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: %s", __MODULE__, "readAvailableModes", result.c_str());
-	return result;
-}
-
-// Get progressive
-bool eAVSwitch::getProgressive(int flags) const
-{
-	int value = 0;
-	CFile::parseIntHex(&value, "/proc/stb/vmpeg/0/progressive", __MODULE__, flags);
-	if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: %d", __MODULE__, "getProgressive", value);
-	return value == 1;
-}
-
-// Get screen resolution X
-// parameters defaultVal = 0
-// parameters flags bit ( 1 = DEBUG , 2 = SUPPRESS_NOT_EXISTS , 4 = SUPPRESS_READWRITE_ERROR)
-// @return resolution value
-int eAVSwitch::getResolutionX(int defaultVal, int flags) const
-{
-	int value;
-	int ret = CFile::parseIntHex(&value, "/proc/stb/vmpeg/0/xres", __MODULE__, flags);
-
-	if (ret != 0)
-	{
-		value = defaultVal;
-	}
-	else if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: %d", __MODULE__, "getResolutionX", value);
-
-	return value;
-}
-
-// Get screen resolution Y
-// parameters defaultVal = 0
-// parameters flags bit (1 = DEBUG , 2 = SUPPRESS_NOT_EXISTS , 4 = SUPPRESS_READWRITE_ERROR)
-// @return resolution value
-int eAVSwitch::getResolutionY(int defaultVal, int flags) const
-{
-
-	int value;
-	int ret = CFile::parseIntHex(&value, "/proc/stb/vmpeg/0/yres", __MODULE__, flags);
-
-	if (ret != 0)
-	{
-		value = defaultVal;
-	}
-	else if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: %d", __MODULE__, "getResolutionY", value);
-	return value;
-}
-
-// Get FrameRate
-// parameters defaultVal
-// parameters flags bit ( 1 = DEBUG , 2 = SUPPRESS_NOT_EXISTS , 4 = SUPPRESS_READWRITE_ERROR)
-// @return
-int eAVSwitch::getFrameRate(int defaultVal, int flags) const
-{
-
-	const char *fileName = "/proc/stb/vmpeg/0/framerate";
-	int value = 0;
-	int ret = CFile::parseInt(&value, fileName, __MODULE__, flags);
-	if (ret != 0)
-	{
-		value = defaultVal;
-	}
-	else if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: %d", __MODULE__, "getFrameRate", value);
-
-	return value;
-}
-
-// Get VideoMode
-// parameters defaultVal
-// parameters flags bit ( 1 = DEBUG , 2 = SUPPRESS_NOT_EXISTS , 4 = SUPPRESS_READWRITE_ERROR)
-// @return
-std::string eAVSwitch::getVideoMode(const std::string &defaultVal, int flags) const
-{
-	std::string result = CFile::read(proc_videomode, __MODULE__, flags);
-	if (!result.empty() && result[result.length() - 1] == '\n')
-	{
-		result.erase(result.length() - 1);
-	}
-	if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: %s", __MODULE__, "getVideoMode", result.c_str());
-
-	return result;
 }
 
 void eAVSwitch::setInput(int val)
@@ -235,22 +72,9 @@ void eAVSwitch::setInput(int val)
 	close(fd);
 }
 
-// set VideoMode --> newMode
-void eAVSwitch::setVideoMode(const std::string &newMode, int flags) const
+bool eAVSwitch::isActive()
 {
-	CFile::writeStr(proc_videomode, newMode, __MODULE__, flags);
-	if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: %s", __MODULE__, "setVideoMode", newMode.c_str());
-}
-
-// @brief setAspect
-// parameters newFormat (auto, 4:3, 16:9, 16:10)
-// parameters flags bit ( 1 = DEBUG , 2 = SUPPRESS_NOT_EXISTS , 4 = SUPPRESS_READWRITE_ERROR)
-void eAVSwitch::setAspect(const std::string &newFormat, int flags) const
-{
-	CFile::writeStr(proc_videoaspect_w, newFormat, __MODULE__, flags);
-	if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: %s", __MODULE__, "setAspect", newFormat.c_str());
+	return m_active;
 }
 
 void eAVSwitch::setColorFormat(int format)
@@ -275,7 +99,7 @@ void eAVSwitch::setColorFormat(int format)
 	if (*fmt == '\0')
 		return; // invalid format
 
-	if ((fd = open("/proc/stb/avs/0/colorformat", O_WRONLY)) < 0) {
+	if ((fd = open("/proc/stb/avs/0/colorformat", O_WRONLY)) < 0) {  //NOSONAR
 		eDebug("[eAVSwitch] cannot open /proc/stb/avs/0/colorformat: %m");
 		return;
 	}
@@ -302,10 +126,18 @@ void eAVSwitch::setAspectRatio(int ratio)
 	const char *policy[] = {"letterbox", "panscan", "bestfit", "panscan", "letterbox", "panscan", "letterbox"};
 
 	int fd;
+#ifdef DREAMNEXTGEN
+	if((fd = open("/sys/class/video/screen_mode", O_WRONLY)) < 0) {
+		eDebug("[eAVSwitch] cannot open /sys/class/video/screen_mode: %m");
+		return;
+	}
+#else
 	if((fd = open("/proc/stb/video/aspect", O_WRONLY)) < 0) {
 		eDebug("[eAVSwitch] cannot open /proc/stb/video/aspect: %m");
 		return;
 	}
+#endif
+
 //	eDebug("set aspect to %s", aspect[ratio]);
 	if (write(fd, aspect[ratio], strlen(aspect[ratio])) < 1)
 	{
@@ -324,6 +156,12 @@ void eAVSwitch::setAspectRatio(int ratio)
 	}
 	close(fd);
 
+//	if((fd = open("/proc/stb/video/policy2", O_WRONLY)) < 0) {
+//		eDebug("cannot open /proc/stb/video/policy2");
+//		return;
+//	}
+//	write(fd, policy[ratio], strlen(policy[ratio]));
+//	close(fd);
 }
 
 void eAVSwitch::setVideomode(int mode)
@@ -360,11 +198,19 @@ void eAVSwitch::setVideomode(int mode)
 	}
 	else
 	{
+#ifdef DREAMNEXTGEN
+		int fd = open("/sys/class/display/mode", O_WRONLY);
+		if(fd < 0) {
+			eDebug("[eAVSwitch] cannot open /sys/class/display/mode: %m");
+			return;
+		}
+#else
 		int fd = open("/proc/stb/video/videomode", O_WRONLY);
 		if(fd < 0) {
 			eDebug("[eAVSwitch] cannot open /proc/stb/video/videomode: %m");
 			return;
 		}
+#endif
 		switch(mode) {
 			case 0:
 				if (write(fd, pal, strlen(pal)) < 1)
@@ -405,42 +251,6 @@ void eAVSwitch::setWSS(int val) // 0 = auto, 1 = auto(4:3_off)
 	}
 //	eDebug("set wss to %s", wss[val]);
 	close(fd);
-}
-
-// set Policy43
-void eAVSwitch::setPolicy43(const std::string &newPolicy, int flags) const
-{
-
-	CFile::writeStr(proc_policy43, newPolicy, __MODULE__, flags);
-
-	if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: %s", __MODULE__, "setPolicy43", newPolicy.c_str());
-}
-
-// set Policy169
-// parameters newPolicy
-void eAVSwitch::setPolicy169(const std::string &newPolicy, int flags) const
-{
-
-	CFile::writeStr(proc_policy169, newPolicy, __MODULE__, flags);
-
-	if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: %s", __MODULE__, "setPolicy169", newPolicy.c_str());
-}
-
-// set VideoSize
-// param top, left, width, height
-void eAVSwitch::setVideoSize(int top, int left, int width, int height, int flags) const
-{
-
-	CFile::writeIntHex("/proc/stb/vmpeg/0/dst_top", top, __MODULE__, flags);
-	CFile::writeIntHex("/proc/stb/vmpeg/0/dst_left", left, __MODULE__, flags);
-	CFile::writeIntHex("/proc/stb/vmpeg/0/dst_width", width, __MODULE__, flags);
-	CFile::writeIntHex("/proc/stb/vmpeg/0/dst_height", height, __MODULE__, flags);
-	CFile::writeInt("/proc/stb/vmpeg/0/dst_apply", 1, __MODULE__, flags);
-
-	if (flags & FLAGS_DEBUG)
-		eDebug("[%s] %s: T:%d L:%d W:%d H:%d", __MODULE__, "setVideoSize", top, left, width, height);
 }
 
 //FIXME: correct "run/startlevel"

@@ -4,16 +4,11 @@
 #include <lib/base/object.h>
 #include <lib/python/connections.h>
 
-class eSocketNotifier;
-
-class eAVSwitch: public sigc::trackable
+class eAVSwitch
 {
 	static eAVSwitch *instance;
 	int m_video_mode;
 	bool m_active;
-	ePtr<eSocketNotifier> m_fp_notifier;
-	void fp_event(int what);
-	int m_fp_fd;
 #ifdef SWIG
 	eAVSwitch();
 	~eAVSwitch();
@@ -26,7 +21,6 @@ public:
 #endif
 	static eAVSwitch *getInstance();
 	bool haveScartSwitch();
-	int getVCRSlowBlanking();
 	int getAspect(int defaultVal = 0, int flags = 0) const;
 	int getFrameRate(int defaultVal = 50000, int flags = 0) const;
 	bool getProgressive(int flags = 0) const;
@@ -54,7 +48,6 @@ public:
 		FLAGS_SUPPRESS_READWRITE_ERROR = 4
 	};
 
-	PSignal1<void, int> vcr_sb_notifier;
 };
 
 #endif

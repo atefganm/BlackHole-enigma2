@@ -12,6 +12,7 @@
 #include <lib/base/wrappers.h>
 #include <lib/base/cfile.h>
 #include <lib/nav/core.h>
+#include <lib/base/nconfig.h>
 #include <lib/dvb/encoder.h>
 #include <lib/dvb/pmt.h>
 #include <lib/service/service.h>

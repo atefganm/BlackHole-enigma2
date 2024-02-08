@@ -32,7 +32,7 @@ eDVBCIInterfaces *eDVBCIInterfaces::instance = 0;
 pthread_mutex_t eDVBCIInterfaces::m_pmt_handler_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 pthread_mutex_t eDVBCIInterfaces::m_slot_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 
-static char* readInputCI(int NimNumber)
+char* eDVBCISlot::readInputCI(int tuner_no)
 {
 	char id1[] = "NIM Socket";
 	char id2[] = "Input_Name";
@@ -53,7 +53,7 @@ static char* readInputCI(int NimNumber)
 
 			p += strlen(id1);
 			p += strcspn(p, keys1);
-			if (*p && strtol(p, 0, 0) == NimNumber)
+			if (*p && strtol(p, 0, 0) == tuner_no)
 				break;
 		}
 
@@ -86,15 +86,11 @@ static char* readInputCI(int NimNumber)
 	return inputName;
 }
 
-static std::string getTunerLetterDM(int NimNumber)
+std::string eDVBCISlot::getTunerLetterDM(int tuner_no)
 {
-	char *srcCI = readInputCI(NimNumber);
-	if (srcCI) {
-		std::string ret = std::string(srcCI);
-		free(srcCI);
-		return ret;
-	}
-	return eDVBCISlot::getTunerLetter(NimNumber);
+	char *srcCI = readInputCI(tuner_no);
+	if (srcCI) return std::string(srcCI);
+	return eDVBCISlot::getTunerLetter(tuner_no);
 }
 
 eDVBCIInterfaces::eDVBCIInterfaces()
@@ -134,8 +130,8 @@ eDVBCIInterfaces::eDVBCIInterfaces()
 
 	for (eSmartPtrList<eDVBCISlot>::iterator it(m_slots.begin()); it != m_slots.end(); ++it)
 #ifdef DREAMBOX_DUAL_TUNER
-		it->setSource(getTunerLetterDM(0));
-#else 
+		it->setSource(eDVBCISlot::getTunerLetterDM(0));
+#else
 		it->setSource("A");
 #endif
 
@@ -149,8 +145,8 @@ eDVBCIInterfaces::eDVBCIInterfaces()
 			break;
 
 #ifdef DREAMBOX_DUAL_TUNER
-		setInputSource(tuner_no, getTunerLetterDM(tuner_no));
-#else 
+		setInputSource(tuner_no, eDVBCISlot::getTunerLetterDM(tuner_no));
+#else
 		setInputSource(tuner_no, eDVBCISlot::getTunerLetter(tuner_no));
 #endif
 	}
@@ -382,7 +378,11 @@ void eDVBCIInterfaces::ciRemoved(eDVBCISlot *slot)
 		if (slot->linked_next)
 			slot->linked_next->setSource(slot->current_source);
 		else // last CI in chain
+#ifdef DREAMBOX_DUAL_TUNER
+			setInputSource(slot->current_tuner, eDVBCISlot::getTunerLetterDM(slot->current_tuner));
+#else
 			setInputSource(slot->current_tuner, eDVBCISlot::getTunerLetter(slot->current_tuner));
+#endif
 		slot->linked_next = 0;
 		slot->use_count=0;
 		slot->plugged=true;
@@ -654,8 +654,8 @@ void eDVBCIInterfaces::recheckPMTHandlers()
 							{
 								setInputSource(tunernum, ci_source.str());
 #ifdef DREAMBOX_DUAL_TUNER
-								ci_it->setSource(getTunerLetterDM(tunernum));
-#else 
+								ci_it->setSource(eDVBCISlot::getTunerLetterDM(tunernum));
+#else
 								ci_it->setSource(eDVBCISlot::getTunerLetter(tunernum));
 #endif
 							}
@@ -787,11 +787,7 @@ void eDVBCIInterfaces::removePMTHandler(eDVBServicePMTHandler *pmthandler)
 					{
 						case finish_use_tuner_a:
 						{
-#ifdef DREAMBOX_DUAL_TUNER
-							finish_source = getTunerLetterDM(0);
-#else
 							finish_source = "A";
-#endif
 							break;
 						}
 
@@ -814,11 +810,7 @@ void eDVBCIInterfaces::removePMTHandler(eDVBServicePMTHandler *pmthandler)
 					if(finish_source == "")
 					{
 						eDebug("[CI] warning: CI streaming finish mode not set, assuming \"tuner A\"");
-#ifdef DREAMBOX_DUAL_TUNER
-							finish_source = getTunerLetterDM(0);
-#else
 						finish_source = "A";
-#endif
 					}
 
 					slot->setSource(finish_source);
@@ -830,7 +822,11 @@ void eDVBCIInterfaces::removePMTHandler(eDVBServicePMTHandler *pmthandler)
 				if (slot->linked_next)
 					slot->linked_next->setSource(slot->current_source);
 				else
+#ifdef DREAMBOX_DUAL_TUNER
+					setInputSource(slot->current_tuner, eDVBCISlot::getTunerLetterDM(slot->current_tuner));
+#else
 					setInputSource(slot->current_tuner, eDVBCISlot::getTunerLetter(slot->current_tuner));
+#endif
 
 				if (base_slot != slot)
 				{

@@ -26,12 +26,6 @@
 
 #include <dvbsi++/ca_program_map_section.h>
 
-
-eDVBCIInterfaces *eDVBCIInterfaces::instance = 0;
-
-pthread_mutex_t eDVBCIInterfaces::m_pmt_handler_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-pthread_mutex_t eDVBCIInterfaces::m_slot_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-
 char* eDVBCISlot::readInputCI(int tuner_no)
 {
 	char id1[] = "NIM Socket";
@@ -92,6 +86,11 @@ std::string eDVBCISlot::getTunerLetterDM(int tuner_no)
 	if (srcCI) return std::string(srcCI);
 	return eDVBCISlot::getTunerLetter(tuner_no);
 }
+
+eDVBCIInterfaces *eDVBCIInterfaces::instance = 0;
+
+pthread_mutex_t eDVBCIInterfaces::m_pmt_handler_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+pthread_mutex_t eDVBCIInterfaces::m_slot_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 
 eDVBCIInterfaces::eDVBCIInterfaces()
  : m_messagepump_thread(this,1, "dvbci"), m_messagepump_main(eApp,1, "dvbci"), m_runTimer(eTimer::create(this))

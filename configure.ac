@@ -437,6 +437,26 @@ if test x"$withbwlcd128" != xno ; then
 fi
 AM_CONDITIONAL(HAVE_BWLCD128, test x"$withbwlcd128" != xno)
 
+AC_ARG_WITH(fullgraphiclcd,
+	AC_HELP_STRING([--with-fullgraphiclcd], [display right_half_vfd_icons from skin(for ultimo), yes or no]),
+	[[withfullgraphiclcd=$withval]],
+	[[withfullgraphiclcd=no]]
+)
+if test x"$withfullgraphiclcd" != xno ; then
+	AC_DEFINE(HAVE_FULLGRAPHICLCD, 1,[Define when display right_half_vfd_icons from skin, for ultimo])
+fi
+AM_CONDITIONAL(HAVE_FULLGRAPHICLCD, test x"$withfullgraphiclcd" != xno)
+
+AC_ARG_WITH(gigabluelcd,
+	AC_HELP_STRING([--with-gigabluelcd], [use fix color map in color display, yes or no]),
+	[[withgigabluelcd=$withval]],
+	[[withgigabluelcd=no]]
+)
+if test x"$withgigabluelcd" != xno ; then
+	AC_DEFINE(HAVE_GIGABLUELCD, 1,[Define when using a 220x176 color display device])
+fi
+AM_CONDITIONAL(HAVE_GIGABLUELCD, test x"$withgigabluelcd" != xno)
+
 AC_ARG_WITH(oldpvr,
 	AS_HELP_STRING([--with-oldpvr], [use /dev/misc/pvr instead of /dev/dvb/adapterX/dvrX, yes or no]),
 	[[witholdpvr=$withval]],

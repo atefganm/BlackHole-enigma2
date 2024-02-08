@@ -2,7 +2,7 @@ from ast import literal_eval
 from os import listdir
 from hashlib import md5
 from os.path import isfile, join as pathjoin
-from enigma import Misc_Options, eDVBCIInterfaces, eDVBResourceManager
+from enigma import Misc_Options, eDVBCIInterfaces, eDVBResourceManager, eGetEnigmaDebugLvl
 
 from Components.About import getChipSetString
 from Components.RcModel import rc_model
@@ -197,6 +197,7 @@ def hasInitCam():
 
 
 
+SystemInfo["InDebugMode"] = eGetEnigmaDebugLvl() >= 4
 SystemInfo["CanKexecVu"] = SystemInfo["boxtype"] in ("vusolo4k", "vuduo4k", "vuduo4kse", "vuultimo4k", "vuuno4k", "vuuno4kse", "vuzero4k") and not SystemInfo["HasKexecMultiboot"]
 SystemInfo["HasUsbhdd"] = {}
 SystemInfo["ArchIsARM"] = ARCHITECTURE.startswith(("arm", "cortex"))

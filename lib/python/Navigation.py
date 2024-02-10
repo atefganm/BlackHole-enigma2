@@ -247,7 +247,7 @@ class Navigation:
 	def getCurrentlyPlayingServiceOrGroup(self):
 		return self.currentlyPlayingServiceOrGroup
 
-	def recordService(self, ref, simulate=False, type=pNavigation.isUnknownRecording)
+	def recordService(self, ref, simulate=False, type=pNavigation.isUnknownRecording):
 		service = None
 		if not simulate:
 			print("[Navigation] recording service:", (ref and ref.toString()))
@@ -278,8 +278,14 @@ class Navigation:
 	def getRecordingsTypesOnly(self, type=pNavigation.isAnyRecording):
 		return self.pnav and self.pnav.getRecordingsTypesOnly(type)
 
+	def getRecordingsSlotIDsOnly(self, type=pNavigation.isAnyRecording):
+		return self.pnav and self.pnav.getRecordingsSlotIDsOnly(type)
+
 	def getRecordingsServicesAndTypes(self, type=pNavigation.isAnyRecording):
 		return self.pnav and self.pnav.getRecordingsServicesAndTypes(type)
+
+	def getRecordingsServicesAndTypesAndSlotIDs(self, type=pNavigation.isAnyRecording):
+		return self.pnav and self.pnav.getRecordingsServicesAndTypesAndSlotIDs(type)
 
 	def getCurrentService(self):
 		if not self.currentlyPlayingService:

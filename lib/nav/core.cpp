@@ -195,10 +195,23 @@ void eNavigation::getRecordingsTypesOnly(std::vector<pNavigation::RecordType> &r
 		if (m_recordings_types[it->first] & type)
 		{
 			returnedTypes.push_back(it->second);
-		//	eDebug("[core.cpp] getRecordingsTypesOnly: returning type %d (asked for type %d)", m_recordings_types[it->first], type);
 		}
-		//else
-		//	eDebug("[core.cpp] getRecordingsTypesOnly: not returning type %d (asked for type %d)", m_recordings_types[it->first], type);
+	}
+}
+
+void eNavigation::getRecordingsSlotIDsOnly(std::vector<int> &slotids, pNavigation::RecordType type)
+{
+	for (std::map<ePtr<iRecordableService>, eServiceReference>::iterator it(m_recordings_services.begin()); it != m_recordings_services.end(); ++it)
+	{
+		if (m_recordings_types[it->first] & type)
+		{
+			ePtr<iFrontendInformation> fe_info;
+			it->first->frontendInfo(fe_info);
+			if (fe_info)
+				slotids.push_back(fe_info->getFrontendInfo(iFrontendInformation_ENUMS::frontendNumber));
+			else
+				slotids.push_back(-1);
+		}
 	}
 }
 

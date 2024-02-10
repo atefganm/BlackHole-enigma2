@@ -256,7 +256,9 @@ int eListboxServiceContent::getPrevMarkerPos()
 		return 0;
 	list::iterator i(m_cursor);
 	int index = m_cursor_number;
-	while (index) // Find marker for this section
+
+	// if the search is starting part way through a section return to the start of the current section
+	while (index)
 	{
 		--i;
 		--index;
@@ -264,12 +266,10 @@ int eListboxServiceContent::getPrevMarkerPos()
 			break;
 	}
 
-	//eDebug("[eListboxServiceContent] prevMarkerIndex= %i; curSelIndex= %i; index= %i", cursorResolve(prevMarkerIndex), cursorResolve(m_cursor_number), index);
-
-	// if currently selected service is not the first after the marker found - return the found marker index
+	// if the search started from part way through the current section return now because this is the previous visible marker
 	if (cursorResolve(index) + 1 != cursorResolve(m_cursor_number)) return cursorResolve(index);
 
-
+	// search for visible marker index of previous section
 	while (index)
 	{
 		--i;

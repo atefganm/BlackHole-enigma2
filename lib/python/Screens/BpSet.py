@@ -1,6 +1,7 @@
 from Screens.Screen import Screen
 from Screens.MessageBox import MessageBox
 from Screens.Standby import TryQuitMainloop
+from boxbranding import getBrandOEM, getBoxType
 from Screens.VirtualKeyBoard import VirtualKeyBoard
 from Components.About import getChipSetString
 from Components.ActionMap import ActionMap
@@ -10,7 +11,6 @@ from Components.Pixmap import Pixmap
 from Components.ConfigList import ConfigListScreen
 from Components.config import getConfigListEntry, config, ConfigYesNo, ConfigText, ConfigSelection, ConfigClock, ConfigNumber, NoSave
 from Components.Sources.List import List
-from Components.SystemInfo import SystemInfo
 from Components.Network import iNetwork
 from Tools.LoadPixmap import LoadPixmap
 from Tools.Directories import fileExists, pathExists, resolveFilename, SCOPE_CURRENT_SKIN
@@ -100,8 +100,10 @@ class DeliteSettings(Screen):
 		elif self.sel == 13:
 			self.session.open(Setup, "epgsettings")
 		elif self.sel == 14:
-			from Screens.Recordings import RecordingSettings
-			self.session.open(RecordingSettings)
+			self.session.open(Setup, "recording")
+		elif self.sel == 15:
+			from Screens.RecordPaths import RecordPathsSettings
+			self.session.open(RecordPathsSettings)
 		elif self.sel == 16:
 			self.session.open(Setup, "subtitlesetup")
 		elif self.sel == 17:
@@ -966,21 +968,21 @@ class BhSpeedUp(Screen, ConfigListScreen):
 		["MiniDlna UPnP Server", "enigma2-plugin-extensions-dlnaserver"],
 		]
 
-		if SystemInfo["boxtype"] in ("vuduo", "vuuno", "vuultimo", "vuzero", "vusolo2", "vusolose", "vuduo2", "osninoplus", "osninopro"):
+		if getBoxType() in ("vuduo", "vuuno", "vuultimo", "vuzero", "vusolo2", "vusolose", "vuduo2", "osninoplus", "osninopro"):
 			self.pluglist.append(["HbbTV", "enigma2-plugin-extensions-hbbtv"])
-		elif SystemInfo["brand"] == "vuplus" and SystemInfo["boxtype"] != "vusolo":
+		elif getBrandOEM() == "vuplus" and getBoxType() != "vusolo":
 			self.pluglist.append(["ChromiumOS", "enigma2-plugin-extensions-chromium"])
 			self.pluglist.append(["HbbTV", "enigma2-plugin-extensions-webkithbbtv"])
-		elif SystemInfo["brand"] != "vuplus" and SystemInfo["brand"] != "abcom" and SystemInfo["brand"] != "airdigital" and SystemInfo["brand"] != "maxytec" and SystemInfo["boxtype"] != "osninoplus" and SystemInfo["boxtype"] != "osninopro" and SystemInfo["boxtype"] != "gbquad4k" and SystemInfo["boxtype"] != "gbue4k" and SystemInfo["boxtype"] != "sfx6008" and SystemInfo["boxtype"] != "sfx6018":
+		elif getBrandOEM() != "vuplus" and getBrandOEM() != "abcom" and getBrandOEM() != "airdigital" and getBoxType() != "osninoplus" and getBoxType() != "osninopro" and getBoxType() != "gbquad4k" and getBoxType() != "gbue4k" and getBoxType() != "sfx6008" and getBoxType() != "sfx6018":
 			self.pluglist.append(["HbbTV", "enigma2-plugin-extensions-hbbtv-webkit"])
-		elif SystemInfo["brand"] == "abcom" or SystemInfo["boxtype"] == "zgemmah9twinse" or SystemInfo["boxtype"] == "zgemmah11s":
+		elif getBrandOEM() == "abcom" or getBoxType() == "zgemmah9twinse" or getBoxType() == "zgemmah11s":
 			self.pluglist.append(["HbbTV", "enigma2-plugin-extensions-openhbbtvbrowser"])
-		elif SystemInfo["brand"] == "gigablue" and SystemInfo["boxtype"] == "gbquad4k" or SystemInfo["boxtype"] == "gbue4k":
+		elif getBrandOEM() == "gigablue" and getBoxType() == "gbquad4k" or getBoxType() == "gbue4k":
 			self.pluglist.append(["HbbTV", "enigma2-plugin-extensions-hbbtv-gb"])
-		elif SystemInfo["boxtype"] == "zgemmah7" or SystemInfo["boxtype"] == "novaler4kpro":
+		elif getBoxType() == "zgemmah7":
 			self.pluglist.append(["HbbTV", "enigma2-plugin-extensions-hbbtv-qt"])
 
-		if SystemInfo["boxtype"] not in ("vusolo", "vuduo", "vuultimo", "vuuno", "vuzero", "osninoplus", "osninopro", "zgemmah82h", "sfx6008", "sfx6018"):
+		if getBoxType() not in ("vusolo", "vuduo", "vuultimo", "vuuno", "vuzero", "osninoplus", "osninopro", "zgemmah82h", "sfx6008", "sfx6018"):
 			self.pluglist.append(["Kodi", "enigma2-plugin-extensions-kodi"])
 
 		if getChipSetString() in ("3798mv200", "3798mv300", "hi3798mv200", "hi3798mv200h", "hi3798mv200advca", "hi3798mv300"):

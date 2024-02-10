@@ -60,6 +60,7 @@ fbClass::fbClass(const char *fb)
 		goto nolfb;
 	}
 
+
 	if (ioctl(fbFd, FBIOGET_VSCREENINFO, &screeninfo)<0)
 	{
 		eDebug("[fb] FBIOGET_VSCREENINFO: %m");
@@ -174,7 +175,7 @@ nolfb:
 		::close(fbFd);
 		fbFd = -1;
 	}
-	eDebug("[fb] framebuffer %s not available", fb);
+	eDebug("[fb] framebuffer not available");
 	return;
 }
 
@@ -194,14 +195,19 @@ int fbClass::showConsole(int state)
 
 int fbClass::SetMode(int nxRes, int nyRes, int nbpp)
 {
-	if (fbFd < 0) return -1;
 #ifdef CONFIG_ION
 	/* unmap old framebuffer with old size */
 	if (lfb)
 		munmap(lfb, stride * screeninfo.yres_virtual);
 #endif
+
 	screeninfo.xres_virtual=screeninfo.xres=nxRes;
+#ifdef DREAMNEXTGEN
+	screeninfo.yres_virtual=(screeninfo.yres=nyRes)*3;
+	screeninfo.activate = FB_ACTIVATE_ALL;
+#else
 	screeninfo.yres_virtual=(screeninfo.yres=nyRes)*2;
+#endif
 	screeninfo.height=0;
 	screeninfo.width=0;
 	screeninfo.xoffset=screeninfo.yoffset=0;
@@ -244,7 +250,11 @@ int fbClass::SetMode(int nxRes, int nyRes, int nbpp)
 		}
 		eDebug("[fb] double buffering not available.");
 	} else
+#ifdef DREAMNEXTGEN
+		eDebug("[fb] triple buffering available!");
+#else
 		eDebug("[fb] double buffering available!");
+#endif
 
 	m_number_of_pages = screeninfo.yres_virtual / nyRes;
 
@@ -288,7 +298,6 @@ void fbClass::getMode(int &xres, int &yres, int &bpp)
 
 int fbClass::setOffset(int off)
 {
-	if (fbFd < 0) return -1;
 	screeninfo.xoffset = 0;
 	screeninfo.yoffset = off;
 	return ioctl(fbFd, FBIOPAN_DISPLAY, &screeninfo);
@@ -297,13 +306,11 @@ int fbClass::setOffset(int off)
 int fbClass::waitVSync()
 {
 	int c = 0;
-	if (fbFd < 0) return -1;
 	return ioctl(fbFd, FBIO_WAITFORVSYNC, &c);
 }
 
 void fbClass::blit()
 {
-	if (fbFd < 0) return;
 #if !defined(CONFIG_ION)
 	if (m_manual_blit == 1) {
 		if (ioctl(fbFd, FBIO_BLIT) < 0)
@@ -334,7 +341,6 @@ fbClass::~fbClass()
 
 int fbClass::PutCMAP()
 {
-	if (fbFd < 0) return -1;
 	return ioctl(fbFd, FBIOPUTCMAP, &cmap);
 }
 
@@ -365,7 +371,6 @@ void fbClass::unlock()
 
 void fbClass::enableManualBlit()
 {
-	if (fbFd < 0) return;
 #ifndef CONFIG_ION
 	unsigned char tmp = 1;
 	if (ioctl(fbFd,FBIO_SET_MANUAL_BLIT, &tmp)<0)
@@ -379,7 +384,6 @@ void fbClass::disableManualBlit()
 {
 #ifndef CONFIG_ION
 	unsigned char tmp = 0;
-	if (fbFd < 0) return;
 	if (ioctl(fbFd,FBIO_SET_MANUAL_BLIT, &tmp)<0)
 		eDebug("[fb] FBIO_SET_MANUAL_BLIT %m");
 	else

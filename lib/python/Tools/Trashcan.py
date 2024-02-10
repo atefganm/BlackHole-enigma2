@@ -1,5 +1,6 @@
 from os import access, mkdir, path as ospath, rmdir, stat, statvfs, walk, W_OK
 import enigma
+from enigma import pNavigation
 import time
 
 from Components.config import config
@@ -65,6 +66,7 @@ class Trashcan:
 		self.gotRecordEvent(None, None)
 
 	def gotRecordEvent(self, service, event):
+		self.recordings = len(self.session.nav.getRecordings(False,pNavigation.isRealRecording))
 		if event == enigma.iRecordableService.evEnd:
 			self.cleanIfIdle()
 
@@ -152,7 +154,8 @@ class CleanTrashTask(Components.Task.PythonTask):
 			if parts[1] == "/media/autofs":
 				continue
 			# skip network mounts unless the option to clean them is set
-			if not config.usage.movielist_trashcan_network_clean.value and parts[1].startswith(("/media/net", "/media/autofs")):
+			if (not config.usage.movielist_trashcan_network_clean.value and
+				(parts[1].startswith("/media/net") or parts[1].startswith("/media/autofs"))):
 				continue
 			# one trashcan in the root, one in movie subdirectory
 			trashcanLocations.add(parts[1])

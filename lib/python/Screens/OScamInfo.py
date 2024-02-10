@@ -238,7 +238,7 @@ class OscamInfo:
 					if "version" in dataXML.attrib:
 						self.version = dataXML.attrib["version"]
 					else:
-						self.version = "-"
+						self.version = "n/a"
 					return self.version
 				status = dataXML.find("status")
 				clients = status.findall("client")
@@ -254,13 +254,13 @@ class OscamInfo:
 					if "ecmtime" in client.find("request").attrib:
 						ecmtime = client.find("request").attrib["ecmtime"]
 						if ecmtime == "0" or ecmtime == "":
-							ecmtime = _("-")
+							ecmtime = _("n/a")
 						else:
 							ecmtime = str(float(ecmtime) / 1000)[:5]
 					else:
-						ecmtime = _("-")
+						ecmtime = _("n/a")
 					srvname = client.find("request").text
-					srvname_short = _("-")
+					srvname_short = _("n/a")
 					if srvname is not None:
 						srvname_short = srvname.split(":")[1].strip() if ":" in srvname else srvname
 					if proto.lower() == "dvbapi":
@@ -322,10 +322,10 @@ class OscamInfo:
 			if "revision" in dataXML.attrib:
 				self.version = dataXML.attrib["revision"]
 			else:
-				self.version = _("-")
+				self.version = _("n/a")
 			return self.version
 		else:
-			self.version = _("-")
+			self.version = _("n/a")
 		return self.version
 
 	def getTotalCards(self, reader):
@@ -856,7 +856,7 @@ class oscInfo(Screen, OscamInfo):
 		if self.listchange:
 			self.listchange = False
 			self["output"].l.setItemHeight(int(self.itemheight * f))
-			self["output"].instance.setScrollbarMode(0)  # "showOnDemand"
+			self["output"].instance.setScrollbarMode(0) #"showOnDemand"
 			self.rows = int(self["output"].instance.size().height() / (self.itemheight * f))
 			if self.what != "l" and self.rows < len(self.out):
 				self.enableScrolling(True)
@@ -1188,7 +1188,7 @@ class OscamInfoConfigScreen(ConfigListScreen, Screen):
 	def __init__(self, session, msg=None):
 		Screen.__init__(self, session)
 		self.setTitle(_("%s Info - Configuration") % check_NAMEBIN2())
-		self["status"] = StaticText(_("Error:\n%s") % msg if msg is not None else "")  # what is this?
+		self["status"] = StaticText(_("Error:\n%s") % msg if msg is not None else "") # what is this?
 		ConfigListScreen.__init__(self, [], session=session, on_change=self.changedEntry, fullUI=True)
 		self.createSetup()
 

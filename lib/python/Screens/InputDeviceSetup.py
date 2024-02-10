@@ -7,9 +7,9 @@ from Components.Sources.List import List
 from Components.config import config, ConfigYesNo, getConfigListEntry, ConfigSelection
 from Components.ConfigList import ConfigListScreen
 from Components.ActionMap import ActionMap, HelpableActionMap
-from Components.SystemInfo import SystemInfo
 from Tools.Directories import resolveFilename, SCOPE_CURRENT_SKIN
 from Tools.LoadPixmap import LoadPixmap
+from boxbranding import getBoxType, getMachineBrand, getMachineName, getMachineBuild
 
 
 class InputDeviceSelection(Screen, HelpableScreen):
@@ -128,7 +128,7 @@ class InputDeviceSetup(ConfigListScreen, Screen):
 		self["introduction"] = StaticText()
 
 		# for generating strings into .po only
-		devicenames = [_("%s %s front panel") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]), _("%s %s remote control (native)") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]), _("%s %s advanced remote control (native)") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]), _("%s %s ir keyboard") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]), _("%s %s ir mouse") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"])]  # noqa: F841
+		devicenames = [_("%s %s front panel") % (getMachineBrand(), getMachineName()), _("%s %s remote control (native)") % (getMachineBrand(), getMachineName()), _("%s %s advanced remote control (native)") % (getMachineBrand(), getMachineName()), _("%s %s ir keyboard") % (getMachineBrand(), getMachineName()), _("%s %s ir mouse") % (getMachineBrand(), getMachineName())]  # noqa: F841
 
 		self.createSetup()
 		self.onLayoutFinish.append(self.layoutFinished)
@@ -217,7 +217,7 @@ class InputDeviceSetup(ConfigListScreen, Screen):
 
 class RemoteControlType(ConfigListScreen, Screen):
 	odinRemote = "OdinM9"
-	if SystemInfo["boxtype"] == "maram9":
+	if getBoxType() == "maram9":
 		odinRemote = "MaraM9"
 
 	rcList = [
@@ -243,7 +243,7 @@ class RemoteControlType(ConfigListScreen, Screen):
 		("24", _("Axas E4HD Ultra")),
 		("25", _("Zgemma H9/I55Plus old Model")),
 		("26", _("Protek 4K UHD/HD61")),
-		("27", _("HD60/Multiboxpro")),
+		("27", _("HD60")),
 		("28", _("H7/H9/H9COMBO/H10 new Model")),
 		("30", _("PULSe 4K/4K Mini"))
 	]
@@ -284,7 +284,6 @@ class RemoteControlType(ConfigListScreen, Screen):
 		("protek4k", 26),
 		("hd61", 26),
 		("hd60", 27),
-		("multiboxpro", 27),
 		("h7", 28),  # new model
 		("h9", 28),  # new model
 		("h9combo", 28),
@@ -319,8 +318,8 @@ class RemoteControlType(ConfigListScreen, Screen):
 		self.getDefaultRcType()
 
 	def getDefaultRcType(self):
-		boxtype = SystemInfo["model"]
-		procBoxtype = iRcTypeControl.SystemInfo["boxtype"]
+		boxtype = getMachineBuild()
+		procBoxtype = iRcTypeControl.getBoxType()
 		print("[InputDevice] procBoxtype = %s, self.boxType = %s" % (procBoxtype, boxtype))
 		for x in self.defaultRcList:
 			if x[0] in boxtype or x[0] in procBoxtype:

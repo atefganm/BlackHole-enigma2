@@ -122,7 +122,9 @@ eDVBResourceManager::eDVBResourceManager()
 	if (fd >= 0)
 		close(fd);
 
-	if (!strncmp(tmp, "dm8000\n", rd))
+	if (!strncmp(tmp, "dm7025\n", rd))
+		m_boxtype = DM7025;
+	else if (!strncmp(tmp, "dm8000\n", rd))
 		m_boxtype = DM8000;
 	else if (!strncmp(tmp, "dm800\n", rd))
 		m_boxtype = DM800;
@@ -150,57 +152,18 @@ eDVBResourceManager::eDVBResourceManager()
 		m_boxtype = DREAMTWO;
 	else if (!strncmp(tmp, "seven\n", rd))
 		m_boxtype = DREAMSEVEN;
-	else if (!strncmp(tmp, "Gigablue\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gb800solo\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gb800se\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gb800ue\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gb800seplus\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gb800ueplus\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbipbox\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbquad\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbquadplus\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbultra\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbultrase\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbultraue\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbultraueh\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbx1\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbx2\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbx3\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbx3h\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbquad4k\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbue4k\n", rd))
-		m_boxtype = GIGABLUE;
-	else if (!strncmp(tmp, "gbx34k\n", rd))
-		m_boxtype = GIGABLUE;
 	else {
-		eDebug("[eDVBResourceManager] boxtype detection via /proc/stb/info not possible... use fallback via demux count!");
+		eDebug("boxtype detection via /proc/stb/info not possible... use fallback via demux count!\n");
 		if (m_demux.size() == 3)
 			m_boxtype = DM800;
+		else if (m_demux.size() < 5)
+			m_boxtype = DM7025;
 		else
 			m_boxtype = DM8000;
 	}
 
-	eDebug("[eDVBResourceManager] found %zd adapter, %zd frontends(%zd sim) and %zd demux, boxtype %d",
-		m_adapter.size(), m_frontend.size(), m_simulate_frontend.size(), m_demux.size(), m_boxtype);
-
+	eDebug("[eDVBResourceManager] found %zd adapter, %zd frontends(%zd sim) and %zd demux",
+		m_adapter.size(), m_frontend.size(), m_simulate_frontend.size(), m_demux.size());
 	m_fbcmng = new eFBCTunerManager(instance);
 
 	CONNECT(m_releaseCachedChannelTimer->timeout, eDVBResourceManager::releaseCachedChannel);

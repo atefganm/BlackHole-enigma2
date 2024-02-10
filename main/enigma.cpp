@@ -167,7 +167,7 @@ static const std::string getConfigCurrentSpinner(const char* key)
 	}
 
 	return "spinner"; // fallback on default system spinner
-} 
+}
 
 int exit_code;
 
@@ -409,11 +409,6 @@ const char *getE2Rev()
 	return E2REV;
 }
 
-const char *getOARev()
-{
-	return OAREV;
-}
-
 const char *getGStreamerVersionString()
 {
 	return gst_version_string();
@@ -444,9 +439,15 @@ void setAnimation_speed(int speed)
 {
 	gles_set_animation_speed(speed);
 }
+
+void setAnimation_current_listbox(int a)
+{
+	gles_set_animation_listbox_func(a);
+}
 #else
 #ifndef HAVE_OSDANIMATION
 void setAnimation_current(int a) {}
 void setAnimation_speed(int speed) {}
+void setAnimation_current_listbox(int a) {}
 #endif
 #endif

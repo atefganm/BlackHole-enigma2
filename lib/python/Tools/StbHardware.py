@@ -16,14 +16,17 @@ def getFPVersion():
 			version = fileReadLine("/proc/stb/info/micomver", source=MODULE_NAME)
 		elif getBoxType() in ('dm7080', 'dm820', 'dm520', 'dm525', 'dm900', 'dm920'):
 			version = open("/proc/stb/fp/version", "r").read()
+		elif getBoxType() in ('dreamone', 'dreamtwo'):
+			version = open("/proc/stb/fp/version", "r").read()
 		else:
 			version = int(open("/proc/stb/fp/version", "r").read())
-	except IOError:
-		try:
-			with open("/dev/dbox/fp0") as fd:
-				version = ioctl(fd.fileno(), 0)
-		except (IOError, OSError) as err:
-			print("[StbHardware] Error %d: Unable to access '/dev/dbox/fp0', getFPVersion failed!  (%s)" % (err.errno, err.strerror))
+	except OSError:
+		if isfile("/dev/dbox/fp0"):
+			try:
+				with open("/dev/dbox/fp0") as fd:
+					version = ioctl(fd.fileno(), 0)
+			except OSError as err:
+				print("[StbHardware] Error %d: Unable to access '/dev/dbox/fp0', getFPVersion failed!  (%s)" % (err.errno, err.strerror))
 	return version
 
 

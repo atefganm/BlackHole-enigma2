@@ -5,17 +5,26 @@ import socket
 import fcntl
 import struct
 
-from boxbranding import getDriverDate, getImageVersion, getMachineBuild, getBoxType
-
 from enigma import getEnigmaVersionString
-
+from Components.SystemInfo import BoxInfo
 from Tools.Directories import fileReadLine, fileReadLines
 
 MODULE_NAME = __name__.split(".")[-1]
 
+socfamily = BoxInfo.getItem("socfamily")
+MODEL = BoxInfo.getItem("model")
+
 
 def getVersionString():
-	return getImageVersion()
+	return BoxInfo.getItem("imageversion")
+
+
+def getImageVersionString():
+	return str(BoxInfo.getItem("imageversion"))
+
+
+def getEnigmaVersionString():
+	return str(BoxInfo.getItem("imageversion"))
 
 
 def getFlashDateString():
@@ -70,66 +79,117 @@ def getIsBroadcom():
 
 
 def getModelString():
-	model = getBoxType()
+	model = BoxInfo.getItem("machinebuild")
 	return model
 
 
-def getChipSetString():
-	if getMachineBuild() in ('dm7080', 'dm820'):
-		return "7435"
-	elif getMachineBuild() in ('dm520', 'dm525'):
-		return "73625"
-	elif getMachineBuild() in ('dm900', 'dm920', 'et13000', 'sf5008'):
-		return "7252S"
-	elif getMachineBuild() in ('hd51', 'vs1500', 'h7'):
-		return "7251S"
-	elif getMachineBuild() in ('dreamone', 'dreamonetwo', 'dreamseven'):
-		return "S922X"
+def getChipsetString():
+	if MODEL in ("dm7080", "dm820"):
+		chipset = "7435"
+	elif MODEL in ("dm520", "dm525"):
+		chipset = "73625"
+	elif MODEL in ("dm900", "dm920", "et13000"):
+		chipset = "7252S"
+	elif MODEL in ("hd51", "vs1500", "h7"):
+		chipset = "7251S"
+	elif MODEL in ("dreamone", "dreamtwo"):
+		chipset = "S922X"
 	else:
-		chipset = fileReadLine("/proc/stb/info/chipset", source=MODULE_NAME)
-		if chipset is None:
-			return _("Undefined")
-		return str(chipset.lower().replace('\n', '').replace('bcm', '').replace('brcm', '').replace('sti', ''))
+		chipset = fileReadLine("/proc/stb/info/chipset", default=_("Undefined"), source=MODULE_NAME)
+		chipset = chipset.lower().replace("\n", "").replace("bcm", "").replace("brcm", "").replace("sti", "")
+	return chipset
 
 
-def getCPUSpeedMHzInt():
-	cpu_speed = 0
-	try:
-		for x in open("/proc/cpuinfo").readlines():
-			x = x.split(": ")
-			if len(x) > 1 and x[0].startswith("cpu MHz"):
-				cpu_speed = float(x[1].split(" ")[0].strip())
-				break
-	except IOError:
-		print("[About] getCPUSpeedMHzInt, /proc/cpuinfo not available")
+def getCPUSerial():
+	lines = fileReadLines("/proc/cpuinfo", source=MODULE_NAME)
+	if lines:
+		for line in lines:
+			if line[0:6] == "Serial":
+				return line[10:26]
+	return _("Undefined")
 
-	if cpu_speed == 0:
-		if getMachineBuild() in ("h7", "hd51", "sf4008", "osmio4k", "osmio4kplus", "osmini4k"):
-			try:
-				import binascii
-				with open("/sys/firmware/devicetree/base/cpus/cpu@0/clock-frequency", "rb") as f:
-					clockfrequency = f.read()
-					cpu_speed = round(int(binascii.hexlify(clockfrequency), 16) // 1000000, 1)
-			except IOError:
-				cpu_speed = 1700
+
+def _getCPUSpeedMhz():
+	if MODEL in ('hzero', 'h8', 'sfx6008', 'sfx6018'):
+		return 1200
+	elif MODEL in ('dreamone', 'dreamtwo', 'dreamseven'):
+		return 1800
+	elif MODEL in ('vuduo4k',):
+		return 2100
+	else:
+		return 0
+
+
+def getCPUInfoString():
+	cpuCount = 0
+	cpuSpeedStr = "-"
+	cpuSpeedMhz = _getCPUSpeedMhz()
+	processor = ""
+	lines = fileReadLines("/proc/cpuinfo", source=MODULE_NAME)
+	if lines:
+		for line in lines:
+			line = [x.strip() for x in line.strip().split(":", 1)]
+			if not processor and line[0] in ("system type", "model name", "Processor"):
+				processor = line[1].split()[0]
+			elif not cpuSpeedMhz and line[0] == "cpu MHz":
+				cpuSpeedMhz = float(line[1])
+			elif line[0] == "processor":
+				cpuCount += 1
+		if processor.startswith("ARM") and isfile("/proc/stb/info/chipset"):
+			processor = "%s (%s)" % (fileReadLine("/proc/stb/info/chipset", "", source=MODULE_NAME).upper(), processor)
+		if not cpuSpeedMhz:
+			cpuSpeed = fileReadLine("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", source=MODULE_NAME)
+			if cpuSpeed:
+				cpuSpeedMhz = int(cpuSpeed) / 1000
+			else:
+				try:
+					cpuSpeedMhz = int(int(hexlify(open("/sys/firmware/devicetree/base/cpus/cpu@0/clock-frequency", "rb").read()), 16) / 100000000) * 100
+				except:
+					cpuSpeedMhz = "1500"
+
+		temperature = None
+		if isfile("/proc/stb/fp/temp_sensor_avs"):
+			temperature = fileReadLine("/proc/stb/fp/temp_sensor_avs", source=MODULE_NAME)
+		elif isfile("/proc/stb/power/avs"):
+			temperature = fileReadLine("/proc/stb/power/avs", source=MODULE_NAME)
+#		elif isfile("/proc/stb/fp/temp_sensor"):
+#			temperature = fileReadLine("/proc/stb/fp/temp_sensor", source=MODULE_NAME)
+#		elif isfile("/proc/stb/sensors/temp0/value"):
+#			temperature = fileReadLine("/proc/stb/sensors/temp0/value", source=MODULE_NAME)
+#		elif isfile("/proc/stb/sensors/temp/value"):
+#			temperature = fileReadLine("/proc/stb/sensors/temp/value", source=MODULE_NAME)
+		elif isfile("/sys/devices/virtual/thermal/thermal_zone0/temp"):
+			temperature = fileReadLine("/sys/devices/virtual/thermal/thermal_zone0/temp", source=MODULE_NAME)
+			if temperature:
+				temperature = int(temperature) / 1000
+		elif isfile("/sys/class/thermal/thermal_zone0/temp"):
+			temperature = fileReadLine("/sys/class/thermal/thermal_zone0/temp", source=MODULE_NAME)
+			if temperature:
+				temperature = int(temperature) / 1000
+		elif isfile("/proc/hisi/msp/pm_cpu"):
+			lines = fileReadLines("/proc/hisi/msp/pm_cpu", source=MODULE_NAME)
+			if lines:
+				for line in lines:
+					if "temperature = " in line:
+						temperature = int(line.split("temperature = ")[1].split()[0])
+
+		if cpuSpeedMhz and cpuSpeedMhz >= 1000:
+			cpuSpeedStr = _("%s GHz") % format_string("%.1f", cpuSpeedMhz / 1000)
 		else:
-			try: # Solo4K sf8008
-				with open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", "r") as file:
-					cpu_speed = float(file.read()) // 1000
-			except IOError:
-				print("[About] getCPUSpeedMHzInt, /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq not available")
-	return int(cpu_speed)
+			cpuSpeedStr = _("%d MHz") % int(cpuSpeedMhz)
 
-
-def getCPUSpeedString():
-	cpu_speed = float(getCPUSpeedMHzInt())
-	if cpu_speed > 0:
-		if cpu_speed >= 1000:
-			cpu_speed = "%s GHz" % str(round(cpu_speed / 1000, 1))
-		else:
-			cpu_speed = "%s MHz" % str(int(cpu_speed))
-		return cpu_speed
-	return _("unavailable")
+		if temperature:
+			degree = "\u00B0"
+			if not isinstance(degree, str):
+				degree = degree.encode("UTF-8", errors="ignore")
+			if isinstance(temperature, float):
+				temperature = format_string("%.1f", temperature)
+			else:
+				temperature = str(temperature)
+			return (processor, cpuSpeedStr, ngettext("%d core", "%d cores", cpuCount) % cpuCount, "%s%s C" % (temperature, degree))
+			#return ("%s %s MHz (%s) %s%sC") % (processor, cpuSpeed, ngettext("%d core", "%d cores", cpuCount) % cpuCount, temperature, degree)
+		return (processor, cpuSpeedStr, ngettext("%d core", "%d cores", cpuCount) % cpuCount, "")
+		#return ("%s %s MHz (%s)") % (processor, cpuSpeed, ngettext("%d core", "%d cores", cpuCount) % cpuCount)
 
 
 def getCPUArch():

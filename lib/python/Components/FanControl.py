@@ -1,6 +1,7 @@
 from os import path
 
 from Components.config import config, ConfigSubList, ConfigSubsection, ConfigSlider
+from Components.SystemInfo import BoxInfo
 from Tools.BoundFunction import boundFunction
 
 import NavigationInstance
@@ -65,7 +66,9 @@ class FanControl:
 		for fanid in range(self.getFanCount()):
 			fan = ConfigSubsection()
 			fan.vlt = ConfigSlider(default=15, increment=5, limits=(0, 255))
+			if BoxInfo.getItem("machinebuild") == 'tm2t':
 			fan.pwm = ConfigSlider(default=50, increment=5, limits=(0, 255))
+			if BoxInfo.getItem("machinebuild") == 'tmsingle':
 			fan.vlt_standby = ConfigSlider(default=5, increment=5, limits=(0, 255))
 			fan.pwm_standby = ConfigSlider(default=0, increment=5, limits=(0, 255))
 			fan.vlt.addNotifier(boundFunction(setVlt, self, fanid))

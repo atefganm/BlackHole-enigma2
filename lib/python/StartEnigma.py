@@ -54,11 +54,6 @@ class Session:
 		self.summary = None
 		self.in_exec = False
 		self.screen = SessionGlobals(self)
-
-		self.shutdown = False
-		from Components.FrontPanelLed import frontPanelLed
-		frontPanelLed.init(self)
-
 		for p in plugins.getPlugins(PluginDescriptor.WHERE_SESSIONSTART):
 			try:
 				p(reason=0, session=self)
@@ -241,7 +236,7 @@ class PowerKey:
 
 	def shutdown(self):
 		wasRecTimerWakeup = False
-		recordings = self.session.nav.getRecordings(False,Components.RecordingConfig.recType(config.recording.warn_box_restart_rec_types.getValue()))
+		recordings = self.session.nav.getRecordings()
 		if not recordings:
 			next_rec_time = self.session.nav.RecordTimer.getNextRecordingTime()
 		if recordings or (next_rec_time > 0 and (next_rec_time - time()) < 360):
@@ -382,10 +377,7 @@ def runScreenTest():
 
 	profile("RunReactor")
 	profile_final()
-	from Components.FrontPanelLed import FrontPanelLed
 	runReactor()
-	session.shutdown = True
-	FrontPanelLed.shutdown()
 
 	if not VuRecovery:
 		profile("wakeup")
@@ -516,7 +508,6 @@ profile("LOAD:Tools")
 print("[StartEnigma]  Initialising FallbackFiles.")
 
 from Tools.Directories import InitFallbackFiles, resolveFilename, SCOPE_PLUGINS, SCOPE_CURRENT_SKIN  # noqa: E402
-import Components.RecordingConfig
 InitFallbackFiles()
 
 profile("config.misc")
@@ -674,10 +665,6 @@ print("[StartEnigma]  Initialising AVSwitch.")
 from Components.AVSwitch import InitAVSwitch, InitiVideomodeHotplug  # noqa: E402
 InitAVSwitch()
 InitiVideomodeHotplug()
-
-profile("HdmiRecord")
-import Components.HdmiRecord
-Components.HdmiRecord.InitHdmiRecord()
 
 profile("EpgConfig")
 from Components.EpgConfig import InitEPGConfig  # noqa: E402

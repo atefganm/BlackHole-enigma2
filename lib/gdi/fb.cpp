@@ -138,7 +138,7 @@ fbClass::fbClass(const char *fb)
 		{
 			close(m_accel_fd);
 			eDebug("[fb] mmap lion failed");
-err_ioc_free:
+			err_ioc_free:
 			eFatal("[fb] failed to allocate accel memory via ION!!!");
 			m_accel_fd = -1;
 			memset(&free_data, 0, sizeof(free_data));
@@ -278,8 +278,8 @@ int fbClass::SetMode(int nxRes, int nyRes, int nbpp)
 	stride=fix.line_length;
 
 #ifdef CONFIG_ION
-    m_phys_mem = fix.smem_start;
-    available = fix.smem_len;
+	m_phys_mem = fix.smem_start;
+	available = fix.smem_len;
 	/* map new framebuffer */
 	lfb=(unsigned char*)mmap(0, stride * screeninfo.yres_virtual, PROT_WRITE|PROT_READ, MAP_SHARED, fbFd, 0);
 #endif

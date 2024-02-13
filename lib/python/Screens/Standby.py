@@ -1,11 +1,9 @@
 from os import path
 from time import time
 
-from enigma import eDVBVolumecontrol, eTimer, eDVBLocalTimeHandler, eServiceReference, eStreamServer, iRecordableService, quitMainloop
+from enigma import eAVSwitch, eDVBVolumecontrol, eTimer, eDVBLocalTimeHandler, eServiceReference, eStreamServer, iRecordableService, quitMainloop
 
-from boxbranding import getMachineBrand, getMachineName, getBoxType, getBrandOEM
 from Components.ActionMap import ActionMap
-from Components.AVSwitch import AVSwitch
 from Components.config import config
 from Components.Console import Console
 import Components.ParentalControl
@@ -25,7 +23,6 @@ QUIT_REBOOT = 2
 QUIT_RESTART = 3
 QUIT_UPGRADE_FP = 4
 QUIT_ERROR_RESTART = 5
-QUIT_RECOVERY = 16
 QUIT_ANDROID = 12
 QUIT_MAINT = 16
 QUIT_UPGRADE_PROGRAM = 42
@@ -43,7 +40,7 @@ def setLCDMiniTVMode(value):
 
 class Standby2(Screen):
 	def Power(self):
-		if getBrandOEM() in ('dinobot') or SystemInfo["HasHiSi"] or getBoxType() in ("sfx6008", "sfx6018"):
+		if SystemInfo["brand"] in ('dinobot') or SystemInfo["HasHiSi"] or SystemInfo["boxtype"] in ("sfx6008", "sfx6018"):
 			try:
 				open("/proc/stb/hdmi/output", "w").write("on")
 			except:
@@ -63,7 +60,6 @@ class Standby2(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
 		self.skinName = "Standby"
-		self.avswitch = AVSwitch()
 
 		print("[Standby] enter standby")
 
@@ -116,10 +112,10 @@ class Standby2(Screen):
 			self.infoBarInstance and hasattr(self.infoBarInstance, "showPiP") and self.infoBarInstance.showPiP()
 
 		if SystemInfo["ScartSwitch"]:
-			self.avswitch.setInput("SCART")
+			self.setInput("SCART")
 		else:
-			self.avswitch.setInput("AUX")
-		if getBrandOEM() in ('dinobot') or SystemInfo["HasHiSi"] or getBoxType() in ("sfx6008", "sfx6018"):
+			self.setInput("AUX")
+		if SystemInfo["brand"] in ('dinobot') or SystemInfo["HasHiSi"] or SystemInfo["boxtype"] in ("sfx6008", "sfx6018"):
 			try:
 				open("/proc/stb/hdmi/output", "w").write("off")
 			except:
@@ -143,7 +139,7 @@ class Standby2(Screen):
 				self.session.nav.playService(self.prev_running_service)
 		self.session.screen["Standby"].boolean = False
 		globalActionMap.setEnabled(True)
-		self.avswitch.setInput("ENCODER")
+		self.setInput("ENCODER")
 		self.leaveMute()
 		if path.exists("/usr/scripts/standby_leave.sh"):
 			Console().ePopen("/usr/scripts/standby_leave.sh")
@@ -162,6 +158,14 @@ class Standby2(Screen):
 		if Components.ParentalControl.parentalControl.isProtected(self.prev_running_service):
 			self.prev_running_service = eServiceReference(config.tv.lastservice.value)
 		self.session.nav.stopService()
+
+	def setInput(self, input):
+		INPUT = {
+			"ENCODER": 0,
+			"SCART": 1,
+			"AUX": 2
+		}
+		eAVSwitch.getInstance().setInput(INPUT[input])
 
 
 class Standby(Standby2):
@@ -208,16 +212,15 @@ class QuitMainloopScreen(Screen):
 		Screen.__init__(self, session)
 		from Components.Label import Label
 		text = {
-			QUIT_SHUTDOWN: _("Your %s %s is shutting down") % (getMachineBrand(), getMachineName()),
-			QUIT_REBOOT: _("Your %s %s is rebooting") % (getMachineBrand(), getMachineName()),
-			QUIT_RESTART: _("The user interface of your %s %s is restarting") % (getMachineBrand(), getMachineName()),
-			QUIT_RECOVERY: _("Your %s %s is rebooting into Recovery Mode") % (getMachineBrand(), getMachineName()),
-			QUIT_ANDROID: _("Your %s %s is rebooting into Android Mode") % (getMachineBrand(), getMachineName()),
-			QUIT_MAINT: _("Your %s %s is rebooting into Recovery Mode") % (getMachineBrand(), getMachineName()),
-			QUIT_UPGRADE_FP: _("Your frontprocessor will be upgraded\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (getMachineBrand(), getMachineName()),
-			QUIT_ERROR_RESTART: _("The user interface of your %s %s is restarting\ndue to an error in StartEnigma.py") % (getMachineBrand(), getMachineName()),
-			QUIT_UPGRADE_PROGRAM: _("Upgrade in progress\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (getMachineBrand(), getMachineName()),
-			QUIT_IMAGE_RESTORE: _("Reflash in progress\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (getMachineBrand(), getMachineName())
+			QUIT_SHUTDOWN: _("Your %s %s is shutting down") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]),
+			QUIT_REBOOT: _("Your %s %s is rebooting") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]),
+			QUIT_RESTART: _("The user interface of your %s %s is restarting") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]),
+			QUIT_ANDROID: _("Your %s %s is rebooting into Android Mode") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]),
+			QUIT_MAINT: _("Your %s %s is rebooting into Recovery Mode") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]),
+			QUIT_UPGRADE_FP: _("Your frontprocessor will be upgraded\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]),
+			QUIT_ERROR_RESTART: _("The user interface of your %s %s is restarting\ndue to an error in StartEnigma.py") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]),
+			QUIT_UPGRADE_PROGRAM: _("Upgrade in progress\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]),
+			QUIT_IMAGE_RESTORE: _("Reflash in progress\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"])
 		}.get(retvalue)
 		self["text"] = Label(text)
 
@@ -264,12 +267,11 @@ class TryQuitMainloop(MessageBox):
 				QUIT_SHUTDOWN: _("Really shutdown now?"),
 				QUIT_REBOOT: _("Really reboot now?"),
 				QUIT_RESTART: _("Really restart now?"),
-				QUIT_RECOVERY: _("Really reboot into Recovery Mode?"),
 				QUIT_ANDROID: _("Really reboot into Android Mode?"),
 				QUIT_MAINT: _("Really reboot into Recovery Mode?"),
 				QUIT_UPGRADE_FP: _("Really upgrade the frontprocessor and reboot now?"),
-				QUIT_UPGRADE_PROGRAM: _("Really upgrade your %s %s and reboot now?") % (getMachineBrand(), getMachineName()),
-				QUIT_IMAGE_RESTORE: _("Really reflash your %s %s and reboot now?") % (getMachineBrand(), getMachineName())
+				QUIT_UPGRADE_PROGRAM: _("Really upgrade your %s %s and reboot now?") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"]),
+				QUIT_IMAGE_RESTORE: _("Really reflash your %s %s and reboot now?") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"])
 			}.get(retvalue)
 			if text:
 				MessageBox.__init__(self, session, "%s\n%s" % (reason, text), type=MessageBox.TYPE_YESNO, timeout=timeout, default=default_yes)
@@ -289,13 +291,13 @@ class TryQuitMainloop(MessageBox):
 		else:
 			if event == iRecordableService.evEnd:
 				recordings = self.session.nav.getRecordings()
-				if not recordings: # no more recordings exist
+				if not recordings:  # no more recordings exist
 					rec_time = self.session.nav.RecordTimer.getNextRecordingTime()
 					if rec_time > 0 and (rec_time - time()) < 360:
-						self.initTimeout(360) # wait for next starting timer
+						self.initTimeout(360)  # wait for next starting timer
 						self.startTimer()
 					else:
-						self.close(True) # immediate shutdown
+						self.close(True)  # immediate shutdown
 			elif event == iRecordableService.evStart:
 				self.stopTimer()
 
@@ -338,7 +340,7 @@ class TryQuitMainloop(MessageBox):
 				# set LCDminiTV off / fix a deep-standby-crash on some boxes / gb4k
 				print("[Standby] LCDminiTV off")
 				setLCDMiniTVMode("0")
-			if getBoxType() == "vusolo4k":  # workaround for white display flash
+			if SystemInfo["boxtype"] == "vusolo4k":  # workaround for white display flash
 				f = open("/proc/stb/fp/oled_brightness", "w")
 				f.write("0")
 				f.close()

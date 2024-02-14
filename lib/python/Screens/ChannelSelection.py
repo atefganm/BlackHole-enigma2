@@ -6,6 +6,7 @@ from time import localtime, time, strftime
 from enigma import eActionMap, eServiceReference, eEPGCache, eServiceCenter, eRCInput, eTimer, ePoint, eDVBDB, iPlayableService, iServiceInformation, getPrevAsciiCode, eDVBLocalTimeHandler
 
 from Tools.Profile import profile
+from ServiceReference import ServiceReference, hdmiInServiceRef, serviceRefAppendPath
 from Components.ActionMap import ActionMap, HelpableActionMap, HelpableNumberActionMap
 from Components.Button import Button
 from Components.ChoiceList import ChoiceList, ChoiceEntryComponent

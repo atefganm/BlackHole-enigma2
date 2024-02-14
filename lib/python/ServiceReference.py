@@ -132,5 +132,11 @@ class ServiceReference(eServiceReference):
 		elif not isinstance(ref, eServiceReference):
 			eServiceReference.__init__(self, ref or "")
 
+def serviceRefAppendPath(sref, path):
+	nsref = eServiceReference(sref)
+	nsref.setPath(nsref.getPath() + path)
+	return nsref
+
+
 def hdmiInServiceRef():
 	return eServiceReference(eServiceReference.idServiceHDMIIn, eServiceReference.noFlags, eServiceReferenceDVB.dTv)

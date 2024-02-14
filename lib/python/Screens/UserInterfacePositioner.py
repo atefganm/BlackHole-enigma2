@@ -359,12 +359,44 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 		self["config"].l.setList(self.list)
 
 		self.onLayoutFinish.append(self.layoutFinished)
+		self.serviceRef = None
+		if "wizard" not in str(traceback.extract_stack()).lower():
+			self.onClose.append(self.__onClose)
+		if self.welcomeWarning not in self.onShow:
+			self.onShow.append(self.welcomeWarning)
 		if self.selectionChanged not in self["config"].onSelectionChanged:
 			self["config"].onSelectionChanged.append(self.selectionChanged)
 		self.selectionChanged()
 
 	def selectionChanged(self):
 		self["status"].setText(self["config"].getCurrent()[2])
+
+	def welcomeWarning(self):
+		if self.welcomeWarning in self.onShow:
+			self.onShow.remove(self.welcomeWarning)
+		popup = self.session.openWithCallback(self.welcomeAction, MessageBox, _("NOTE: This feature is intended for people who cannot disable overscan "
+			"on their television / display.  Please first try to disable overscan before using this feature.\n\n"
+			"USAGE: Adjust the screen size and position settings so that the shaded user interface layer *just* "
+			"covers the test pattern in the background.\n\n"
+			"Select Yes to continue or No to exit."), type=MessageBox.TYPE_YESNO, timeout=-1, default=False)
+		popup.setTitle(_("OSD position"))
+
+	def welcomeAction(self, answer):
+		if answer:
+			self.serviceRef = self.session.nav.getCurrentlyPlayingServiceReference()
+			self.session.nav.stopService()
+			if self.restoreService not in self.onClose:
+				self.onClose.append(self.restoreService)
+			self.ConsoleB.ePopen('/usr/bin/showiframe /usr/share/enigma2/hd-testcard.mvi')
+			# config.osd.alpha.setValue(155)
+		else:
+			self.close()
+
+	def restoreService(self):
+		try:
+			self.session.nav.playService(self.serviceRef)
+		except:
+			pass
 
 	def layoutFinished(self):
 		self.setTitle(_(self.setup_title))
@@ -464,6 +496,22 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 		config.osd.dst_height.save()
 		configfile.save()
 		self.close()
+
+class OSD3DSetupScreen(ConfigListScreen, Screen):
+	def __init__(self, session):
+		Screen.__init__(self, session)
+		self.skinName = "Setup"
+		self.setTitle(_("3D"))
+		self["description"] = StaticText()
+
+		self.onChangedEntry = []
+		self.list = []
+		ConfigListScreen.__init__(self, self.list, session=self.session, on_change=self.changedEntry, fullUI=True)
+		self.list.append(getConfigListEntry(_("3D Mode"), config.osd.threeDmode, _("This option lets you choose the 3D mode")))
+		self.list.append(getConfigListEntry(_("Depth"), config.osd.threeDznorm, _("This option lets you adjust the 3D depth")))
+		self.list.append(getConfigListEntry(_("Show in extensions list ?"), config.osd.show3dextensions, _("This option lets you show the option in the extension screen")))
+		self["config"].list = self.list
+		self["config"].l.setList(self.list)
 
 
 class UserInterfacePositioner(Screen, ConfigListScreen):

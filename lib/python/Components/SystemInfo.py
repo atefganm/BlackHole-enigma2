@@ -324,6 +324,7 @@ SystemInfo["HaveTouchSensor"] = getBoxType() in ("dm520", "dm525", "dm900", "dm9
 SystemInfo["DefaultDisplayBrightness"] = getBoxType() in ("dm900", "dm920") and 8 or 5
 BoxInfo.setItem("HDMIin", BoxInfo.getItem("hdmifhdin") or BoxInfo.getItem("hdmihdin"))
 BoxInfo.setItem("HDMIinPiP", BoxInfo.getItem("HDMIin") and BRAND != "dreambox")
+BoxInfo.setItem("HasHDMIin", BoxInfo.getItem("hdmifhdin") or BoxInfo.getItem("hdmihdin"))
 SystemInfo["HaveRCA"] = getHaveRCA() in ('True',)
 SystemInfo["HaveDVI"] = getHaveDVI() in ('True',)
 SystemInfo["HAVEYUV"] = getHaveYUV() in ('True',)

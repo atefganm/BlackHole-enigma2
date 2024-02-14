@@ -639,10 +639,10 @@ void eAVControl::setPolicy169(const std::string &newPolicy, int flags) const
 }
 
 /// @brief setVideoSize
-/// @param top 
-/// @param left 
-/// @param width 
-/// @param height 
+/// @param top
+/// @param left
+/// @param width
+/// @param height
 /// @param flags bit ( 1 = DEBUG , 2 = SUPPRESS_NOT_EXISTS , 4 = SUPPRESS_READWRITE_ERROR)
 void eAVControl::setVideoSize(int top, int left, int width, int height, int flags) const
 {

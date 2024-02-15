@@ -725,7 +725,7 @@ else:
 	from Components.Lcd import InitLcd  # noqa: E402
 	InitLcd()
 
-enigma.eAVControl.getInstance().disableHDMIIn()
+	enigma.eAVControl.getInstance().disableHDMIIn()
 
 	profile("UserInterface")
 	print("[StartEnigma]  Initialising UserInterface.")

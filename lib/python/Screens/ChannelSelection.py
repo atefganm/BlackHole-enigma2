@@ -291,8 +291,8 @@ class ChannelContextMenu(Screen):
 				self.removeFunction = self.removeCurrentService
 				if not csel.entry_marked and not inBouquetRootList and current_root and not (current_root.flags & eServiceReference.isGroup):
 					_append_when_current_valid(current, menu, actions, (_("Add marker"), self.showMarkerInputBox), level=0, key="green")
-					if BoxInfo.getItem("HDMIin"):
-						appendWhenValid(current, menu, (_("Add HDMI IN to bouquet"), self.showHDMIInInputBox))
+					if BoxInfo.getItem("HasHDMIin"):
+						append_when_current_valid(current, menu, (_("Add HDMI IN to bouquet"), self.showHDMIInInputBox))
 					if not csel.movemode:
 						if haveBouquets:
 							_append_when_current_valid(current, menu, actions, (_("Enable bouquet edit"), self.bouquetMarkStart), level=0, key="yellow")
@@ -979,7 +979,7 @@ class ChannelSelectionEdit:
 	def addHDMIIn(self, name):
 		current = self.servicelist.getCurrent()
 		mutableList = self.getMutableList()
-		ref = hdmiInServiceRef()
+		ref = eServiceReference(str)
 		ref.setName(name)
 		if mutableList and current and current.valid():
 			if not mutableList.addService(ref, current):

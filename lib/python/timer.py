@@ -37,7 +37,7 @@ class TimerEntry:
 	def resetState(self):
 		self.state = self.StateWaiting
 		self.cancelled = False
-		self.first_try_prepare = 0
+		self.first_try_prepare = True
 		self.findRunningEvent = True
 		self.findNextEvent = False
 		self.timeChanged()

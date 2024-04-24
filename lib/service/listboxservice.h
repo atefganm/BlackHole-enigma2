@@ -6,7 +6,6 @@
 #include <lib/service/iservice.h>
 #include <lib/python/python.h>
 #include <set>
-#include <lib/nav/core.h>
 
 class eListboxServiceContent: public virtual iListboxContent
 {
@@ -152,13 +151,11 @@ public:
 		eventRemainingForegroundSelected,
 		eventRemainingForegroundFallback,
 		eventRemainingForegroundSelectedFallback,
-		servicePseudoRecorded,
-		serviceStreamed,
 		colorElements
 	};
 
 	void setColor(int color, gRGB &col);
-	bool checkServiceIsRecorded(eServiceReference ref,pNavigation::RecordType type=pNavigation::isAnyRecording);
+	bool checkServiceIsRecorded(eServiceReference ref);
 protected:
 	void cursorHome();
 	void cursorEnd();

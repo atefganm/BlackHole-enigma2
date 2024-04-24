@@ -12,6 +12,8 @@
 #define ACCEL_ALIGNMENT_SHIFT	6
 #define ACCEL_ALIGNMENT_MASK	((1<<ACCEL_ALIGNMENT_SHIFT)-1)
 
+// #define ACCEL_DEBUG
+
 gAccel *gAccel::instance;
 
 #if not defined(HAVE_HISILICON_ACCEL)
@@ -102,10 +104,9 @@ gAccel::~gAccel()
 	instance = 0;
 }
 
+#ifdef ACCEL_DEBUG
 void gAccel::dumpDebug()
 {
-	if(!m_accel_debug)
-		return;
 	eDebug("[gAccel] info --");
 	for (MemoryBlockList::const_iterator it = m_accel_allocation.begin();
 		 it != m_accel_allocation.end();
@@ -124,6 +125,9 @@ void gAccel::dumpDebug()
 	 }
 	eDebug("--");
 }
+#else
+void gAccel::dumpDebug() {}
+#endif
 
 void gAccel::releaseAccelMemorySpace()
 {
@@ -137,8 +141,9 @@ void gAccel::releaseAccelMemorySpace()
 		if (surface != NULL)
 		{
 			int size = surface->y * surface->stride;
-			if(m_accel_debug)
-				eDebug("[gAccel] %s: Re-locating %p->%x(%p) %dx%d:%d", __func__, surface, surface->data_phys, surface->data, surface->x, surface->y, surface->bpp);
+#ifdef ACCEL_DEBUG
+			eDebug("[gAccel] %s: Re-locating %p->%x(%p) %dx%d:%d", __func__, surface, surface->data_phys, surface->data, surface->x, surface->y, surface->bpp);
+#endif
 			unsigned char *new_data = new unsigned char [size];
 			memcpy(new_data, surface->data, size);
 			surface->data = new_data;
@@ -388,8 +393,9 @@ int gAccel::accelAlloc(gUnmanagedSurface* surface)
 		return -4;
 	}
 
-	if(m_accel_debug)
-		eDebug("[gAccel] [%s] %p size=%d %dx%d:%d", __func__, surface, size, surface->x, surface->y, surface->bpp);
+#ifdef ACCEL_DEBUG
+	eDebug("[gAccel] [%s] %p size=%d %dx%d:%d", __func__, surface, size, surface->x, surface->y, surface->bpp);
+#endif
 
 	size += ACCEL_ALIGNMENT_MASK;
 	size >>= ACCEL_ALIGNMENT_SHIFT;
@@ -429,8 +435,9 @@ void gAccel::accelFree(gUnmanagedSurface* surface)
 	int phys_addr = surface->data_phys;
 	if (phys_addr != 0)
 	{
-		if(m_accel_debug)
-			eDebug("[gAccel] [%s] %p->%x %dx%d:%d", __func__, surface, surface->data_phys, surface->x, surface->y, surface->bpp);
+#ifdef ACCEL_DEBUG
+		eDebug("[gAccel] [%s] %p->%x %dx%d:%d", __func__, surface, surface->data_phys, surface->x, surface->y, surface->bpp);
+#endif
 		/* The lock scope is "good enough", the only other method that
 		 * might alter data_phys is the global release, and that will
 		 * be called in a safe context. So don't obtain the lock. */

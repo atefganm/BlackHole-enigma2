@@ -1355,14 +1355,14 @@ void eDVBFrontend::calculateSignalQuality(int snr, int &signalquality, int &sign
 	{
 		ret = snr;
 	}
-	else if (!strncmp(m_description, "Si2166D", 7)) // S2 - SF8008/HD51/AB Pulse 4K(mini)/GB Trio 4K/Zgemma more models/DM820/DM9O0/DM920
+	else if (!strncmp(m_description, "Si2166D", 7)) // S2 - SF8008/HD51/AB Pulse 4K(mini)/GB Trio 4K/Zgemma more models/DM9O0/DM920
 	{
 		ret = snr;
 		sat_max = 1620;
 	}
-	else if (!strcmp(m_description, "Vuplus DVB-S NIM(Si2166)")) // VU+ Zero4K
+	else if (!strcmp(m_description, "Vuplus DVB-S NIM(SI2166)")) // VU+ Zero4K
 	{
-		ret = snr;
+		ret = snr / 40;
 	}
 	else if (!strncmp(m_description, "Si216", 5)) // New models with SI tuners
 	{
@@ -2297,7 +2297,7 @@ void eDVBFrontend::setFrontend(bool recvEvents)
 			{
 				p[cmdseq.num].cmd = DTV_ROLLOFF, p[cmdseq.num].u.data = rolloff, cmdseq.num++;
 				p[cmdseq.num].cmd = DTV_PILOT, p[cmdseq.num].u.data = pilot, cmdseq.num++;
-				if (m_dvbversion >= DVB_VERSION(5, 11))
+								if (m_dvbversion >= DVB_VERSION(5, 11))
 				{
 					p[cmdseq.num].cmd = DTV_STREAM_ID, p[cmdseq.num].u.data = parm.is_id, cmdseq.num++;
 					p[cmdseq.num].cmd = DTV_SCRAMBLING_SEQUENCE_INDEX, p[cmdseq.num].u.data = parm.pls_code, cmdseq.num++;

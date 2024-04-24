@@ -41,7 +41,6 @@ is usually caused by not marking PSignals as immutable.
 #include <lib/base/eenv.h>
 #include <lib/base/eerror.h>
 #include <lib/base/message.h>
-#include <lib/base/modelinformation.h>
 #include <lib/base/e2avahi.h>
 #include <lib/driver/rc.h>
 #include <lib/driver/rcinput_swig.h>
@@ -79,7 +78,7 @@ is usually caused by not marking PSignals as immutable.
 #include <lib/gui/elistboxcontent.h>
 #include <lib/gui/esubtitle.h>
 #include <lib/service/listboxservice.h>
-#include <lib/nav/core.h>
+#include <lib/nav/pcore.h>
 #include <lib/actions/action.h>
 #include <lib/gdi/gfont.h>
 #include <lib/gdi/epng.h>
@@ -103,7 +102,6 @@ is usually caused by not marking PSignals as immutable.
 #include <lib/components/file_eraser.h>
 #include <lib/components/tuxtxtapp.h>
 #include <lib/driver/avswitch.h>
-#include <lib/driver/avcontrol.h>
 #include <lib/driver/hdmi_cec.h>
 #include <lib/driver/rfmod.h>
 #include <lib/driver/misc_options.h>
@@ -116,8 +114,6 @@ is usually caused by not marking PSignals as immutable.
 #include <lib/python/python_helpers.h>
 #include <lib/gdi/picload.h>
 #include <lib/dvb/fcc.h>
-#include <lib/gdi/accel.h>
-#include <include/hardwaredb.h>
 %}
 
 %feature("ref")   iObject "$this->AddRef(); /* eDebug(\"AddRef (%s:%d)!\", __FILE__, __LINE__); */ "
@@ -164,7 +160,6 @@ typedef long time_t;
 
 %immutable eSocketNotifier::activated;
 %include <lib/base/ebase.h>
-%include <lib/base/modelinformation.h>
 %include <lib/base/smartptr.h>
 %include <lib/service/event.h>
 %include <lib/service/iservice.h>
@@ -188,7 +183,7 @@ typedef long time_t;
 %immutable eDVBCI_UI::ciStateChanged;
 %immutable eSocket_UI::socketStateChanged;
 %immutable eDVBResourceManager::frontendUseMaskChanged;
-%immutable eAVControl::vcr_sb_notifier;
+%immutable eAVSwitch::vcr_sb_notifier;
 %immutable eHdmiCEC::messageReceived;
 %immutable eHdmiCEC::addressChanged;
 %immutable ePythonMessagePump::recv_msg;
@@ -235,7 +230,7 @@ typedef long time_t;
 %include <lib/gui/evideo.h>
 %include <lib/gui/esubtitle.h>
 %include <lib/service/listboxservice.h>
-%include <lib/nav/core.h>
+%include <lib/nav/pcore.h>
 %include <lib/actions/action.h>
 %include <lib/gdi/gfont.h>
 %include <lib/gdi/epng.h>
@@ -251,11 +246,11 @@ typedef long time_t;
 %include <lib/dvb/cahandler.h>
 %include <lib/dvb/fastscan.h>
 %include <lib/dvb/cablescan.h>
+%include <lib/dvb/metaparser.h>
 %include <lib/components/scan.h>
 %include <lib/components/file_eraser.h>
 %include <lib/components/tuxtxtapp.h>
 %include <lib/driver/avswitch.h>
-%include <lib/driver/avcontrol.h>
 %include <lib/driver/hdmi_cec.h>
 %include <lib/driver/rfmod.h>
 %include <lib/driver/misc_options.h>
@@ -270,9 +265,6 @@ typedef long time_t;
 %include <lib/gdi/picload.h>
 %include <lib/dvb/fcc.h>
 %include <lib/dvb/streamserver.h>
-%include <lib/dvb/metaparser.h>
-%include <lib/gdi/accel.h>
-
 /**************  eptr  **************/
 
 /**************  signals  **************/
@@ -459,27 +451,6 @@ PyObject *getFontFaces()
 }
 %}
 
-void setACCELDebug(int);
-%{
-void setACCELDebug(int enable)
-{
-	gAccel::getInstance()->setAccelDebug(enable);
-}
-%}
-
-PyObject *getDeviceDB();
-%{
-PyObject *getDeviceDB()
-{
-	ePyObject result = PyDict_New();
-	for (const auto & [ key, value ] : HardwareDB) {
-		PutToDict(result, key.c_str(), value.c_str());
-	}
-    return result;
-}
-%}
-
-
 /************** temp *****************/
 
 	/* need a better place for this, i agree. */
@@ -490,16 +461,13 @@ extern eApplication *getApplication();
 extern int getPrevAsciiCode();
 extern void addFont(const char *filename, const char *alias, int scale_factor, int is_replacement, int renderflags = 0);
 extern const char *getEnigmaVersionString();
-extern const char *getE2Rev();
 extern const char *getGStreamerVersionString();
-extern const char *getBoxType();
 extern void dump_malloc_stats(void);
 extern void pauseInit(void);
 extern void resumeInit(void);
 #ifndef HAVE_OSDANIMATION
 extern void setAnimation_current(int a);
 extern void setAnimation_speed(int speed);
-extern void setAnimation_current_listbox(int a);
 #endif
 %}
 
@@ -509,16 +477,13 @@ extern void runMainloop();
 extern void quitMainloop(int exit_code);
 extern eApplication *getApplication();
 extern const char *getEnigmaVersionString();
-extern const char *getE2Rev();
 extern const char *getGStreamerVersionString();
-extern const char *getBoxType();
 extern void dump_malloc_stats(void);
 extern void pauseInit(void);
 extern void resumeInit(void);
 #ifndef HAVE_OSDANIMATION
 extern void setAnimation_current(int a);
 extern void setAnimation_speed(int speed);
-extern void setAnimation_current_listbox(int a);
 #endif
 
 %include <lib/python/python_console.i>

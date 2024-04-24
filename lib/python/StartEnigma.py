@@ -4,7 +4,6 @@ from time import localtime, strftime, time
 from datetime import datetime
 from traceback import print_exc
 
-from boxbranding import getImageArch, getImageBuild, getImageDevBuild, getImageType, getImageVersion
 from Tools.Profile import profile, profile_final
 import Tools.RedirectOutput  # noqa: F401 # Don't remove this line. It may seem to do nothing, but if removed it will break output redirection for crash logs.
 import eConsoleImpl
@@ -209,7 +208,7 @@ class Session:
 		# close all open dialogs by emptying the dialog stack
 		# remove any return values and callbacks for a swift exit
 		while self.current_dialog is not None and type(self.current_dialog) is not InfoBar.InfoBar:
-			print("[SkinReloader] closing %s" % type(self.current_dialog))
+			print(f"[SkinReloader] closing {type(self.current_dialog)}")
 			self.current_dialog.returnValue = None
 			self.current_dialog.callback = None
 			self.execEnd()
@@ -290,29 +289,26 @@ class PowerKey:
 
 class AutoScartControl:
 	def __init__(self, session):
-		self.hasScart = BoxInfo.getItem("scart")
-		if self.hasScart:
-			self.force = False
-			self.current_vcr_sb = enigma.eAVControl.getInstance().getVCRSlowBlanking()
-			if self.current_vcr_sb and config.av.vcrswitch.value:
-				self.scartDialog = session.instantiateDialog(Scart, True)
-			else:
-				self.scartDialog = session.instantiateDialog(Scart, False)
-			config.av.vcrswitch.addNotifier(self.recheckVCRSb)
-			enigma.eAVControl.getInstance().vcr_sb_notifier.get().append(self.VCRSbChanged)
+		self.force = False
+		self.current_vcr_sb = enigma.eAVSwitch.getInstance().getVCRSlowBlanking()
+		if self.current_vcr_sb and config.av.vcrswitch.value:
+			self.scartDialog = session.instantiateDialog(Scart, True)
+		else:
+			self.scartDialog = session.instantiateDialog(Scart, False)
+		config.av.vcrswitch.addNotifier(self.recheckVCRSb)
+		enigma.eAVSwitch.getInstance().vcr_sb_notifier.get().append(self.VCRSbChanged)
 
 	def recheckVCRSb(self, configElement):
 		self.VCRSbChanged(self.current_vcr_sb)
 
 	def VCRSbChanged(self, value):
-		if self.hasScart:
-			# print("[StartEnigma] VCR SB changed to '%s'." % value)
-			self.current_vcr_sb = value
-			if config.av.vcrswitch.value or value > 2:
-				if value:
-					self.scartDialog.showMessageBox()
-				else:
-					self.scartDialog.switchToTV()
+		# print("vcr sb changed to", value)
+		self.current_vcr_sb = value
+		if config.av.vcrswitch.value or value > 2:
+			if value:
+				self.scartDialog.showMessageBox()
+			else:
+				self.scartDialog.switchToTV()
 
 
 def runScreenTest():
@@ -370,10 +366,6 @@ def runScreenTest():
 		if enigma.eAVSwitch.getInstance().haveScartSwitch():
 			# we need session.scart to access it from within menu.xml
 			session.scart = AutoScartControl(session)
-
-		profile("Init:AutoVideoMode")
-		import Screens.VideoMode
-		Screens.VideoMode.autostart(session)
 
 	profile("RunReactor")
 	profile_final()
@@ -444,12 +436,14 @@ def runScreenTest():
 
 
 profile("PYTHON_START")
+from Components.SystemInfo import SystemInfo  # noqa: E402  don't move this import
+
 print("[StartEnigma]  Starting Python Level Initialisation.")
-print("[StartEnigma]  Image Type -> '%s'" % getImageType())
-print("[StartEnigma]  Image Version -> '%s'" % getImageVersion())
-print("[StartEnigma]  Image Build -> '%s'" % getImageBuild())
-if getImageType() != "release":
-	print("[StartEnigma]  Image DevBuild -> '%s'" % getImageDevBuild())
+print(f"[StartEnigma]  Image Type -> {SystemInfo['imagetype']}")
+print(f"[StartEnigma]  Image Version -> {SystemInfo['imageversion']}")
+print(f"[StartEnigma]  Image Build -> {SystemInfo['imagebuild']}")
+if SystemInfo["imagetype"] == "developer":
+	print(f"[StartEnigma]  Image DevBuild -> {SystemInfo['imagedevbuild']}")
 
 
 # SetupDevices sets up defaults:- language, keyboard, parental & expert config.
@@ -460,7 +454,7 @@ print("[StartEnigma]  Initialising SetupDevices.")
 from Components.SetupDevices import InitSetupDevices  # noqa: E402
 InitSetupDevices()
 
-if getImageArch() in ("aarch64"):
+if SystemInfo["architecture"] in ("aarch64"):  # something not right here
 	from usb.backend import libusb1  # noqa: E402
 	libusb1.get_backend(find_library=lambda x: "/lib64/libusb-1.0.so.0")
 
@@ -474,7 +468,7 @@ profile("InfoBar")
 print("[StartEnigma]  Initialising InfoBar.")
 from Screens import InfoBar  # noqa: E402
 
-from Components.SystemInfo import SystemInfo  # noqa: E402  don't move this import
+# from Components.SystemInfo import SystemInfo  # noqa: E402  don't move this import
 VuRecovery = SystemInfo["HasKexecMultiboot"] and SystemInfo["MultiBootSlot"] == 0
 # print("[StartEnigma]  Is this VuRecovery?. Recovery = ", VuRecovery)
 
@@ -625,6 +619,7 @@ config.misc.RCSource.addNotifier(RCSelectionChanged, immediate_feedback=False)
 
 profile("Standby")
 import Screens.Standby  # noqa: E402
+
 from Screens.Menu import MainMenu, mdom  # noqa: E402
 from GlobalActions import globalActionMap  # noqa: E402
 
@@ -665,10 +660,6 @@ print("[StartEnigma]  Initialising AVSwitch.")
 from Components.AVSwitch import InitAVSwitch, InitiVideomodeHotplug  # noqa: E402
 InitAVSwitch()
 InitiVideomodeHotplug()
-
-profile("HdmiRecord")
-import Components.HdmiRecord
-Components.HdmiRecord.InitHdmiRecord()
 
 profile("EpgConfig")
 from Components.EpgConfig import InitEPGConfig  # noqa: E402
@@ -724,8 +715,6 @@ else:
 	print("[StartEnigma]  Initialising LCD / FrontPanel.")
 	from Components.Lcd import InitLcd  # noqa: E402
 	InitLcd()
-
-	enigma.eAVControl.getInstance().disableHDMIIn()
 
 	profile("UserInterface")
 	print("[StartEnigma]  Initialising UserInterface.")

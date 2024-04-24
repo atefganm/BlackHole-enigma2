@@ -1,4 +1,4 @@
-from enigma import eServiceReference, eServiceReferenceDVB, eServiceCenter, getBestPlayableServiceReference
+from enigma import eServiceReference, eServiceCenter, getBestPlayableServiceReference
 import NavigationInstance
 
 # Global helper functions
@@ -131,12 +131,3 @@ class ServiceReference(eServiceReference):
 			eServiceReference.__init__(self, reftype, flags, path)
 		elif not isinstance(ref, eServiceReference):
 			eServiceReference.__init__(self, ref or "")
-
-def serviceRefAppendPath(sref, path):
-	nsref = eServiceReference(sref)
-	nsref.setPath(nsref.getPath() + path)
-	return nsref
-
-
-def hdmiInServiceRef():
-	return eServiceReference(eServiceReference.idServiceHDMIIn, eServiceReference.noFlags, eServiceReferenceDVB.dTv)

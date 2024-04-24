@@ -127,7 +127,6 @@ public:
 	void setContent(iListboxContent *content);
 
 	void allowNativeKeys(bool allow);
-	void enableAutoNavigation(bool allow) { allowNativeKeys(allow); }
 
 /*	enum Movement {
 		moveUp,
@@ -153,7 +152,6 @@ public:
 		pageUp,
 		pageDown,
 		justCheck,
-		refresh,
 		moveStartTop,
 		moveStart,
 		prevItemPage,

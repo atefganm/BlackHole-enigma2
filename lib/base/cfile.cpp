@@ -28,9 +28,9 @@ int CFile::parseInt(int *result, const char *fileName)
 	return 0;
 }
 
-int CFile::parsePts_t(pts_t *result, const char *filename)
+int CFile::parsePts_t(pts_t *result, const char *fileName)
 {
-	CFile f(filename, "r");
+	CFile f(fileName, "r");
 	if (!f)
 		return -1;
 	if (fscanf(f, "%lld", result) != 1)

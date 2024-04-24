@@ -5,6 +5,7 @@
 #include <lib/python/swig.h>
 #include <lib/python/python.h>
 #include <lib/base/object.h>
+#include <lib/base/estring.h>
 #include <string>
 #include <connection.h>
 #include <list>
@@ -17,26 +18,17 @@ class eServiceReference
 public:
 	enum
 	{
-		idServiceIsScrambled  = 0x0100,				//  256  Added to normal id to indicate scrambling
-		idInvalid             = -1,
-		idStructure           = 0x0000,				//    0 service_id == 0 is root
-		idDVB                 = 0x0001,				//    1
-		idFile                = 0x0002,				//    2
-		idServiceM2TS         = 0x0003,				//    3
-		idDVBScrambled        = idDVB + idServiceIsScrambled,	//  257/0x0101
-		idUser                = 0x1000,				// 4096
-		idServiceMP3          = 0x1001,				// 4097
-		idServiceAirPlay      = 0x1009,				// 4105
-		idServiceXINE         = 0x1010,				// 4112
-		idServiceDVD          = 0x1111,				// 4369
-		idServiceAzBox        = 0x1112,                         // 4370
-		idServiceHDMIIn       = 0x2000,				// 8192
+		idInvalid=-1,
+		idStructure,	// service_id == 0 is root
+		idDVB,
+		idFile,
+		idUser=0x1000,
+		idServiceMP3=0x1001
 	};
 	int type;
 
 	enum
 	{
-		noFlags=0,
 		isDirectory=1,		// SHOULD enter  (implies mustDescent)
 		mustDescent=2,		// cannot be played directly - often used with "isDirectory" (implies canDescent)
 		/*
@@ -59,6 +51,8 @@ public:
 	int flags; // flags will NOT be compared.
 
 	inline int getSortKey() const { return (flags & hasSortKey) ? data[3] : ((flags & sort1) ? 1 : 0); }
+
+	static RESULT parseNameAndProviderFromName(std::string &sourceName, std::string& name, std::string& prov);
 
 #ifndef SWIG
 	int data[8];
@@ -97,9 +91,18 @@ public:
 // real existing service ( for dvb eServiceDVB )
 #ifndef SWIG
 	std::string name;
+	std::string prov;
 	int number;
 #endif
-	std::string getName() const { return name; }
+	std::string getName() const { 
+		if (!name.empty()) {
+			std::vector<std::string> name_split = split(name, "•");
+			std::string name_res = name_split[0];
+			return name_res; 
+		}
+		return name; 
+	}
+	std::string getProvider() const { return prov; }
 	void setName( const std::string &n ) { name=n; }
 	int getChannelNum() const { return number; }
 	void setChannelNum(const int n) { number = n; }
@@ -110,6 +113,7 @@ public:
 		memset(data, 0, sizeof(data));
 		number = 0;
 	}
+#ifndef SWIG
 	eServiceReference(int type, int flags)
 		: type(type), flags(flags)
 	{
@@ -161,6 +165,11 @@ public:
 		data[4]=data4;
 		number = 0;
 	}
+	operator bool() const
+	{
+		return valid();
+	}
+#endif
 #ifdef SWIG
 public:
 %typemap(in) (const char* string2) {
@@ -185,15 +194,9 @@ public:
 	eServiceReference(const char* string2);
 	std::string toString() const;
 	std::string toCompareString() const;
-#ifndef SWIG
-	operator bool() const
-	{
-		return valid();
-	}
-#endif
 	bool operator==(const eServiceReference &c) const
 	{
-		if (type != c.type)
+		if (!c || type != c.type)
 			return 0;
 		return (memcmp(data, c.data, sizeof(int)*8)==0) && (path == c.path);
 	}
@@ -203,6 +206,8 @@ public:
 	}
 	bool operator<(const eServiceReference &c) const
 	{
+		if (!c) return 0;
+		
 		if (type < c.type)
 			return 1;
 

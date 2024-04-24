@@ -162,17 +162,12 @@ class eDVBResourceManager: public iObject, public sigc::trackable
 	DECLARE_REF(eDVBResourceManager);
 	int avail, busy;
 
-	enum { DM7025, DM800, DM500HD, DM800SE, DM8000, DM7020HD, DM7080, DM820, DM520, DM525, DM900, DM920, DREAMONE, DREAMTWO, DREAMSEVEN, DM500HDV2, DM800SEV2};
-
-	int m_boxtype;
-
 	eSmartPtrList<iDVBAdapter> m_adapter;
 	eSmartPtrList<eDVBRegisteredDemux> m_demux;
 	eSmartPtrList<eDVBRegisteredFrontend> m_frontend, m_simulate_frontend;
 	void addAdapter(iDVBAdapter *adapter, bool front = false);
 	void setUsbTuner();
 
-public:
 	struct active_channel
 	{
 		eDVBChannelID m_channel_id;
@@ -182,7 +177,6 @@ public:
 		active_channel(const eDVBChannelID &chid, eDVBChannel *ch) : m_channel_id(chid), m_channel(ch) { }
 	};
 
-private:
 	std::list<active_channel> m_active_channels, m_active_simulate_channels;
 
 	ePtr<iDVBChannelList> m_list;
@@ -210,7 +204,6 @@ public:
 
 	RESULT setChannelList(iDVBChannelList *list);
 	RESULT getChannelList(ePtr<iDVBChannelList> &list);
-	RESULT getActiveChannels(std::list<active_channel> &list);
 
 	enum {
 			/* errNoFrontend = -1 replaced by more spcific messages */

@@ -1,7 +1,7 @@
 from Components.Sources.Source import Source
 from Components.Element import cached
 from Components.SystemInfo import SystemInfo
-from enigma import eServiceReference, pNavigation
+from enigma import eServiceReference
 
 StreamServiceList = []
 
@@ -45,11 +45,7 @@ class StreamService(Source):
 				if hasattr(InfoBar.instance.session, 'pip'):
 					del InfoBar.instance.session.pip
 					InfoBar.instance.session.pipshown = False
-		try:
-			#not all images support recording type indicators
-			self.__service = self.navcore.recordService(self.ref,False,pNavigation.isStreaming)
-		except:
-			self.__service = self.navcore.recordService(self.ref)
+		self.__service = self.navcore.recordService(self.ref)
 		self.navcore.record_event.append(self.recordEvent)
 		if self.__service is not None:
 			if self.__service.__deref__() not in StreamServiceList:

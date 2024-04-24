@@ -1,7 +1,6 @@
 from os import path, unlink
 
 from enigma import eConsoleAppContainer, eDVBDB, eTimer
-from boxbranding import getImageType, getMachineBrand, getMachineName
 
 from Components.ActionMap import ActionMap, NumberActionMap
 from Components.Button import Button
@@ -14,6 +13,7 @@ from Components.OnlineUpdateCheck import feedsstatuscheck, kernelMismatch
 from Components.PluginComponent import plugins
 from Components.PluginList import PluginList, PluginEntryComponent, PluginCategoryComponent, PluginDownloadComponent
 from Components.Sources.StaticText import StaticText
+from Components.SystemInfo import SystemInfo
 from Plugins.Plugin import PluginDescriptor
 from Screens.ChoiceBox import ChoiceBox
 from Screens.Console import Console
@@ -242,7 +242,7 @@ class PluginBrowser(Screen, ProtectedScreen):
 	def download(self):
 		config.misc.pluginbrowser.po.value = True
 		if not (feedsstatuscheck.adapterAvailable() and feedsstatuscheck.NetworkUp()):
-			self.session.openWithCallback(self.close, MessageBox, _("Your %s %s has no %s access, please check your network settings and make sure you have network cable connected and try again.") % (getMachineBrand(), getMachineName(), feedsstatuscheck.adapterAvailable() and 'internet' or 'network'), type=MessageBox.TYPE_INFO, timeout=30, close_on_any_key=True)
+			self.session.openWithCallback(self.close, MessageBox, _("Your %s %s has no %s access, please check your network settings and make sure you have network cable connected and try again.") % (SystemInfo["MachineBrand"], SystemInfo["MachineName"], feedsstatuscheck.adapterAvailable() and 'internet' or 'network'), type=MessageBox.TYPE_INFO, timeout=30, close_on_any_key=True)
 			return
 		if kernelMismatch():
 			self.session.openWithCallback(self.close, MessageBox, _("The Linux kernel has changed, plugins are not compatible. \nInstall latest image using USB stick or Image Manager."), type=MessageBox.TYPE_INFO, timeout=30, close_on_any_key=True)
@@ -250,9 +250,14 @@ class PluginBrowser(Screen, ProtectedScreen):
 		self.session.openWithCallback(self.PluginDownloadBrowserClosed, PluginDownloadBrowser, PluginDownloadBrowser.DOWNLOAD, self.firsttime)
 		self.firsttime = False
 
-	def PluginDownloadBrowserClosed(self):
-		self.updateList()
-		self.checkWarnings()
+	def PluginDownloadBrowserClosed(self, returnValue):
+		if returnValue is None:
+			self.updateList()
+			self.checkWarnings()
+		elif returnValue == 0:
+			self.download()
+		else:
+			self.delete()
 
 	def userInstalledPlugins(self):
 		from Screens.AboutUserInstalledPlugins import AboutUserInstalledPlugins
@@ -307,6 +312,8 @@ class PluginDownloadBrowser(Screen):
 		elif self.type == self.REMOVE:
 			self["text"] = Label(_("Getting plugin information. Please wait..."))
 
+		self["key_red" if self.type == self.DOWNLOAD else "key_green"] = Label(_("Remove plugins") if self.type == self.DOWNLOAD else _("Download plugins"))
+
 		self.run = 0
 		self.remainingdata = ""
 		self["actions"] = ActionMap(["WizardActions"],
@@ -314,6 +321,7 @@ class PluginDownloadBrowser(Screen):
 			"ok": self.go,
 			"back": self.requestClose,
 		})
+		self["PluginDownloadActions"] = ActionMap(["ColorActions"], {"red": self.delete} if self.type == self.DOWNLOAD else {"green": self.download})
 		if path.isfile('/usr/bin/opkg'):
 			self.ipkg = '/usr/bin/opkg'
 			self.ipkg_install = self.ipkg + ' install'
@@ -395,7 +403,13 @@ class PluginDownloadBrowser(Screen):
 				mbox = self.session.openWithCallback(self.runInstall, MessageBox, _("Do you really want to remove the plugin \"%s\"?") % sel.name, default=False)
 				mbox.setTitle(_("Remove plugins"))
 
-	def requestClose(self):
+	def delete(self):
+		self.requestClose(1)
+
+	def download(self):
+		self.requestClose(0)
+
+	def requestClose(self, returnValue=None):
 		if self.plugins_changed:
 			plugins.readPluginList(resolveFilename(SCOPE_PLUGINS))
 		if self.reload_settings:
@@ -405,7 +419,7 @@ class PluginDownloadBrowser(Screen):
 		plugins.readPluginList(resolveFilename(SCOPE_PLUGINS))
 		self.container.appClosed.remove(self.runFinished)
 		self.container.dataAvail.remove(self.dataAvail)
-		self.close()
+		self.close(returnValue)
 
 	def resetPostInstall(self):
 		try:
@@ -470,13 +484,13 @@ class PluginDownloadBrowser(Screen):
 				self.doRemove(self.installFinished, self["list"].l.getCurrentSelection()[0].name + " --force-remove --force-depends")
 
 	def doRemove(self, callback, pkgname):
-		if pkgname.startswith('kernel-module-') or pkgname.startswith('enigma2-locale-'):
+		if pkgname.startswith(('kernel-module-', 'enigma2-locale-')):
 			self.session.openWithCallback(callback, Console, cmdlist=[self.ipkg_remove + Ipkg.opkgExtraDestinations() + " " + pkgname, "sync"], closeOnSuccess=True)
 		else:
 			self.session.openWithCallback(callback, Console, cmdlist=[self.ipkg_remove + Ipkg.opkgExtraDestinations() + " " + self.PLUGIN_PREFIX + pkgname, "sync"], closeOnSuccess=True)
 
 	def doInstall(self, callback, pkgname):
-		if pkgname.startswith('kernel-module-') or pkgname.startswith('enigma2-locale-'):
+		if pkgname.startswith(('kernel-module-', 'enigma2-locale-')):
 			self.session.openWithCallback(callback, Console, cmdlist=[self.ipkg_install + " " + pkgname, "sync"], closeOnSuccess=True)
 		else:
 			self.session.openWithCallback(callback, Console, cmdlist=[self.ipkg_install + " " + self.PLUGIN_PREFIX + pkgname, "sync"], closeOnSuccess=True)
@@ -505,9 +519,9 @@ class PluginDownloadBrowser(Screen):
 		self.listHeight = listsize.height()
 		if self.type == self.DOWNLOAD:
 			self.type = self.UPDATE
-			if (getImageType() != "release" and feedsstatuscheck.getFeedsBool() not in ("unknown", "alien")) or (getImageType() == "release" and feedsstatuscheck.getFeedsBool() not in ("stable", "unstable", "alien")):
+			if (SystemInfo["imagetype"] != "release" and feedsstatuscheck.getFeedsBool() not in ("unknown", "alien")) or (SystemInfo["imagetype"] == "release" and feedsstatuscheck.getFeedsBool() not in ("stable", "unstable", "alien")):
 				self["text"].setText(feedsstatuscheck.getFeedsErrorMessage())
-			elif getImageType() != 'release' or (config.softwareupdate.updateisunstable.value == '1' and config.softwareupdate.updatebeta.value):
+			elif SystemInfo["imagetype"] != 'release' or (config.softwareupdate.updateisunstable.value == 1 and config.softwareupdate.updatebeta.value):
 				self["text"].setText(_("WARNING: feeds may be unstable.") + '\n' + _("Downloading plugin information. Please wait..."))
 				self.container.execute(self.ipkg + " update")
 			elif config.softwareupdate.updateisunstable.value == '1' and not config.softwareupdate.updatebeta.value:

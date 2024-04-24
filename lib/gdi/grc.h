@@ -205,7 +205,7 @@ struct gOpcode
 			ePoint point;
 			eSize size;
 		} *setShowItemInfo;
-		
+
 		struct psetFlush
 		{
 			bool enable;
@@ -222,7 +222,7 @@ struct gOpcode
 #define MAXSIZE 2048
 
 /* gRC is the singleton which controls the fifo and dispatches commands */
-class gRC: public iObject, public sigc::trackable
+class gRC : public iObject, public sigc::trackable
 {
 	DECLARE_REF(gRC);
 	friend class gPainter;
@@ -260,16 +260,7 @@ public:
 
 	void submit(const gOpcode &o);
 
-#ifdef CONFIG_ION
-	void lock();
-	void unlock();
-#endif
-
-#if SIGCXX_MAJOR_VERSION == 3
 	sigc::signal<void()> notify;
-#else
-	sigc::signal0<void> notify;
-#endif
 
 	void setSpinnerDC(gDC *dc) { m_spinner_dc = dc; }
 	void setSpinnerOnOff(int onoff) { m_spinneronoff = onoff; }
@@ -385,7 +376,7 @@ public:
 #endif
 };
 
-class gDC: public iObject
+class gDC : public iObject
 {
 	DECLARE_REF(gDC);
 

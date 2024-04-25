@@ -2,12 +2,12 @@ name: Enigma2 Python 3
 
 on:
   push:
-    branches: [ Python3.11]
+    branches: [ Python3.12]
     paths-ignore:
       - '**/README'
       - '**/DOCS'
   pull_request:
-    branches: [ Python3.11]
+    branches: [ Python3.12]
     paths-ignore:
       - '**/README'
       - '**/DOCS'

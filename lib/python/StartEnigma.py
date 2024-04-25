@@ -209,7 +209,7 @@ class Session:
 		# close all open dialogs by emptying the dialog stack
 		# remove any return values and callbacks for a swift exit
 		while self.current_dialog is not None and type(self.current_dialog) is not InfoBar.InfoBar:
-			print(f"[SkinReloader] closing {type(self.current_dialog)}")
+			print("[SkinReloader] closing %s" % type(self.current_dialog))
 			self.current_dialog.returnValue = None
 			self.current_dialog.callback = None
 			self.execEnd()
@@ -444,14 +444,12 @@ def runScreenTest():
 
 
 profile("PYTHON_START")
-from Components.SystemInfo import SystemInfo  # noqa: E402  don't move this import
-
 print("[StartEnigma]  Starting Python Level Initialisation.")
-print(f"[StartEnigma]  Image Type -> {SystemInfo['imagetype']}")
-print(f"[StartEnigma]  Image Version -> {SystemInfo['imageversion']}")
-print(f"[StartEnigma]  Image Build -> {SystemInfo['imagebuild']}")
-if SystemInfo["imagetype"] != "release":
-	print(f"[StartEnigma]  Image DevBuild -> {SystemInfo['imagedevbuild']}")
+print("[StartEnigma]  Image Type -> '%s'" % getImageType())
+print("[StartEnigma]  Image Version -> '%s'" % getImageVersion())
+print("[StartEnigma]  Image Build -> '%s'" % getImageBuild())
+if getImageType() != "release":
+	print("[StartEnigma]  Image DevBuild -> '%s'" % getImageDevBuild())
 
 
 # SetupDevices sets up defaults:- language, keyboard, parental & expert config.
@@ -462,7 +460,7 @@ print("[StartEnigma]  Initialising SetupDevices.")
 from Components.SetupDevices import InitSetupDevices  # noqa: E402
 InitSetupDevices()
 
-if SystemInfo["architecture"] in ("aarch64"):  # something not right here
+if getImageArch() in ("aarch64"):
 	from usb.backend import libusb1  # noqa: E402
 	libusb1.get_backend(find_library=lambda x: "/lib64/libusb-1.0.so.0")
 
@@ -476,7 +474,7 @@ profile("InfoBar")
 print("[StartEnigma]  Initialising InfoBar.")
 from Screens import InfoBar  # noqa: E402
 
-# from Components.SystemInfo import SystemInfo  # noqa: E402  don't move this import
+from Components.SystemInfo import SystemInfo  # noqa: E402  don't move this import
 VuRecovery = SystemInfo["HasKexecMultiboot"] and SystemInfo["MultiBootSlot"] == 0
 # print("[StartEnigma]  Is this VuRecovery?. Recovery = ", VuRecovery)
 
@@ -668,6 +666,10 @@ from Components.AVSwitch import InitAVSwitch, InitiVideomodeHotplug  # noqa: E40
 InitAVSwitch()
 InitiVideomodeHotplug()
 
+profile("HdmiRecord")
+import Components.HdmiRecord
+Components.HdmiRecord.InitHdmiRecord()
+
 profile("EpgConfig")
 from Components.EpgConfig import InitEPGConfig  # noqa: E402
 InitEPGConfig()
@@ -723,18 +725,7 @@ else:
 	from Components.Lcd import InitLcd  # noqa: E402
 	InitLcd()
 
-from Tools.HardwareInfo import HardwareInfo
-if HardwareInfo().get_device_model() in ('dm7080', 'dm820', 'dm900', 'dm920', 'dreamone', 'dreamtwo'):
-	print("[StartEnigma] Read /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
-	check = open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "r").read()
-	if check.startswith("on"):
-		print("[StartEnigma] Write to /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
-		open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "w").write("off")
-	print("[StartEnigma] Read /proc/stb/audio/hdmi_rx_monitor")
-	checkaudio = open("/proc/stb/audio/hdmi_rx_monitor", "r").read()
-	if checkaudio.startswith("on"):
-		print("[StartEnigma] Write to /proc/stb/audio/hdmi_rx_monitor")
-		open("/proc/stb/audio/hdmi_rx_monitor", "w").write("off")
+	enigma.eAVControl.getInstance().disableHDMIIn()
 
 	profile("UserInterface")
 	print("[StartEnigma]  Initialising UserInterface.")

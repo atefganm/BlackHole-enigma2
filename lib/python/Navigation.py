@@ -1,7 +1,7 @@
 from time import time
 from os import path
 
-from enigma import eServiceCenter, eServiceReference, eTimer, pNavigation, getBestPlayableServiceReference, iServiceInformation, iPlayableService, setPreferredTuner, eDVBLocalTimeHandler, iRecordableServicePtr
+from enigma import eServiceCenter, eServiceReference, eTimer, pNavigation, getBestPlayableServiceReference, iPlayableService, setPreferredTuner, eDVBLocalTimeHandler, iRecordableServicePtr
 
 from Components.ParentalControl import parentalControl
 from Components.config import config
@@ -52,7 +52,6 @@ class Navigation:
 
 	def _processTimerWakeup(self):
 		now = time()
-		wakeup = ""
 		timeHandlerCallbacks = eDVBLocalTimeHandler.getInstance().m_timeUpdated.get()
 		if self.__nextRecordTimerAfterEventActionAuto and now < eDVBLocalTimeHandler.timeOK:  # 01.01.2004
 			print("[Navigation] RECTIMER: wakeup to standby but system time not set.")
@@ -63,18 +62,21 @@ class Navigation:
 			timeHandlerCallbacks.remove(self._processTimerWakeup)
 
 		if self.__nextRecordTimerAfterEventActionAuto and abs(self.RecordTimer.getNextRecordingTime() - now) <= 360:
-			wakeup = "/tmp/was_rectimer_wakeup"  # set wakeup flags as RecordTimer woke the box to record, place the box in standby.
+			print("[Navigation] RECTIMER: wakeup to standby detected.")
+			f = open("/tmp/was_rectimer_wakeup", "w")
+			f.write("1")
+			f.close()
+			# as we woke the box to record, place the box in standby.
+			self.standbytimer = eTimer()
+			self.standbytimer.callback.append(self.gotostandby)
+			self.standbytimer.start(15000, True)
+
 		elif self.__nextPowerManagerAfterEventActionAuto:
-			wakeup = "/tmp/was_powertimer_wakeup"  # set wakeup flags as a PowerTimer WakeToStandby was actioned.
-		if wakeup:
-			fwakeup = open(f"{wakeup}", "w")  # set wakeup timer type
-			fwakeup.write("1")
-			fwakeup.close()
-			if path.exists(f"{wakeup}"):
-				print(f"[Navigation] TIMER: wakeup to standby detected, flag set: {wakeup}.")
-			fcec = open("/tmp/was_cectimer_wakeup", "w")  # tell Cec was timer wakeup, so don't issue Standby to TV
-			fcec.write("1")
-			fcec.close()
+			print("[Navigation] POWERTIMER: wakeup to standby detected.")
+			f = open("/tmp/was_powertimer_wakeup", "w")
+			f.write("1")
+			f.close()
+			# as a PowerTimer WakeToStandby was actiond to it.
 			self.standbytimer = eTimer()
 			self.standbytimer.callback.append(self.gotostandby)
 			self.standbytimer.start(15000, True)
@@ -245,12 +247,7 @@ class Navigation:
 	def getCurrentlyPlayingServiceOrGroup(self):
 		return self.currentlyPlayingServiceOrGroup
 
-	def getCurrentServiceRef(self):
-		curPlayService = self.getCurrentService()
-		info = curPlayService and curPlayService.info()
-		return info and info.getInfoString(iServiceInformation.sServiceref)
-
-	def recordService(self, ref, simulate=False):
+	def recordService(self, ref, simulate=False, type=pNavigation.isUnknownRecording):
 		service = None
 		if not simulate:
 			print("[Navigation] recording service:", (ref and ref.toString()))
@@ -258,7 +255,7 @@ class Navigation:
 			if ref.flags & eServiceReference.isGroup:
 				ref = getBestPlayableServiceReference(ref, eServiceReference(), simulate)
 			ref = streamrelay.streamrelayChecker(ref)
-			service = ref and self.pnav and self.pnav.recordService(ref, simulate)
+			service = ref and self.pnav and self.pnav.recordService(ref, simulate, type)
 			if service is None:
 				print("[Navigation] record returned non-zero")
 		return service
@@ -269,13 +266,26 @@ class Navigation:
 			ret = self.pnav and self.pnav.stopRecordService(service)
 		return ret
 
-	def getRecordings(self, simulate=False):
-		recs = self.pnav and self.pnav.getRecordings(simulate)
-		if not simulate and StreamServiceList:
-			for rec in recs[:]:
-				if rec.__deref__() in StreamServiceList:
-					recs.remove(rec)
-		return recs
+	def getRecordings(self, simulate=False, type=pNavigation.isAnyRecording):
+		return self.pnav and self.pnav.getRecordings(simulate, type)
+
+	def getRecordingsServices(self, type=pNavigation.isAnyRecording):
+		return self.pnav and self.pnav.getRecordingsServices(type)
+
+	def getRecordingsServicesOnly(self, type=pNavigation.isAnyRecording):
+		return self.pnav and self.pnav.getRecordingsServicesOnly(type)
+
+	def getRecordingsTypesOnly(self, type=pNavigation.isAnyRecording):
+		return self.pnav and self.pnav.getRecordingsTypesOnly(type)
+
+	def getRecordingsSlotIDsOnly(self, type=pNavigation.isAnyRecording):
+		return self.pnav and self.pnav.getRecordingsSlotIDsOnly(type)
+
+	def getRecordingsServicesAndTypes(self, type=pNavigation.isAnyRecording):
+		return self.pnav and self.pnav.getRecordingsServicesAndTypes(type)
+
+	def getRecordingsServicesAndTypesAndSlotIDs(self, type=pNavigation.isAnyRecording):
+		return self.pnav and self.pnav.getRecordingsServicesAndTypesAndSlotIDs(type)
 
 	def getCurrentService(self):
 		if not self.currentlyPlayingService:

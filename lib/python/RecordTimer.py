@@ -4,13 +4,14 @@ from bisect import insort
 from sys import maxsize
 from time import localtime, strftime, ctime, time
 
-from enigma import eEPGCache, getBestPlayableServiceReference, eStreamServer, eServiceReference, iRecordableService, quitMainloop, eActionMap, setPreferredTuner, eServiceCenter
+from enigma import eEPGCache, getBestPlayableServiceReference, eStreamServer, eServiceReference, iRecordableService, pNavigation, quitMainloop, eActionMap, setPreferredTuner, eServiceCenter
 from Components.config import config
 import Components.ParentalControl
 from Components.UsageConfig import defaultMoviePath
 from Components.SystemInfo import SystemInfo
 from Components.TimerSanityCheck import TimerSanityCheck
 import Screens.InfoBar
+import Components.RecordingConfig
 from Screens.MessageBox import MessageBox
 from Screens.PictureInPicture import PictureInPicture
 import Screens.Standby
@@ -230,6 +231,10 @@ class RecordTimerEntry(TimerEntry):
 		self.autoincreasetime = 3600 * 24  # 1 day
 		self.tags = tags or []
 		self.conflict_detection = conflict_detection
+		self.messageString = ""
+		self.messageStringShow = False
+		self.messageBoxAnswerPending = False
+		self.justTriedFreeingTuner = False
 
 		if descramble == "notset" and record_ecm == "notset":
 			if config.recording.ecm_data.value == "descrambled+ecm":
@@ -381,7 +386,11 @@ class RecordTimerEntry(TimerEntry):
 					return False
 
 			self.setRecordingPreferredTuner()
-			self.record_service = rec_ref and NavigationInstance.instance.recordService(rec_ref)
+			try:
+				#not all images support recording type indicators
+				self.record_service = rec_ref and NavigationInstance.instance.recordService(rec_ref,False,pNavigation.isRealRecording)
+			except:
+				self.record_service = rec_ref and NavigationInstance.instance.recordService(rec_ref)
 
 			if not self.record_service:
 				self.log(1, "'record service' failed")
@@ -517,7 +526,18 @@ class RecordTimerEntry(TimerEntry):
 		next_state = self.state + 1
 		self.log(5, "activating state %d (%s)" % (next_state, TimerEntry.States.get(next_state, "?")))
 
+		# print "[TIMER] activate called",time(),next_state,self.first_try_prepare,' pending ',self.messageBoxAnswerPending,' justTried ',self.justTriedFreeingTuner,' show ',self.messageStringShow,self.messageString #TODO remove
+
 		if next_state == self.StatePrepared:
+			if self.messageBoxAnswerPending:
+				self.start_prepare = time() + 1 # call again in 1 second
+				return False
+
+			if self.justTriedFreeingTuner:
+				self.start_prepare = time() + 5 # tryPrepare in 5 seconds
+				self.justTriedFreeingTuner = False
+				return False
+
 			if not self.justplay and not self.freespace():
 				Notifications.AddPopup(text=_("Write error while recording. Disk full?\n%s") % self.name, type=MessageBox.TYPE_ERROR, timeout=5, id="DiskFullMessage")
 				self.failed = True
@@ -544,13 +564,16 @@ class RecordTimerEntry(TimerEntry):
 							if self.ts_dialog is None:
 								self.openChoiceActionBeforeZap()
 						else:
-							Notifications.AddNotification(MessageBox, _("In order to record a timer, the TV was switched to the recording service!\n"), type=MessageBox.TYPE_INFO, timeout=20)
-							self.setRecordingPreferredTuner()
-							self.failureCB(True)
-							self.log(5, "zap to recording service")
+								self.messageString += _("The TV was switched to the recording service!\n")
+								self.messageStringShow = True
+								self.setRecordingPreferredTuner()
+								self.failureCB(True)
+								self.log(5, "zap to recording service")
 
 			if self.tryPrepare():
 				self.log(6, "prepare ok, waiting for begin")
+				if self.messageStringShow:
+					Notifications.AddNotification(MessageBox, _("In order to record a timer, a tuner was freed successfully:\n\n") + self.messageString, type=MessageBox.TYPE_INFO, timeout=20)
 				# create file to "reserve" the filename
 				# because another recording at the same time on another service can try to record the same event
 				# i.e. cable / sat.. then the second recording needs an own extension... when we create the file
@@ -574,13 +597,72 @@ class RecordTimerEntry(TimerEntry):
 				self.log(71, "eStreamerServer client - stop")
 				eStreamServer.getInstance().stopStream()
 				return False
-			if self.first_try_prepare or (self.ts_dialog is not None and not self.checkingTimeshiftRunning()):
-				self.first_try_prepare = False
-				cur_ref = NavigationInstance.instance.getCurrentlyPlayingServiceReference()
-				rec_ref = self.service_ref and self.service_ref.ref
-				if cur_ref and not cur_ref.getPath() or rec_ref.toString()[:4] in config.recording.setstreamto1.value:  # "or" check if IPTV services (4097, etc)
-					if self.always_zap:
-						return False
+			if self.first_try_prepare == 0:  # Try to make a tuner available by disabling PiP.
+				self.first_try_prepare += 1
+				if not InfoBar:
+					from Screens.InfoBar import InfoBar
+				from Screens.InfoBarGenerics import InfoBarPiP
+				from Components.ServiceEventTracker import InfoBarCount
+				InfoBarInstance = InfoBarCount == 1 and InfoBar.instance
+				if InfoBarInstance and InfoBarPiP.pipShown(InfoBarInstance) is True:
+					if config.recording.ask_to_abort_pip.value == "ask":
+						self.log(8, "Asking user to disable PiP.")
+						self.messageBoxAnswerPending = True
+						message = _("A timer failed to record!\nDisable PiP and try again?\n")
+						if InfoBar and InfoBar.instance:
+							InfoBar.instance.openInfoBarMessageWithCallback(self.failureCB_pip, message, MessageBox.TYPE_YESNO, timeout=20, default=True)
+						else:
+							AddNotificationWithCallback(self.failureCB_pip, MessageBox, message, MessageBox.TYPE_YESNO, timeout=20, default=True)
+					elif config.recording.ask_to_abort_pip.value in ("abort_no_msg", "abort_msg"):
+						self.log(8, "Disable PiP without asking.")
+						self.setRecordingPreferredTuner()
+						self.failureCB_pip(True)
+					return False
+				else:
+					self.log(8, "No PiP active so we don't need to stop it.")
+			if self.first_try_prepare == 1:  # Try to make a tuner available by aborting pseudo recordings.
+				self.first_try_prepare += 1
+				self.backoff = 0
+				if len(NavigationInstance.instance.getRecordings(False, pNavigation.isPseudoRecording)) > 0:
+					if config.recording.ask_to_abort_pseudo_rec.value == "ask":
+						self.log(8, "Asking user to abort pseudo recordings.")
+						self.messageBoxAnswerPending = True
+						message = _("A timer failed to record!\nAbort pseudo recordings (e.g. EPG refresh) and try again?\n")
+						if InfoBar and InfoBar.instance:
+							InfoBar.instance.openInfoBarMessageWithCallback(self.failureCB_pseudo_rec, message, MessageBox.TYPE_YESNO, timeout=20, default=True)
+						else:
+							AddNotificationWithCallback(self.failureCB_pseudo_rec, MessageBox, message, MessageBox.TYPE_YESNO, timeout=20, default=True)
+					elif config.recording.ask_to_abort_pseudo_rec.value in ("abort_no_msg", "abort_msg"):
+						self.log(8, "Abort pseudo recordings without asking.")
+						self.setRecordingPreferredTuner()
+						self.failureCB_pseudo_rec(True)
+					return False
+				else:
+					self.log(8, "No pseudo recordings active so we don't need to stop them.")
+			if self.first_try_prepare == 2:  # Try to make a tuner available by aborting streaming.
+				self.first_try_prepare += 1
+				self.backoff = 0
+				if len(NavigationInstance.instance.getRecordings(False, pNavigation.isStreaming)) > 0:
+					if config.recording.ask_to_abort_streaming.value == "ask":
+						self.log(8, "Asking user to abort streaming.")
+						self.messageBoxAnswerPending = True
+						message = _("A timer failed to record!\nAbort streaming and try again?\n")
+						if InfoBar and InfoBar.instance:
+							InfoBar.instance.openInfoBarMessageWithCallback(self.failureCB_streaming, message, MessageBox.TYPE_YESNO, timeout=20, default=True)
+						else:
+							AddNotificationWithCallback(self.failureCB_streaming, MessageBox, message, MessageBox.TYPE_YESNO, timeout=20, default=True)
+					elif config.recording.ask_to_abort_streaming.value in ("abort_no_msg", "abort_msg"):
+						self.log(8, "Abort streaming without asking.")
+						self.setRecordingPreferredTuner()
+						self.failureCB_streaming(True)
+					return False
+				else:
+					self.log(8, "No streaming active so we don't need to stop it.")
+			if self.first_try_prepare == 3:  # Try to make a tuner available by switching live TV to the recording service.
+				self.first_try_prepare += 1
+				self.backoff = 0
+				currentReference = NavigationInstance.instance.getCurrentlyPlayingServiceReference()
+				if currentReference and not currentReference.getPath():
 					if Screens.Standby.inStandby:
 						self.setRecordingPreferredTuner()
 						self.failureCB(True)
@@ -589,16 +671,27 @@ class RecordTimerEntry(TimerEntry):
 							self.openChoiceActionBeforeZap()
 					elif not config.recording.asktozap.value:
 						self.log(8, "asking user to zap away")
+						self.messageBoxAnswerPending = True
 						Notifications.AddNotificationWithCallback(self.failureCB, MessageBox, _("A timer failed to record!\nDisable TV and try again?\n"), timeout=20)
 					else:  # zap without asking
 						self.log(9, "zap without asking")
-						Notifications.AddNotification(MessageBox, _("In order to record a timer, the TV was switched to the recording service!\n"), type=MessageBox.TYPE_INFO, timeout=20)
 						self.setRecordingPreferredTuner()
 						self.failureCB(True)
+					return False
 				elif cur_ref:
-					self.log(8, "currently running service is not a live service.. so stop it makes no sense")
+					self.log(8, "currently running service is not a live service.. so stopping it makes no sense")
 				else:
 					self.log(8, "currently no service running... so we dont need to stop it")
+
+			if self.first_try_prepare == 4:
+				# (4) freeing a tuner failed
+				self.first_try_prepare += 1
+				self.log(8, "freeing a tuner failed")
+				if self.messageString:
+					Notifications.AddNotification(MessageBox, _("No tuner is available for recording a timer!\n\nThe following methods of freeing a tuner were tried without success:\n\n") + self.messageString, type=MessageBox.TYPE_INFO, timeout=20)
+				else:
+					Notifications.AddNotification(MessageBox, _("No tuner is available for recording a timer!\n"), type=MessageBox.TYPE_INFO, timeout=20)
+
 			return False
 
 		elif next_state == self.StateRunning:
@@ -884,18 +977,66 @@ class RecordTimerEntry(TimerEntry):
 				self.StateRunning: self.begin,
 				self.StateEnded: self.end}[next_state]
 
+	def failureCB_pip(self, answer):
+		if answer:
+			self.log(13, "ok, disable PIP")
+			from Screens.InfoBar import InfoBar
+			from Screens.InfoBarGenerics import InfoBarPiP
+			from Components.ServiceEventTracker import InfoBarCount
+			InfoBarInstance = InfoBarCount == 1 and InfoBar.instance
+			if InfoBarInstance:
+				InfoBarPiP.showPiP(InfoBarInstance)
+				self.messageString += _("Disabled PIP.\n")
+			else:
+				self.log(14, "tried to disable PIP, suddenly found no InfoBar.instance")
+				self.messageString += _("Tried to disable PIP, suddenly found no InfoBar.instance.\n")
+			if config.recording.ask_to_abort_pip.value in ("ask", "abort_msg"):
+				self.messageStringShow = True
+			self.justTriedFreeingTuner = True
+		else:
+			self.log(14, "user didn't want to disable PIP, try other methods of freeing a tuner")
+		self.messageBoxAnswerPending = False
+
+	def failureCB_pseudo_rec(self, answer):
+		if answer:
+			self.log(13, "ok, abort pseudo recordings")
+			for rec in NavigationInstance.instance.getRecordings(False,pNavigation.isPseudoRecording):
+				NavigationInstance.instance.stopRecordService(rec)
+				self.messageString += _("Aborted a pseudo recording.\n")
+			if config.recording.ask_to_abort_pseudo_rec.value in ("ask", "abort_msg"):
+				self.messageStringShow = True
+			self.justTriedFreeingTuner = True
+		else:
+			self.log(14, "user didn't want to abort pseudo recordings, try other methods of freeing a tuner")
+		self.messageBoxAnswerPending = False
+
+	def failureCB_streaming(self, answer):
+		if answer:
+			self.log(13, "ok, abort streaming")
+			for rec in NavigationInstance.instance.getRecordings(False,pNavigation.isStreaming):
+				NavigationInstance.instance.stopRecordService(rec)
+				self.messageString += _("Aborted a streaming service.\n")
+			if config.recording.ask_to_abort_streaming.value in ("ask", "abort_msg"):
+				self.messageStringShow = True
+			self.justTriedFreeingTuner = True
+		else:
+			self.log(14, "user didn't want to abort streaming, try other methods of freeing a tuner")
+		self.messageBoxAnswerPending = False
+
 	def failureCB(self, answer):
 		if answer:
 			self.log(13, "ok, zapped away")
+			self.messageString += _("The TV was switched to the recording service!\n")
+			self.messageStringShow = True
 			# NavigationInstance.instance.stopUserServices()
-			self._bouquet_search()
-			if not self.first_try_prepare and self.InfoBarInstance and hasattr(self.InfoBarInstance.session, "pipshown") and self.InfoBarInstance.session.pipshown:
-				hasattr(self.InfoBarInstance, "showPiP") and self.InfoBarInstance.showPiP()
-				if hasattr(self.InfoBarInstance.session, "pip"):
-					del self.InfoBarInstance.session.pip
-					self.InfoBarInstance.session.pipshown = False
+			if InfoBar and InfoBar.instance and InfoBar.instance.servicelist:
+				InfoBar.instance.servicelist.performZap(self.service_ref.ref)
+			else:
+				NavigationInstance.instance.playService(self.service_ref.ref)
+			self.justTriedFreeingTuner = True
 		else:
-			self.log(14, "user didn't want to zap away, record will probably fail")
+			self.log(14, "User didn't want to zap away, recording will probably fail!")
+		self.messageBoxAnswerPending = False
 
 	def timeChanged(self):
 		old_prepare = self.start_prepare
@@ -1052,7 +1193,11 @@ class RecordTimer(Timer):
 			if w.repeated:
 				w.processRepeated()
 				w.state = RecordTimerEntry.StateWaiting
-				w.first_try_prepare = True
+				w.first_try_prepare = 0 # changed from a bool to a counter, not renamed for compatibility with openWebif
+				w.messageBoxAnswerPending = False
+				w.justTriedFreeingTuner = False
+				w.messageString = "" # incremental MessageBox string
+				w.messageStringShow = False
 				self.addTimerEntry(w)
 			else:
 				# If we want to keep done timers, re-insert in the active list

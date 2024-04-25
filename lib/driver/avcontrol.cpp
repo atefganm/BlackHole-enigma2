@@ -164,10 +164,14 @@ eAVControl::~eAVControl()
 int eAVControl::getAspect(int defaultVal, int flags) const
 {
 	int value = 0;
-	CFile::parseIntHex(&value, proc_videoaspect_r, __MODULE__, flags);
-	if (flags & FLAGS_DEBUG)
+	int ret = CFile::parseIntHex(&value, proc_videoaspect_r, __MODULE__, flags);
+	if (ret != 0)
+	{
+		value = defaultVal;
+	}
+	else if (flags & FLAGS_DEBUG)
 		eDebug("[%s] %s: %d", __MODULE__, "getAspect", value);
-	return defaultVal;
+	return value;
 }
 
 /// @brief Get progressive
@@ -403,6 +407,8 @@ std::string eAVControl::readAvailableModes(int flags) const
 
 #ifdef DREAMNEXTGEN
 	return std::string("480i60hz 576i50hz 480p60hz 576p50hz 720p60hz 1080i60hz 1080p60hz 720p50hz 1080i50hz 1080p30hz 1080p50hz 1080p25hz 1080p24hz 2160p30hz 2160p25hz 2160p24hz smpte24hz smpte25hz smpte30hz smpte50hz smpte60hz 2160p50hz 2160p60hz");
+#elif USE_VIDEO_MODE_HD
+	return std::string("pal ntsc 720p 720p25 720p30 720p50 1080i 1080i50 1080p25 1080p30 1080p50 1080p 576i 576p 480i 480p");
 #else
 	const char *fileName = "/proc/stb/video/videomode_choices";
 	std::string result = "";
@@ -633,10 +639,10 @@ void eAVControl::setPolicy169(const std::string &newPolicy, int flags) const
 }
 
 /// @brief setVideoSize
-/// @param top 
-/// @param left 
-/// @param width 
-/// @param height 
+/// @param top
+/// @param left
+/// @param width
+/// @param height
 /// @param flags bit ( 1 = DEBUG , 2 = SUPPRESS_NOT_EXISTS , 4 = SUPPRESS_READWRITE_ERROR)
 void eAVControl::setVideoSize(int top, int left, int width, int height, int flags) const
 {

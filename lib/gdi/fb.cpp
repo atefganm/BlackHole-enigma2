@@ -138,7 +138,7 @@ fbClass::fbClass(const char *fb)
 		{
 			close(m_accel_fd);
 			eDebug("[fb] mmap lion failed");
-err_ioc_free:
+			err_ioc_free:
 			eFatal("[fb] failed to allocate accel memory via ION!!!");
 			m_accel_fd = -1;
 			memset(&free_data, 0, sizeof(free_data));
@@ -200,8 +200,14 @@ int fbClass::SetMode(int nxRes, int nyRes, int nbpp)
 	if (lfb)
 		munmap(lfb, stride * screeninfo.yres_virtual);
 #endif
+
 	screeninfo.xres_virtual=screeninfo.xres=nxRes;
+#ifdef DREAMNEXTGEN
+	screeninfo.yres_virtual=(screeninfo.yres=nyRes)*3;
+	screeninfo.activate = FB_ACTIVATE_ALL;
+#else
 	screeninfo.yres_virtual=(screeninfo.yres=nyRes)*2;
+#endif
 	screeninfo.height=0;
 	screeninfo.width=0;
 	screeninfo.xoffset=screeninfo.yoffset=0;
@@ -244,7 +250,11 @@ int fbClass::SetMode(int nxRes, int nyRes, int nbpp)
 		}
 		eDebug("[fb] double buffering not available.");
 	} else
+#ifdef DREAMNEXTGEN
+		eDebug("[fb] triple buffering available!");
+#else
 		eDebug("[fb] double buffering available!");
+#endif
 
 	m_number_of_pages = screeninfo.yres_virtual / nyRes;
 
@@ -268,8 +278,8 @@ int fbClass::SetMode(int nxRes, int nyRes, int nbpp)
 	stride=fix.line_length;
 
 #ifdef CONFIG_ION
-    m_phys_mem = fix.smem_start;
-    available = fix.smem_len;
+	m_phys_mem = fix.smem_start;
+	available = fix.smem_len;
 	/* map new framebuffer */
 	lfb=(unsigned char*)mmap(0, stride * screeninfo.yres_virtual, PROT_WRITE|PROT_READ, MAP_SHARED, fbFd, 0);
 #endif

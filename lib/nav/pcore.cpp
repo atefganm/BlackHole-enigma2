@@ -1,4 +1,4 @@
-#include <lib/nav/pcore.h>
+#include <lib/nav/core.h>
 #include <lib/service/service.h>
 #include <lib/service/event.h>
 #include <lib/base/eerror.h>
@@ -22,7 +22,7 @@ RESULT pNavigation::playService(const eServiceReference &service)
 	return m_core->playService(service);
 }
 
-RESULT pNavigation::getCurrentService(ePtr<iPlayableService> &service)
+RESULT pNavigation::getCurrentService(ePtr<iPlayableService>& service)
 {
 	return m_core->getCurrentService(service);
 }
@@ -37,19 +37,39 @@ RESULT pNavigation::stopService()
 	return m_core->stopService();
 }
 
-RESULT pNavigation::recordService(const eServiceReference &ref, ePtr<iRecordableService> &service, bool simulate)
+RESULT pNavigation::recordService(const eServiceReference &ref, ePtr<iRecordableService>& service, bool simulate, RecordType type)
 {
-	return m_core->recordService(ref, service, simulate);
+	return m_core->recordService(ref, service, simulate, type);
 }
 
-RESULT pNavigation::stopRecordService(ePtr<iRecordableService> &service)
+RESULT pNavigation::stopRecordService(ePtr<iRecordableService>& service)
 {
 	return m_core->stopRecordService(service);
 }
 
-void pNavigation::getRecordings(std::vector<ePtr<iRecordableService> > &recordings, bool simulate)
+void pNavigation::getRecordings(std::vector<ePtr<iRecordableService> >& recordings, bool simulate, RecordType type)
 {
-	m_core->getRecordings(recordings, simulate);
+	m_core->getRecordings(recordings, simulate, type);
+}
+
+void pNavigation::getRecordingsServicesOnly(std::vector<eServiceReference>& services, RecordType type)
+{
+	m_core->getRecordingsServicesOnly(services, type);
+}
+
+void pNavigation::getRecordingsTypesOnly(std::vector<RecordType>& returnedTypes, RecordType type)
+{
+	m_core->getRecordingsTypesOnly(returnedTypes, type);
+}
+
+void pNavigation::getRecordingsSlotIDsOnly(std::vector<int>& slotids, RecordType type)
+{
+	m_core->getRecordingsSlotIDsOnly(slotids, type);
+}
+
+std::map<ePtr<iRecordableService>, eServiceReference, std::less<iRecordableService*> > pNavigation::getRecordingsServices(RecordType type)
+{
+	return m_core->getRecordingsServices(type);
 }
 
 void pNavigation::navEvent(int event)

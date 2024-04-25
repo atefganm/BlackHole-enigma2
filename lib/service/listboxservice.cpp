@@ -256,7 +256,9 @@ int eListboxServiceContent::getPrevMarkerPos()
 		return 0;
 	list::iterator i(m_cursor);
 	int index = m_cursor_number;
-	while (index) // Find marker for this section
+
+	// if the search is starting part way through a section return to the start of the current section
+	while (index)
 	{
 		--i;
 		--index;
@@ -264,12 +266,10 @@ int eListboxServiceContent::getPrevMarkerPos()
 			break;
 	}
 
-	//eDebug("[eListboxServiceContent] prevMarkerIndex= %i; curSelIndex= %i; index= %i", cursorResolve(prevMarkerIndex), cursorResolve(m_cursor_number), index);
-
-	// if currently selected service is not the first after the marker found - return the found marker index
+	// if the search started from part way through the current section return now because this is the previous visible marker
 	if (cursorResolve(index) + 1 != cursorResolve(m_cursor_number)) return cursorResolve(index);
 
-
+	// search for visible marker index of previous section
 	while (index)
 	{
 		--i;
@@ -667,10 +667,10 @@ void eListboxServiceContent::setItemHeight(int height)
 		m_listbox->setItemHeight(height);
 }
 
-bool eListboxServiceContent::checkServiceIsRecorded(eServiceReference ref)
+bool eListboxServiceContent::checkServiceIsRecorded(eServiceReference ref,pNavigation::RecordType type)
 {
 	std::map<ePtr<iRecordableService>, eServiceReference, std::less<iRecordableService*> > recordedServices;
-	recordedServices = eNavigation::getInstance()->getRecordingsServices();
+	recordedServices = eNavigation::getInstance()->getRecordingsServices(type);
 	for (std::map<ePtr<iRecordableService>, eServiceReference >::iterator it = recordedServices.begin(); it != recordedServices.end(); ++it)
 	{
 		if (ref.flags & eServiceReference::isGroup)
@@ -821,7 +821,9 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 		bool isMarker = ref.flags & eServiceReference::isMarker;
 		bool isDirectory = ref.flags & eServiceReference::isDirectory;
 		bool isPlayable = !(isDirectory || isMarker);
-		bool isRecorded = isPlayable && checkServiceIsRecorded(ref);
+		bool isRecorded = m_record_indicator_mode && isPlayable && checkServiceIsRecorded(ref,pNavigation::RecordType(pNavigation::isRealRecording|pNavigation::isUnknownRecording));
+		bool isStreamed = m_record_indicator_mode && isPlayable && checkServiceIsRecorded(ref,pNavigation::isStreaming);
+		bool isPseudoRecorded = m_record_indicator_mode && isPlayable && checkServiceIsRecorded(ref,pNavigation::isPseudoRecording);
 		ePtr<eServiceEvent> evt, evt_next;
 		bool serviceAvail = true;
 		bool serviceFallback = false;
@@ -850,6 +852,20 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 					serviceFallback = true;
 				}
 			}
+		}
+		if (m_record_indicator_mode == 3 && isPseudoRecorded)
+		{
+			if (m_color_set[servicePseudoRecorded])
+				painter.setForegroundColor(m_color[servicePseudoRecorded]);
+			else
+				painter.setForegroundColor(gRGB(0x41b1ec));
+		}
+		if (m_record_indicator_mode == 3 && isStreamed)
+		{
+			if (m_color_set[serviceStreamed])
+				painter.setForegroundColor(m_color[serviceStreamed]);
+			else
+				painter.setForegroundColor(gRGB(0xf56712));
 		}
 		if (m_record_indicator_mode == 3 && isRecorded)
 		{
@@ -1014,7 +1030,9 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 			// channel number + name
 			if (service_info)
 				service_info->getName(ref, text);
-
+#ifdef USE_LIBVUGLES2
+					painter.setFlush(text == "<n/a>");
+#endif
 			ePtr<eTextPara> paraName = new eTextPara(eRect(0, 0, m_itemsize.width(), m_itemheight/2));
 			paraName->setFont(m_element_font[celServiceName]);
 			paraName->renderString(text.c_str());

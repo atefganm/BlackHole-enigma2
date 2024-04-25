@@ -146,7 +146,14 @@ BackupTime = 0
 
 class OpenBhImageManager(Screen):
 	skin = ["""<screen name="OpenBhImageManager" position="center,center" size="%d,%d">
-		<panel name="__DynamicColorButtonTemplate__"/>
+		<ePixmap pixmap="skin_default/buttons/red.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<ePixmap pixmap="skin_default/buttons/green.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<ePixmap pixmap="skin_default/buttons/yellow.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<ePixmap pixmap="skin_default/buttons/blue.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<widget name="key_red" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#9f1313" transparent="1"/>
+		<widget name="key_green" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#1f771f" transparent="1"/>
+		<widget name="key_yellow" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#a08500" transparent="1"/>
+		<widget name="key_blue" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#18188b" transparent="1"/>
 		<ePixmap pixmap="skin_default/buttons/key_menu.png" position="%d,%d" size="%d,%d" alphatest="blend" transparent="1" zPosition="3" scale="1" />
 		<widget name="lab1" position="%d,%d" size="%d,%d" font="Regular; %d" zPosition="2" transparent="0" halign="center"/>
 		<widget name="list" position="%d,%d" size="%d,%d" font="Regular;%d" scrollbarMode="showOnDemand"/>
@@ -156,6 +163,14 @@ class OpenBhImageManager(Screen):
 		</applet>
 	</screen>""",
 		560, 400,  # screen
+		0, 0, 140, 40,  # colors
+		140, 0, 140, 40,
+		280, 0, 140, 40,
+		420, 0, 140, 40,
+		0, 0, 140, 40, 20,
+		140, 0, 140, 40, 20,
+		280, 0, 140, 40, 20,
+		420, 0, 140, 40, 20,
 		0, 45, 35, 25,  # menu key
 		0, 50, 560, 50, 18,  # lab1
 		10, 105, 540, 260, 20,  # list
@@ -523,14 +538,9 @@ class OpenBhImageManager(Screen):
 		imagedict = GetImagelist()
 		choices = []
 		currentimageslot = SystemInfo["MultiBootSlot"]
-		idx = 0
-		for i, x in enumerate(imagedict.keys()):
+		for x in imagedict.keys():
 			choices.append(((_("slot%s %s - %s (current image)") if x == currentimageslot else _("slot%s %s - %s")) % (x, SystemInfo["canMultiBoot"][x]["slotname"], imagedict[x]["imagename"]), (x)))
-			if x == currentimageslot:
-				idx = i
-		dialog = self.session.openWithCallback(self.keyRestore2, MessageBox, message, list=choices, default=False, simple=True)
-		if idx:
-			dialog["list"].moveToIndex(idx)
+		self.session.openWithCallback(self.keyRestore2, MessageBox, message, list=choices, default=False, simple=True)
 
 	def keyRestore2(self, retval):
 		if retval:
@@ -886,7 +896,14 @@ class AutoImageManagerTimer:
 class ImageBackup(Screen):
 	skin = ["""
 	<screen name="OpenBhImageManager" position="center,center" size="%d,%d">
-		<panel name="__DynamicColorButtonTemplate__"/>
+		<ePixmap pixmap="skin_default/buttons/red.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<ePixmap pixmap="skin_default/buttons/green.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<ePixmap pixmap="skin_default/buttons/yellow.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<ePixmap pixmap="skin_default/buttons/blue.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<widget name="key_red" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#9f1313" transparent="1"/>
+		<widget name="key_green" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#1f771f" transparent="1"/>
+		<widget name="key_yellow" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#a08500" transparent="1"/>
+		<widget name="key_blue" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#18188b" transparent="1"/>
 		<widget name="lab1" position="%d,%d" size="%d,%d" font="Regular; %d" zPosition="2" transparent="0" halign="center"/>
 		<widget name="list" position="%d,%d" size="%d,%d" font="Regular;%d" scrollbarMode="showOnDemand"/>
 		<applet type="onLayoutFinish">
@@ -894,6 +911,14 @@ class ImageBackup(Screen):
 		</applet>
 	</screen>""",
 		560, 400,  # screen
+		0, 0, 140, 40,  # colors
+		140, 0, 140, 40,
+		280, 0, 140, 40,
+		420, 0, 140, 40,
+		0, 0, 140, 40, 20,
+		140, 0, 140, 40, 20,
+		280, 0, 140, 40, 20,
+		420, 0, 140, 40, 20,
 		0, 50, 560, 50, 18,  # lab1
 		10, 105, 540, 260, 20,  # list
 		26,
@@ -1564,6 +1589,14 @@ class ImageBackup(Screen):
 class ImageManagerDownload(Screen):
 	skin = ["""
 	<screen name = "OpenBhImageManager"  position="center,center" size="%d,%d">
+		<ePixmap pixmap="skin_default/buttons/red.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<ePixmap pixmap="skin_default/buttons/green.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<ePixmap pixmap="skin_default/buttons/yellow.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<ePixmap pixmap="skin_default/buttons/blue.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<widget name="key_red" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#9f1313" transparent="1"/>
+		<widget name="key_green" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#1f771f" transparent="1"/>
+		<widget name="key_yellow" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#a08500" transparent="1"/>
+		<widget name="key_blue" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#18188b" transparent="1"/>
 		<widget name="lab1" position="%d,%d" size="%d,%d" font="Regular; %d" zPosition="2" transparent="0" halign="center"/>
 		<widget name="list" position="%d,%d" size="%d,%d" font="Regular;%d" scrollbarMode="showOnDemand"/>
 		<applet type="onLayoutFinish">
@@ -1571,6 +1604,14 @@ class ImageManagerDownload(Screen):
 		</applet>
 	</screen>""",
 		560, 400,  # screen
+		0, 0, 140, 40,  # colors
+		140, 0, 140, 40,
+		280, 0, 140, 40,
+		420, 0, 140, 40,
+		0, 0, 140, 40, 20,
+		140, 0, 140, 40, 20,
+		280, 0, 140, 40, 20,
+		420, 0, 140, 40, 20,
 		0, 50, 560, 50, 18,  # lab1
 		10, 105, 540, 260, 20,  # list
 		26,

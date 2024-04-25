@@ -18,7 +18,12 @@ from Screens.Standby import TryQuitMainloop
 class OpenBhIPKInstaller(Screen):
 	skin = ["""
 	<screen name="OpenBhIPKInstaller" position="center,center" size="%d,%d">
-		<panel name="__DynamicColorButtonTemplate__"/>
+		<ePixmap pixmap="skin_default/buttons/red.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<ePixmap pixmap="skin_default/buttons/green.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<ePixmap pixmap="skin_default/buttons/yellow.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+		<widget name="key_red" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#9f1313" transparent="1"/>
+		<widget name="key_green" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#1f771f" transparent="1"/>
+		<widget name="key_yellow" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#a08500" transparent="1"/>
 		<widget name="lab1" position="%d,%d" size="%d,%d" font="Regular; %d" zPosition="2" transparent="0" halign="center"/>
 		<widget name="list" position="%d,%d" size="%d,%d" font="Regular;%d" scrollbarMode="showOnDemand"/>
 		<applet type="onLayoutFinish">
@@ -26,6 +31,12 @@ class OpenBhIPKInstaller(Screen):
 		</applet>
 	</screen>""",
 		560, 400,  # screen
+		0, 0, 140, 40,  # colors
+		140, 0, 140, 40,
+		280, 0, 140, 40,
+		0, 0, 140, 40, 20,
+		140, 0, 140, 40, 20,
+		280, 0, 140, 40, 20,
 		0, 50, 560, 50, 18,  # lab1
 		10, 105, 540, 260, 20,  # list
 		26,
@@ -105,21 +116,17 @@ class OpenBhIPKInstaller(Screen):
 
 		del self.list[:]
 		f = listdir(self.defaultDir)
-		self.loadDir = self.defaultDir.replace(" ", "%20")
 		for line in f:
 			if line.find(".ipk") != -1:
-				self.list.append(path.join(self.loadDir, line))
-		#  print(f"[IPKinstaller]1 f:{f} self.list:{self.list}")
+				self.list.append(line)
+
 		if path.ismount("/media/usb"):
 			f = listdir("/media/usb")
-			self.loadDir = "/media/usb"
 			for line in f:
 				if line.find(".ipk") != -1:
-					#  print(f"[IPKinstaller]2 f:{f} line:{line}")
-					self.list.append(path.join(self.loadDir, line))
+					self.list.append(line)
 
 		self.list.sort()
-		#  print(f"[IPKinstaller]3 f:{f} self.list:{self.list}")
 		self["list"].l.setList(self.list)
 
 	def keyInstall(self):
@@ -131,8 +138,8 @@ class OpenBhIPKInstaller(Screen):
 		if answer is True:
 			sel = self["list"].getCurrent()
 			if sel:
-				cmd1 = f"/usr/bin/opkg install {sel}"
-				print(f"[IPKinstaller]4 sel:{sel}, cmd1:{cmd1}")
+				self.defaultDir = self.defaultDir.replace(" ", "%20")
+				cmd1 = "/usr/bin/opkg install " + path.join(self.defaultDir, sel)
 				self.session.openWithCallback(self.installFinished(sel), Console, title=_("Installing..."), cmdlist=[cmd1], closeOnSuccess=True)
 
 	def installFinished(self, sel):
@@ -154,12 +161,27 @@ class OpenBhIPKInstaller(Screen):
 class IpkgInstaller(Screen):
 	skin = ["""
 		<screen name="IpkgInstaller" position="center,center" size="%d,%d">
-			<panel name="__DynamicColorButtonTemplate__"/>
+			<ePixmap pixmap="skin_default/buttons/red.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+			<ePixmap pixmap="skin_default/buttons/green.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+			<ePixmap pixmap="skin_default/buttons/yellow.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+			<ePixmap pixmap="skin_default/buttons/blue.png" position="%d,%d" size="%d,%d" alphatest="blend" scale="1"/>
+			<widget source="key_red" render="Label" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#9f1313" transparent="1"/>
+			<widget source="key_green" render="Label" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#1f771f" transparent="1"/>
+			<widget source="key_yellow" render="Label" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#a08500" transparent="1"/>
+			<widget source="key_blue" render="Label" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#18188b" transparent="1"/>
 			<widget name="list" position="%d,%d" size="%d,%d" font="Regular;%d"/>
 			<ePixmap pixmap="skin_default/div-h.png" position="%d,%d" zPosition="10" size="%d,%d" transparent="1" alphatest="blend" scale="1"/>
 			<widget source="introduction" render="Label" position="%d,%d" zPosition="10" size="%d,%d" halign="center" valign="center" font="Regular;%d" transparent="1" shadowColor="black" shadowOffset="-1,-1"/>
 		</screen>""",
 			560, 450,  # screen
+			0, 0, 140, 40,  # colors
+			140, 0, 140, 40,
+			280, 0, 140, 40,
+			420, 0, 140, 40,
+			0, 0, 140, 40, 20,
+			140, 0, 140, 40, 20,
+			280, 0, 140, 40, 20,
+			420, 0, 140, 40, 20,
 			5, 50, 540, 360, 20,  # list
 			0, 410, 560, 2,
 			5, 420, 550, 30, 22,

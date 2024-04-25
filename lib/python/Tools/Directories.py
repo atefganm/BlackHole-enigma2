@@ -48,12 +48,6 @@ SCOPE_USERETC = SCOPE_HOME
 PATH_CREATE = 0
 PATH_DONTCREATE = 1
 
-#
-# ${libdir} = /usr/lib
-# ${sysconfdir} = /etc/enigma2
-# ${datadir} = /usr/share
-#
-
 defaultPaths = {
 	SCOPE_HOME: ("", PATH_DONTCREATE),  # User home directory
 	SCOPE_LANGUAGE: (eEnv.resolve("${datadir}/enigma2/po/"), PATH_DONTCREATE),
@@ -256,7 +250,7 @@ def resolveFilename(scope, base="", path_prefix=None):
 
 
 def getPrimarySkinResolution():
-	from Components.config import config  # deferred import
+	from Components.config import config # deferred import
 	resolutions = ["480", "576", "720", "1080", "2160", "4320", "8640"]
 	resolution = None
 	skin = resolveFilename(SCOPE_SKIN, config.skin.primary_skin.value)
@@ -405,8 +399,36 @@ def fileExists(f, mode="r"):
 	return access(f, acc_mode)
 
 
+def fileAccess(file, mode="r"):
+	accMode = F_OK
+	if "r" in mode:
+		accMode |= R_OK
+	if "w" in mode:
+		accMode |= W_OK
+	result = False
+	try:
+		result = access(file, accMode)
+	except (IOError, OSError) as err:
+		print("[Directories] Error %d: Couldn't determine file '%s' access mode! (%s)" % (err.errno, file, err.strerror))
+	return result
+
+
 def fileCheck(f, mode="r"):
 	return fileExists(f, mode) and f
+
+
+def fileExists(file, mode="r"):
+	return fileAccess(file, mode) and file
+
+def fileContains(file, content, mode="r"):
+	result = False
+	if fileExists(file, mode):
+		fd = open(file, mode)
+		text = fd.read()
+		fd.close()
+		if content in text:
+			result = True
+	return result
 
 
 def fileHas(f, content, mode="r"):
@@ -624,7 +646,7 @@ def getExtension(file):
 	return extension
 
 
-def mediafilesInUse(session):
+def mediaFilesInUse(session):
 	from Components.MovieList import KNOWN_EXTENSIONS
 	files = [pathBasename(x[2]) for x in lsof() if getExtension(x[2]) in KNOWN_EXTENSIONS]
 	service = session.nav.getCurrentlyPlayingServiceOrGroup()

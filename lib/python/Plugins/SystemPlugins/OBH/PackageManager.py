@@ -1,5 +1,3 @@
-from time import time
-
 from Components.Console import Console
 from Components.Ipkg import IpkgComponent
 from Components.Sources.List import List
@@ -24,10 +22,7 @@ class PackageManagerSummary(ScreenSummary):
 class PackageManager(Screen):
 	skin = ["""
 		<screen name="PackageManager" position="center,center" size="%d,%d" title="Packet manager" >
-			<ePixmap pixmap="skin_default/buttons/red.png" position="%d,%d" size="%d,%d" alphatest="blend" />
-			<ePixmap pixmap="skin_default/buttons/green.png" position="%d,%d" size="%d,%d" alphatest="blend" />
-			<widget source="key_red" render="Label" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#9f1313" transparent="1" />
-			<widget source="key_green" render="Label" position="%d,%d" zPosition="1" size="%d,%d" font="Regular;%d" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
+			<panel name="__DynamicColorButtonTemplate__"/>
 			<widget source="list" render="Listbox" position="%d,%d" size="%d,%d" scrollbarMode="showOnDemand">
 				<convert type="TemplatedMultiContent">
 					{"template": [
@@ -42,19 +37,15 @@ class PackageManager(Screen):
 				</convert>
 			</widget>
 		</screen>""",
-			530, 420,  # Screen
-			0, 0, 140, 40,  # colours
-			140, 0, 140, 40,
-			0, 0, 140, 40, 20,
-			140, 0, 140, 40, 20,
-			5, 50, 520, 365,  # list
-			5, 1, 440, 28,  # template
-			5, 26, 440, 20,
-			445, 2, 48, 48,
-			5, 50, 510, 2,
+			560, 420,  # Screen
+			5, 50, 550, 365,  # list
+			5, 1, 470, 28,  # template
+			5, 26, 470, 20,
+			475, 2, 48, 48,
+			5, 50, 540, 2,
 			22, 14,  # font
 			52,  # itemHeight
-			]
+		]  # noqa: E124
 
 	def __init__(self, session):
 		Screen.__init__(self, session)
@@ -174,9 +165,9 @@ class PackageManager(Screen):
 					tokens = x.split(" - ")
 					name = tokens[0].strip()
 					if name and not any(name.endswith(x) for x in self.unwanted_extensions):
-						l = len(tokens)
-						version = l > 1 and tokens[1].strip() or ""
-						descr = l > 2 and tokens[2].strip() or ""
+						tokenLength = len(tokens)
+						version = tokenLength > 1 and tokens[1].strip() or ""
+						descr = tokenLength > 2 and tokens[2].strip() or ""
 						if name == last_name:
 							continue
 						last_name = name
@@ -207,8 +198,8 @@ class PackageManager(Screen):
 			tokens = x.split(" - ")
 			name = tokens[0].strip()
 			if not any(name.endswith(x) for x in self.unwanted_extensions):
-				l = len(tokens)
-				version = l > 1 and tokens[-1].strip() or ""
+				tokenLength = len(tokens)
+				version = tokenLength > 1 and tokens[-1].strip() or ""
 				packages[name] = version
 		return packages
 

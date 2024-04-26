@@ -409,6 +409,11 @@ const char *getE2Rev()
 	return E2REV;
 }
 
+const char *getOARev()
+{
+	return OAREV;
+}
+
 const char *getGStreamerVersionString()
 {
 	return gst_version_string();

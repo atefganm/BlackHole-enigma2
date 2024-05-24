@@ -185,6 +185,7 @@ public:
 	eServiceReference(const char* string2);
 	std::string toString() const;
 	std::string toCompareString() const;
+	std::string toReferenceString() const;
 #ifndef SWIG
 	operator bool() const
 	{

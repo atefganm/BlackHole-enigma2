@@ -52,7 +52,7 @@ from Tools import Notifications
 from Tools.Directories import pathExists, fileExists, fileReadLine, fileWriteLine
 from Tools.KeyBindings import getKeyDescription, getKeyBindingKeys
 from Tools.General import isIPTV
-from pickle import loads as pickle_loads
+from pickle import load as pickle_load, dump as pickle_dump, HIGHEST_PROTOCOL as pickle_HIGHEST_PROTOCOL
 
 import NavigationInstance
 

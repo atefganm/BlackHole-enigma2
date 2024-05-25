@@ -3,6 +3,7 @@ from Screens.Setup import getConfigMenuItem, Setup
 from Screens.InputBox import PinInput
 from Screens.MessageBox import MessageBox
 from Components.ServiceEventTracker import ServiceEventTracker
+from enigma import iPlayableService, eTimer, eSize, eDVBDB, eServiceReference, eServiceCenter, iServiceInformation
 from Components.ActionMap import NumberActionMap
 from Components.ConfigList import ConfigListScreen
 from Components.config import config, ConfigSubsection, getConfigListEntry, ConfigNothing, ConfigSelection, ConfigOnOff
@@ -15,14 +16,10 @@ from Components.SystemInfo import BoxInfo
 from Components.VolumeControl import VolumeControl
 from Components.Converter.VAudioInfo import StdAudioDesc
 
-from enigma import iPlayableService, eTimer, eSize, eDVBDB, eServiceReference, eServiceCenter, iServiceInformation
-
 from Tools.ISO639 import LanguageCodes
 from Tools.General import isIPTV
 from Tools.Directories import resolveFilename, SCOPE_CURRENT_SKIN
 from Tools.LoadPixmap import LoadPixmap
-from pickle import load as pickle_load, dump as pickle_dump, dumps as pickle_dumps
-from os import path as os_path
 
 FOCUS_CONFIG, FOCUS_STREAMS = range(2)
 [PAGE_AUDIO, PAGE_SUBTITLES] = ["audio", "subtitles"]

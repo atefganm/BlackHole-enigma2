@@ -1,6 +1,7 @@
 #include <lib/mmi/mmi_ui.h>
 #include <lib/dvb_ci/dvbci_session.h> // for parseLengthField
 
+#include <regex>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>

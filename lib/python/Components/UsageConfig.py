@@ -7,7 +7,7 @@ from boxbranding import getBrandOEM, getDisplayType
 from enigma import eDVBDB, eEPGCache, setTunerTypePriorityOrder, setPreferredTuner, setSpinnerOnOff, setEnableTtCachingOnOff, eEnv, Misc_Options, eBackgroundFileEraser, eServiceEvent, RT_HALIGN_LEFT, RT_HALIGN_RIGHT, RT_HALIGN_CENTER, RT_VALIGN_CENTER, RT_WRAP
 
 from Components.Harddisk import harddiskmanager
-from Components.config import config, ConfigBoolean, ConfigClock, ConfigDictionarySet, ConfigDirectory, ConfigInteger, ConfigIP, ConfigLocations, ConfigNumber, ConfigPassword, ConfigSelection, ConfigSelectionNumber, ConfigSet, ConfigSlider, ConfigSubsection, ConfigText, ConfigYesNo, NoSave
+from Components.config import config, ConfigBoolean, ConfigClock, ConfigDictionarySet, ConfigDirectory, ConfigInteger, ConfigIP, ConfigLocations, ConfigNumber, ConfigPassword, ConfigSelection, ConfigSelectionNumber, ConfigSet, ConfigSlider, ConfigEnableDisable, ConfigSubsection, ConfigText, ConfigYesNo, NoSave
 from Tools.camcontrol import CamControl
 from Tools.Directories import SCOPE_HDD, SCOPE_TIMESHIFT, defaultRecordingLocation, fileContains, resolveFilename, fileHas
 from Components.NimManager import nimmanager
@@ -786,13 +786,11 @@ def InitUsageConfig():
 	if BoxInfo.getItem("PowerLED"):
 		def powerLEDChanged(configElement):
 			if "fp" in BoxInfo.getItem("PowerLED"):
-				with open(BoxInfo.getItem("PowerLED"), "w") as fd:
-					fd.write(configElement.value and "1" or "0")
+				open(BoxInfo.getItem("PowerLED"), "w").write(configElement.value and "1" or "0")
 				patterns = [PATTERN_ON, PATTERN_ON, PATTERN_OFF, PATTERN_ON] if configElement.value else [PATTERN_OFF, PATTERN_OFF, PATTERN_OFF, PATTERN_OFF]
 				ledPatterns.setLedPatterns(1, patterns)
 			else:
-				with open(BoxInfo.getItem("PowerLED"), "w") as fd:
-					fd.write(configElement.value and "on" or "off")
+				open(BoxInfo.getItem("PowerLED"), "w").write(configElement.value and "on" or "off")
 		config.usage.powerLED = ConfigYesNo(default=True)
 		config.usage.powerLED.addNotifier(powerLEDChanged)
 
@@ -802,19 +800,16 @@ def InitUsageConfig():
 				patterns = [PATTERN_OFF, PATTERN_BLINK, PATTERN_ON, PATTERN_BLINK] if configElement.value else [PATTERN_OFF, PATTERN_OFF, PATTERN_OFF, PATTERN_OFF]
 				ledPatterns.setLedPatterns(0, patterns)
 			else:
-				with open(BoxInfo.getItem("StandbyLED"), "w") as fd:
-					fd.write(configElement.value and "on" or "off")
+				open(BoxInfo.getItem("StandbyLED"), "w").write(configElement.value and "on" or "off")
 		config.usage.standbyLED = ConfigYesNo(default=True)
 		config.usage.standbyLED.addNotifier(standbyLEDChanged)
 
 	if BoxInfo.getItem("SuspendLED"):
 		def suspendLEDChanged(configElement):
 			if "fp" in BoxInfo.getItem("SuspendLED"):
-				with open(BoxInfo.getItem("SuspendLED"), "w") as fd:
-					fd.write(configElement.value and "1" or "0")
+				open(BoxInfo.getItem("SuspendLED"), "w").write(configElement.value and "1" or "0")
 			else:
-				with open(BoxInfo.getItem("SuspendLED"), "w") as fd:
-					fd.write(configElement.value and "on" or "off")
+				open(BoxInfo.getItem("SuspendLED"), "w").write(configElement.value and "on" or "off")
 		config.usage.suspendLED = ConfigYesNo(default=True)
 		config.usage.suspendLED.addNotifier(suspendLEDChanged)
 
